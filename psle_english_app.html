@@ -1588,21 +1588,39 @@ async function sendClaude(){
   sendBtn.disabled=true;
   const aiEl=appendClaude('ai','');
   aiEl.classList.add('streaming');
-  const sys='You are a friendly and encouraging PSLE English tutor for Primary 6 students in Singapore. Help students understand English grammar, vocabulary, comprehension strategies, and Paper 2 exam format. Give clear, simple explanations with examples. Keep responses helpful — 100 to 250 words. Use warm language suitable for 12-year-olds. For grammar rules, state the rule then give an example sentence. For vocabulary, give the meaning then use it in a sentence.';
-  const messages=[{role:'system',content:sys},...claudeHistory];
+  if(typeof puter==='undefined'){
+    aiEl.classList.remove('streaming');
+    aiEl.textContent='AI is still loading — please wait a moment and try again.';
+    claudeHistory.pop();sendBtn.disabled=false;return;
+  }
+  const sys='You are a friendly and encouraging PSLE English tutor for Primary 6 students in Singapore. Help with English grammar, vocabulary, comprehension, and Paper 2 exam format. Give clear simple explanations with examples, around 150 words. Warm encouraging tone for 12-year-olds.';
+  const msgs=[{role:'system',content:sys},...claudeHistory];
+  let aiText='';
   try{
-    const resp=await puter.ai.chat(messages,{stream:true,model:'claude-3-5-haiku'});
-    let aiText='';
+    // Streaming attempt
+    const resp=await puter.ai.chat(msgs,{stream:true});
     for await(const chunk of resp){
-      const t=chunk?.text??'';
-      aiText+=t;
-      aiEl.textContent=aiText;
-      document.getElementById('claudeMsgsArea').scrollTop=99999;
+      const t=typeof chunk==='string'?chunk
+        :(chunk?.text??chunk?.delta?.text??chunk?.choices?.[0]?.delta?.content??'');
+      if(t){aiText+=t;aiEl.textContent=aiText;document.getElementById('claudeMsgsArea').scrollTop=99999;}
     }
-    if(aiText){claudeHistory.push({role:'assistant',content:aiText});if(claudeHistory.length>20)claudeHistory=claudeHistory.slice(-20);}
-  }catch(err){
-    aiEl.textContent='Oops, something went wrong: '+err.message;
-    claudeHistory.pop();
+  }catch(streamErr){
+    // Non-streaming fallback
+    try{
+      const r=await puter.ai.chat(msgs);
+      aiText=typeof r==='string'?r
+        :(r?.message?.content?.[0]?.text??r?.message?.content??r?.text??'');
+      aiEl.textContent=aiText;
+    }catch(err){
+      aiEl.textContent='Could not get a response ('+err.message+'). Please try again!';
+      aiEl.classList.remove('streaming');claudeHistory.pop();sendBtn.disabled=false;return;
+    }
+  }
+  if(aiText){
+    claudeHistory.push({role:'assistant',content:aiText});
+    if(claudeHistory.length>20)claudeHistory=claudeHistory.slice(-20);
+  } else if(!aiEl.textContent){
+    aiEl.textContent='No response received — please try again.';claudeHistory.pop();
   }
   aiEl.classList.remove('streaming');
   sendBtn.disabled=false;
