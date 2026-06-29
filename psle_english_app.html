@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PSLE English Paper 2 Practice</title>
+<script src="https://js.puter.com/v2/"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -309,20 +310,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
       <span class="claude-chip" onclick="claudeChip('Give me tips for Synthesis and Transformation questions.')">Synthesis tips</span>
       <span class="claude-chip" onclick="claudeChip('What is the difference between a simile and a metaphor?')">Simile vs metaphor</span>
       <span class="claude-chip" onclick="claudeChip('How do I find synonyms for Vocabulary Cloze?')">Vocabulary Cloze</span>
-    </div>
-  </div>
-  <!-- inline key entry, shown only when no key saved -->
-  <div id="claudeKeyBanner" style="display:none;background:#faf5ff;border-top:1.5px solid #e9d5ff;padding:.65rem 1rem;flex-shrink:0">
-    <div style="max-width:800px;margin:0 auto">
-      <div style="font-size:.8rem;color:#5b21b6;font-weight:700;margin-bottom:.4rem">🔑 Enter Anthropic API key to chat</div>
-      <div style="display:flex;gap:.5rem;align-items:center">
-        <input id="claudeKeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off"
-          style="flex:1;border:1.5px solid #c4b5fd;border-radius:8px;padding:.4rem .75rem;font-size:.84rem;font-family:monospace;outline:none;color:#111827"
-          onkeydown="if(event.key==='Enter')saveClaudeKey()"/>
-        <button onclick="saveClaudeKey()"
-          style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:.4rem 1rem;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap">Save</button>
-      </div>
-      <div style="font-size:.72rem;color:#9ca3af;margin-top:.3rem">Get a free key at <strong>console.anthropic.com</strong> → API Keys. Stored only in your browser.</div>
     </div>
   </div>
   <div class="claude-bottom">
@@ -1570,20 +1557,7 @@ function showResult(score,total){
 let claudeHistory=[];
 function openClaude(){
   document.getElementById('claudeOverlay').classList.add('open');
-  const banner=document.getElementById('claudeKeyBanner');
-  if(getKey()){banner.style.display='none';}
-  else{banner.style.display='block';}
-  setTimeout(()=>{
-    if(getKey())document.getElementById('claudeInput').focus();
-    else document.getElementById('claudeKeyInput').focus();
-  },220);
-}
-function saveClaudeKey(){
-  const v=document.getElementById('claudeKeyInput').value.trim();
-  if(!v){return;}
-  localStorage.setItem('anthropic_key',v);
-  document.getElementById('claudeKeyBanner').style.display='none';
-  document.getElementById('claudeInput').focus();
+  setTimeout(()=>document.getElementById('claudeInput').focus(),220);
 }
 function closeClaude(){
   document.getElementById('claudeOverlay').classList.remove('open');
@@ -1614,46 +1588,20 @@ async function sendClaude(){
   sendBtn.disabled=true;
   const aiEl=appendClaude('ai','');
   aiEl.classList.add('streaming');
-  const key=getKey();
-  if(!key){
-    aiEl.classList.remove('streaming');
-    aiEl.textContent='Enter your Anthropic API key in the box above to start chatting! 😊';
-    claudeHistory.pop();
-    document.getElementById('claudeKeyBanner').style.display='block';
-    sendBtn.disabled=false;
-    return;
-  }
-  const sys=`You are Claude, a friendly and encouraging PSLE English tutor for Primary 6 students in Singapore. Help students understand English grammar, vocabulary, comprehension strategies, and the Paper 2 exam format. Give clear, simple explanations with examples. Keep responses helpful and appropriately detailed — aim for 100–250 words. Use warm, encouraging language suitable for 12-year-olds. For grammar rules, state the rule clearly then give an example. For vocabulary, give the meaning and an example sentence. If a student seems confused, reassure them and try explaining differently.`;
+  const sys='You are a friendly and encouraging PSLE English tutor for Primary 6 students in Singapore. Help students understand English grammar, vocabulary, comprehension strategies, and Paper 2 exam format. Give clear, simple explanations with examples. Keep responses helpful — 100 to 250 words. Use warm language suitable for 12-year-olds. For grammar rules, state the rule then give an example sentence. For vocabulary, give the meaning then use it in a sentence.';
+  const messages=[{role:'system',content:sys},...claudeHistory];
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:apiHeaders(),
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,system:sys,messages:claudeHistory,stream:true})
-    });
-    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+resp.status);}
-    const reader=resp.body.getReader();
-    const dec=new TextDecoder();
-    let buf='';let aiText='';
-    while(true){
-      const{done,value}=await reader.read();if(done)break;
-      buf+=dec.decode(value,{stream:true});
-      const lines=buf.split('\n');buf=lines.pop();
-      for(const line of lines){
-        if(!line.startsWith('data:'))continue;
-        const d=line.slice(5).trim();if(d==='[DONE]')continue;
-        try{
-          const j=JSON.parse(d);
-          if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){
-            aiText+=j.delta.text;aiEl.textContent=aiText;
-            const a=document.getElementById('claudeMsgsArea');a.scrollTop=a.scrollHeight;
-          }
-        }catch{}
-      }
+    const resp=await puter.ai.chat(messages,{stream:true,model:'claude-3-5-haiku'});
+    let aiText='';
+    for await(const chunk of resp){
+      const t=chunk?.text??'';
+      aiText+=t;
+      aiEl.textContent=aiText;
+      document.getElementById('claudeMsgsArea').scrollTop=99999;
     }
-    if(aiText)claudeHistory.push({role:'assistant',content:aiText});
-    if(claudeHistory.length>20)claudeHistory=claudeHistory.slice(-20);
+    if(aiText){claudeHistory.push({role:'assistant',content:aiText});if(claudeHistory.length>20)claudeHistory=claudeHistory.slice(-20);}
   }catch(err){
-    aiEl.textContent='Something went wrong: '+err.message+'. Please check your API key and try again.';
+    aiEl.textContent='Oops, something went wrong: '+err.message;
     claudeHistory.pop();
   }
   aiEl.classList.remove('streaming');
@@ -1665,8 +1613,7 @@ function appendClaude(role,text){
   el.className='claude-msg '+role;
   el.textContent=text;
   inner.appendChild(el);
-  const a=document.getElementById('claudeMsgsArea');
-  a.scrollTop=a.scrollHeight;
+  document.getElementById('claudeMsgsArea').scrollTop=99999;
   return el;
 }
 </script>
