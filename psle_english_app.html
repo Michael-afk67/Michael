@@ -218,6 +218,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
     </div>
   </div>
   <button class="full-btn" onclick="go('full')">📋 Full Paper — All Sections (ACS Prelim 2025)</button>
+  <button class="full-btn" onclick="downloadApp()" style="margin-top:.75rem;background:linear-gradient(135deg,#059669,#0d9488)">⬇️ Download this app</button>
 </div>
 
 <!-- SECTION -->
@@ -1221,6 +1222,15 @@ function makeScore(){
   const r=mk('div','score-panel');r.id='scorepanel';
   r.innerHTML=`<div class="score-num">0</div><div class="score-label">marks</div><div class="score-msg"></div>`;
   return r;
+}
+function downloadApp(){
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob(['<!DOCTYPE html>\n'+html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='psle_english_app.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 function showResult(score,total){
   const r=document.getElementById('scorepanel');if(!r)return;
