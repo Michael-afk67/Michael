@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSLE English Paper 2 Practice</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a56db;--lb:#dbeafe;--green:#166534;--lg:#dcfce7;
+  --red:#991b1b;--lr:#fee2e2;--orange:#c2410c;--lo:#ffedd5;
+  --gray:#6b7280;--lgray:#f9fafb;--border:#e5e7eb;
+  --white:#fff;--dark:#111827;--purple:#7c3aed;--lp:#ede9fe;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--dark);min-height:100vh}
+/* HOME */
+.home{max-width:960px;margin:0 auto;padding:2rem 1rem}
+.home-header{text-align:center;margin-bottom:2rem}
+.home-header h1{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#1a56db,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem}
+.home-header p{color:var(--gray);font-size:.95rem}
+.badges{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.6rem}
+.badge{background:var(--lb);color:var(--blue);padding:3px 12px;border-radius:20px;font-size:11.5px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.5rem}
+.card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.card:hover{border-color:var(--blue);box-shadow:0 8px 24px rgba(26,86,219,.13);transform:translateY(-2px)}
+.card-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem}
+.card-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.card-title{font-size:.97rem;font-weight:700}
+.card-sub{font-size:.76rem;color:var(--gray);margin-top:1px}
+.card-marks{position:absolute;top:.9rem;right:.9rem;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:20px}
+.card-desc{font-size:.79rem;color:var(--gray);line-height:1.55;margin-bottom:.5rem}
+.ai-tag{display:inline-flex;align-items:center;gap:3px;background:var(--lp);color:var(--purple);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.full-btn{width:100%;padding:1rem;background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border:none;border-radius:12px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+.full-btn:hover{opacity:.9}
+/* SECTION VIEW */
+.section-view{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.sec-header{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.back-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:5px 13px;font-size:.82rem;cursor:pointer;color:var(--gray);font-weight:600;white-space:nowrap;transition:all .15s}
+.back-btn:hover{border-color:var(--blue);color:var(--blue)}
+.new-btn{background:var(--lp);border:1.5px solid #c4b5fd;border-radius:8px;padding:5px 13px;font-size:.82rem;cursor:pointer;color:var(--purple);font-weight:700;white-space:nowrap;transition:all .15s}
+.new-btn:hover{background:#ddd6fe}
+.new-btn:disabled{opacity:.5;cursor:not-allowed}
+.sec-title{font-size:1rem;font-weight:700}
+.sec-sub{font-size:.75rem;color:var(--gray)}
+.marks-pill{margin-left:auto;background:var(--lb);color:var(--blue);padding:3px 12px;border-radius:20px;font-size:.75rem;font-weight:700;white-space:nowrap}
+/* CONTENT BLOCKS */
+.inst{background:var(--lgray);border:1px solid var(--border);border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1rem;font-size:.83rem;color:var(--gray);line-height:1.55}
+.passage{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1.5rem;margin-bottom:1rem;font-family:'Times New Roman',serif;font-size:15px;line-height:2;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+/* MCQ */
+.mcq-block{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:.8rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.mcq-qtext{font-size:.92rem;margin-bottom:.8rem;line-height:1.6;font-weight:500}
+.mcq-qnum{font-weight:800;color:var(--blue);margin-right:.35rem}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
+.opt{display:flex;align-items:center;gap:.55rem;padding:.5rem .75rem;border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-size:.85rem;transition:all .12s;user-select:none}
+.opt:hover:not(.locked){border-color:var(--blue);background:#eff6ff}
+.opt.picked{border-color:var(--blue);background:#eff6ff}
+.opt.correct{border-color:#16a34a;background:var(--lg);color:var(--green)}
+.opt.wrong{border-color:#dc2626;background:var(--lr);color:var(--red)}
+.opt-circle{width:22px;height:22px;border-radius:50%;border:1.5px solid #9ca3af;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;transition:all .12s}
+.opt.picked .opt-circle{border-color:var(--blue);background:var(--blue);color:#fff}
+.opt.correct .opt-circle{border-color:#16a34a;background:#16a34a;color:#fff}
+.opt.wrong .opt-circle{border-color:#dc2626;background:#dc2626;color:#fff}
+/* EXPLANATION */
+.exp-area{margin-top:.75rem;border-radius:10px;overflow:hidden;display:none}
+.exp-area.show{display:block}
+.exp-header{padding:.55rem .9rem;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:.4rem}
+.exp-header.correct-h{background:#dcfce7;color:#166534}
+.exp-header.wrong-h{background:#fee2e2;color:#991b1b}
+.exp-body{padding:.65rem .9rem;font-size:.83rem;line-height:1.65;background:#fafafa;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;min-height:52px}
+.exp-body.streaming::after{content:'▋';animation:blink .7s infinite;color:var(--blue)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* WORD BANK */
+.wb{background:var(--lgray);border:1px solid var(--border);border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1rem}
+.wb-title{font-size:.75rem;font-weight:700;color:var(--gray);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.05em}
+.wb-items{display:flex;flex-wrap:wrap;gap:.35rem}
+.wb-item{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:2px 10px;font-size:.82rem;font-weight:600}
+/* CLOZE */
+.cloze-pass{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;font-size:.93rem;line-height:2.6;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.bwrap{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px}
+.bnum{font-size:9.5px;font-weight:700;color:var(--blue);line-height:1}
+.bi{border:none;border-bottom:1.5px solid #374151;width:88px;text-align:center;font-size:.88rem;outline:none;background:transparent;padding:1px 2px;font-family:inherit}
+.bi:focus{border-bottom-color:var(--blue)}
+.bi.ok{border-bottom-color:#16a34a;color:#166534;font-weight:600}
+.bi.bad{border-bottom-color:#dc2626;color:#991b1b}
+/* EDITING */
+.edit-pass{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.6rem;margin-bottom:1rem;font-family:'Times New Roman',serif;font-size:15px;line-height:3.4;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.eitem{display:inline;position:relative}
+.enum{font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:700;color:var(--blue);vertical-align:super;margin-right:1px}
+.eword{text-decoration:underline;text-decoration-color:#374151}
+.einput{border:1px solid #d1d5db;border-radius:5px;width:108px;height:25px;vertical-align:middle;font-size:12px;padding:2px 6px;outline:none;font-family:'Segoe UI',sans-serif;background:#fff;margin:0 2px}
+.einput:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,86,219,.15)}
+.einput.ok{border-color:#16a34a;background:#f0fdf4;color:#166534}
+.einput.bad{border-color:#dc2626;background:#fef2f2;color:#991b1b}
+/* BLANKS EXPLANATION LIST */
+.exp-list{margin-top:.75rem}
+.exp-item{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;margin-bottom:.5rem;font-size:.82rem;line-height:1.6}
+.exp-item-head{font-weight:700;margin-bottom:.2rem;display:flex;align-items:center;gap:.4rem}
+.exp-item-head.ok{color:#166534}
+.exp-item-head.bad{color:#991b1b}
+/* SYNTH */
+.synth-block{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:.8rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.synth-orig{font-size:.88rem;line-height:1.6;margin-bottom:.55rem;font-style:italic;border-left:3px solid #e5e7eb;padding-left:.75rem;color:#374151}
+.synth-start{font-size:.9rem;font-weight:600;margin-bottom:.3rem}
+.si{width:100%;border:none;border-bottom:1.5px solid #9ca3af;font-size:.9rem;padding:4px 0;outline:none;background:transparent;font-family:'Times New Roman',serif}
+.si:focus{border-bottom-color:var(--blue)}
+/* COMP */
+.comp-pass{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:1.5rem 2rem 1.5rem 1.1rem;margin-bottom:1rem;font-family:'Times New Roman',serif;font-size:14.5px;line-height:2;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.comp-q{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:.8rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.comp-qnum{font-weight:700;font-size:.82rem;color:var(--blue);margin-bottom:.35rem}
+.comp-qtext{font-size:.88rem;line-height:1.55;margin-bottom:.5rem;font-weight:500}
+.ctable{width:100%;border-collapse:collapse;margin:.4rem 0;font-size:.81rem}
+.ctable th{background:#f3f4f6;padding:.4rem .65rem;border:1px solid var(--border);font-weight:700;text-align:left}
+.ctable td{padding:.4rem .65rem;border:1px solid var(--border);vertical-align:top}
+.ctable input{width:100%;border:none;outline:none;font-size:.81rem;background:transparent;font-family:serif}
+.tans{width:100%;border:none;border-bottom:1.5px solid #9ca3af;font-size:.87rem;padding:3px 0;outline:none;background:transparent;font-family:'Times New Roman',serif;margin:.15rem 0}
+.oi{width:42px;border:none;border-bottom:1.5px solid #374151;text-align:center;font-size:.87rem;outline:none;background:transparent;margin-right:.4rem}
+.model-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:.6rem .9rem;margin-top:.5rem;font-size:.82rem;line-height:1.6;display:none}
+.model-box b{color:var(--blue)}
+/* SUBMIT BAR */
+.sbar{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin-bottom:1rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.mark-btn{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border:none;border-radius:8px;padding:.55rem 1.3rem;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:.4rem}
+.mark-btn:hover{opacity:.9}
+.mark-btn:disabled{opacity:.55;cursor:not-allowed}
+.reset-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:.55rem 1.1rem;font-size:.85rem;cursor:pointer;color:var(--gray);font-weight:600;transition:all .15s}
+.reset-btn:hover{border-color:#dc2626;color:#dc2626}
+/* SCORE */
+.score-panel{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1rem;text-align:center;display:none;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.score-num{font-size:2.8rem;font-weight:800;background:linear-gradient(135deg,#1a56db,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.score-label{font-size:.82rem;color:var(--gray);margin:.1rem 0}
+.score-msg{font-size:.95rem;font-weight:600;margin-top:.4rem}
+/* LOADING */
+.load-box{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:2.5rem;margin-bottom:1rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
+.spinner{width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:var(--blue);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-size:.88rem;color:var(--gray)}
+.ai-chip{display:inline-flex;align-items:center;gap:3px;background:var(--lp);color:var(--purple);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:.75rem}
+.sec-hdr{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border-radius:8px;padding:.6rem 1rem;margin:1.4rem 0 .6rem;font-weight:700;font-size:.9rem}
+.hidden{display:none!important}
+/* EXPLAIN BUTTON */
+.explain-q-btn{display:inline-flex;align-items:center;gap:.3rem;background:var(--lp);color:var(--purple);border:1.5px solid #c4b5fd;border-radius:8px;padding:.3rem .8rem;font-size:.78rem;font-weight:700;cursor:pointer;margin-top:.55rem;transition:all .15s}
+.explain-q-btn:hover{background:#ddd6fe}
+.explain-q-btn:disabled{opacity:.5;cursor:not-allowed}
+.pre-exp{background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:.75rem .95rem;margin-top:.5rem;font-size:.82rem;line-height:1.7;display:none;white-space:pre-wrap}
+.pre-exp.show{display:block}
+.pre-exp-hdr{font-size:.78rem;font-weight:700;color:var(--purple);margin-bottom:.45rem;display:flex;align-items:center;gap:.3rem}
+@media(max-width:560px){.opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="home">
+  <div class="home-header">
+    <h1>📝 PSLE English Paper 2</h1>
+    <p>Primary 6 Practice — ACS Junior Prelim 2025 · AI Questions · AI Explains Every Answer</p>
+    <div class="badges">
+      <span class="badge">Booklet A · 25 marks</span>
+      <span class="badge">Booklet B · 65 marks</span>
+      <span class="badge">Total · 90 marks</span>
+      <span class="badge">✨ AI explains why</span>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card" onclick="go('grammar_mcq')" style="--c:#1a56db">
+      <div class="card-top"><div class="card-icon" style="background:#dbeafe">🔤</div><div><div class="card-title">Grammar MCQ</div><div class="card-sub">Q1–10 · Choose best answer</div></div></div>
+      <span class="card-marks" style="background:#dbeafe;color:#1a56db">10 marks</span>
+      <div class="card-desc">Tenses, subject-verb agreement, prepositions, pronouns and more.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('vocab_mcq')">
+      <div class="card-top"><div class="card-icon" style="background:#dcfce7">📖</div><div><div class="card-title">Vocabulary MCQ</div><div class="card-sub">Q11–15 · Best word choice</div></div></div>
+      <span class="card-marks" style="background:#dcfce7;color:#166534">5 marks</span>
+      <div class="card-desc">Choose the word that best fits from similar-looking options.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('vocab_cloze')">
+      <div class="card-top"><div class="card-icon" style="background:#fef9c3">📝</div><div><div class="card-title">Vocabulary Cloze</div><div class="card-sub">Q16–20 · Synonym from passage</div></div></div>
+      <span class="card-marks" style="background:#fef9c3;color:#854d0e">5 marks</span>
+      <div class="card-desc">Find the word closest in meaning to underlined words in passage.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('visual_text')">
+      <div class="card-top"><div class="card-icon" style="background:#ffedd5">🖼️</div><div><div class="card-title">Visual Text</div><div class="card-sub">Q21–25 · Poster &amp; article MCQ</div></div></div>
+      <span class="card-marks" style="background:#ffedd5;color:#c2410c">5 marks</span>
+      <div class="card-desc">Study a poster and article, then answer comprehension questions.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('grammar_cloze')">
+      <div class="card-top"><div class="card-icon" style="background:#ede9fe">🔡</div><div><div class="card-title">Grammar Cloze</div><div class="card-sub">Q26–35 · Word bank A–Q</div></div></div>
+      <span class="card-marks" style="background:#ede9fe;color:#7c3aed">10 marks</span>
+      <div class="card-desc">Pick from word bank to fill 10 blanks. Each word used once only.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('editing')">
+      <div class="card-top"><div class="card-icon" style="background:#fee2e2">✏️</div><div><div class="card-title">Editing</div><div class="card-sub">Q36–45 · Fix errors</div></div></div>
+      <span class="card-marks" style="background:#fee2e2;color:#991b1b">10 marks</span>
+      <div class="card-desc">Find and correct spelling or grammatical errors in underlined words.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('comp_cloze')">
+      <div class="card-top"><div class="card-icon" style="background:#dcfce7">📄</div><div><div class="card-title">Comprehension Cloze</div><div class="card-sub">Q46–60 · Free-answer blanks</div></div></div>
+      <span class="card-marks" style="background:#dcfce7;color:#166534">15 marks</span>
+      <div class="card-desc">Fill blanks with the most suitable word. No word bank given.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('synthesis')">
+      <div class="card-top"><div class="card-icon" style="background:#e0f2fe">🔄</div><div><div class="card-title">Synthesis &amp; Transformation</div><div class="card-sub">Q61–65 · Rewrite sentences</div></div></div>
+      <span class="card-marks" style="background:#e0f2fe;color:#0369a1">10 marks</span>
+      <div class="card-desc">Rewrite sentences using given words. Same meaning, one sentence.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+    <div class="card" onclick="go('comprehension')">
+      <div class="card-top"><div class="card-icon" style="background:#fce7f3">📚</div><div><div class="card-title">Comprehension</div><div class="card-sub">Q66–75 · Open-ended</div></div></div>
+      <span class="card-marks" style="background:#fce7f3;color:#9d174d">20 marks</span>
+      <div class="card-desc">Read a passage and answer open-ended questions of all types.</div>
+      <div class="ai-tag">✨ AI explains every answer</div>
+    </div>
+  </div>
+  <button class="full-btn" onclick="go('full')">📋 Full Paper — All Sections (ACS Prelim 2025)</button>
+</div>
+
+<!-- SECTION -->
+<div id="secview" class="hidden">
+  <div class="section-view">
+    <div class="sec-header">
+      <button class="back-btn" onclick="goHome()">← Home</button>
+      <button class="new-btn" id="newbtn" onclick="refresh()">✨ New Questions</button>
+      <div><div class="sec-title" id="stitle"></div><div class="sec-sub" id="ssub"></div></div>
+      <span class="marks-pill" id="smarks"></span>
+    </div>
+    <div id="seccontent"></div>
+  </div>
+</div>
+
+<script>
+// ===================== STATIC DATA =====================
+const G_MCQ=[
+  {q:"Neither Jaspal nor his brother _____ present at the hockey practice earlier.",opts:["is","are","was","were"],ans:3},
+  {q:"Construction of the new classrooms _____ soon and is scheduled to end in March next year.",opts:["begin","began","begins","has begun"],ans:3},
+  {q:"She ought to clear up the mess before leaving the classroom for her recess, _____ she?",opts:["hasn't","shan't","couldn't","shouldn't"],ans:3},
+  {q:"Had Peter _____ for the briefing yesterday, he would not have missed the talk by the teacher.",opts:["come","came","comes","coming"],ans:0},
+  {q:"Angry words passed _____ Shuhui and her angry neighbour as Shuhui had denied breaking the flowerpot.",opts:["on","over","among","between"],ans:3},
+  {q:"Please return the Science notes to Caleb and _____ punctually because we need them for our revision.",opts:["I","me","mine","myself"],ans:1},
+  {q:"_____ he win, he will go down in history as the youngest ever world chess master.",opts:["If","Since","Should","Unless"],ans:2},
+  {q:"Judging by the football team's outstanding performance last week, there is _____ doubt that they would advance to the semi-finals.",opts:["any","few","little","much"],ans:2},
+  {q:"My parents and I were gazing _____ awe at the majestic waterfall.",opts:["at","in","by","with"],ans:1},
+  {q:"No sooner had I turned my back on my pet puppy _____ it started chewing on the sofa again.",opts:["than","then","when","while"],ans:0}
+];
+const V_MCQ=[
+  {q:"The Ministry of Environment officers shut down that restaurant when it was found to be _____ with cockroaches.",opts:["inflated","inflicted","infected","infested"],ans:3},
+  {q:"The passers-by _____ how the accident could have happened since they did not witness it.",opts:["reflected","estimated","concluded","speculated"],ans:3},
+  {q:"Although he is the chairman's son, his dishonest act should not be _____.",opts:["endorsed","instigated","condoned","prohibited"],ans:2},
+  {q:"I have decided to _____ my grandparents who are living in Johor to surprise them.",opts:["call in","call on","call over","call upon"],ans:1},
+  {q:"After the fire at the shopping mall, most of the shops were _____ beyond recognition.",opts:["sizzled","charred","scalded","incinerated"],ans:1}
+];
+const SYN_PASS=`With a twinkle in his eye, Father declared that the most worthy of us all would get a spot in the spectator's seat for the upcoming Liverstool versus Manpester City football friendly match. That [spurred] us to put on our best behaviour that week.\n\nAs the week drew to a close, my two brothers began to [drift away] from their goal. I kept up my good behaviour and went to dispose the rubbish into the big bin outside our house. As I began to replace the lid on the bin, a flash of white on the back of the black lid caught my attention. I [wavered] for a moment, unsure of what to make of it. Then, I lifted the flap of the envelope.\n\nTo my [utter] disbelief, I saw a ticket to the dream match; my hard work had been [duly] rewarded! This was a life lesson in responsibility that had stuck with me till today.`;
+const SYN_MCQ=[
+  {num:16,word:"spurred",opts:["compelled","persuaded","encouraged","commanded"],ans:2},
+  {num:17,word:"drift away",opts:["lose","stray","leave","depart"],ans:1},
+  {num:18,word:"wavered",opts:["thought","decided","trembled","hesitated"],ans:3},
+  {num:19,word:"utter",opts:["huge","great","entire","complete"],ans:3},
+  {num:20,word:"duly",opts:["fittingly","honestly","peculiarly","surprisingly"],ans:0}
+];
+const VT_MCQ=[
+  {num:21,q:'"Do you sleep enough?" The question in Text 1 aims to _____.',opts:["make readers reflect on their sleeping habits","persuade readers to improve their sleep schedule","warn the reader about the dangers of sleep deprivation","emphasise to the reader the importance of sleeping well"],ans:0},
+  {num:22,q:"Why is the image in Text 1 being used in this poster? It is to _____.",opts:["evoke emotions","convey a clearer message","replace the need for words","introduce Dr Christine Lee"],ans:0},
+  {num:23,q:"According to Text 1, which of the following statements is true?",opts:["It is natural for teens to be impulsive.","Teens only need 7 hours of sleep a day.","A small percentage of teens have sleep-related issues.","Well-rested teens are more likely to remember what they learn."],ans:3},
+  {num:24,q:"To address our sleep issues, we cannot trust Text 1 alone because Text 2 states that _____.",opts:["only doctors can help fix the problem","we can manage our sleep issues on our own","our bodies can repair tissues throughout the day","exposure to lights helps adapt our sleep-wake cycle"],ans:1},
+  {num:25,q:"Both Text 1 and Text 2 agree that _____.",opts:["sleep is important for our mental health","keeping a bedtime routine is essential","everyone should have a consistent sleep schedule","getting enough sleep strengthens the immune system"],ans:0}
+];
+const GC={
+  wb:[{l:"A",w:"are"},{l:"B",w:"as"},{l:"C",w:"between"},{l:"D",w:"but"},{l:"E",w:"however"},{l:"F",w:"more"},{l:"G",w:"most"},{l:"H",w:"off"},{l:"J",w:"under"},{l:"K",w:"was"},{l:"L",w:"were"},{l:"M",w:"when"},{l:"N",w:"where"},{l:"P",w:"which"},{l:"Q",w:"who"}],
+  pass:`Many of you might have played with the popular children's toy, Play-doh, but did you know that it was not originally meant to be a toy? It all began [26] Cleo McVicker took over the soap company, Kutol, which was about to go [27] in the late 1920s. Together with his brother, Noah, they managed to keep the company afloat. [28] Cleo continued to head the company, he managed to close a business deal with the representatives from Kroger, a grocery chain, [29] was looking for a wallpaper cleaner to be sold in their stores. Back then, families commonly burned coals to heat up their homes [30] it left soot that was difficult to clean off the wallpapers.\n\nNoah set about to come up with the product and ended up inventing a version of the dough-like substance that children all over the world [31] familiar with today. The product was a success as it was easy to use – consumers only needed to roll the dough-like substance across their dirty walls to clean [32] the soot and dirt!\n\n[33] it was only much later that it was reinvented as a children's toy. Detergent from the dough [34] removed and it was originally only available in white. With the intention to make it [35] marketable, it was soon made in red, yellow and blue.`,
+  ans:{26:"M",27:"H",28:"D",29:"P",30:"B",31:"K",32:"J",33:"E",34:"L",35:"F"}
+};
+const ED={
+  pass:`I was spring-cleaning one morning and my son was helping. As he [36:ramaged] through boxes and bags, he came across a knotted [37:hankecheif] with an old, dark brown coin nestled inside. "Mum, can I have this?" I took one look and was immediately [38:transport] to another time. "You can play with all your coins, but not this one," I said slowly. "This one's special. I will never see the woman who gave this to me again." As I fingered the coin [39:gentle], a wave of [40:nostalgic] swept over me. "This coin is worth much more than its [41:monitery] value." My son looked at me strangely and I explained.\n\nI went on a trip to Nigeria in 1991 and my wallet was pickpocketed on the very first day. With not much cash left, I had to be careful with my [42:spent].\n\nOne day, an old woman beggar approached me and [43:thrast] her hand in my face. I snapped and vented my frustration on her, screaming at the top of my lungs that my money had been stolen.\n\nThe woman listened attentively and pondered [44:through] my words. Then her face [45:krummbled] into a toothless grin as she reached into the folds of her dress.`,
+  ans:{36:"rummaged",37:"handkerchief",38:"transported",39:"gently",40:"nostalgia",41:"monetary",42:"spending",43:"thrust",44:"over",45:"crumbled"}
+};
+const CC={
+  pass:`We all want to get things quickly. We feel that the [46] we get them, the better it is for us, because waiting makes us feel impatient. This [47] often happens when we want others to do things for us. But if we do these things ourselves, we will find that delays are [48].\n\nWhen something great is achieved, we only see the success [49] makes it special. We do not think about the many years or [50] centuries of hard work that led to it. We forget the many failures and the patient effort put in before the [51] of the great work.\n\nRome became a powerful empire, and its capital city was one of the most famous places in the ancient [52]. Even today, it is a well-known city. It is [53] to have been built by Remus and Romulus. So many generations helped build the city that by the [54] it became rich and powerful, people had forgotten who these brothers were.\n\nThis is not only true for Rome but [55] for all of mankind's achievements. When we see a finished product, we may think it is amazing. However, a [56] study of all parts of it shows us that there was a lot of patient effort [57] it. Poetry or music may seem like it came from sudden inspiration, but a poet needs to observe life and a singer has to train his [58]. A painter and a sculptor also need to work hard on their art pieces.\n\nWhen we look at the Taj Mahal, we may say it is a dream made of marble. But it was not [59] in a day. It took twenty long years to build it, and thousands of workers were [60] in its construction.`,
+  ans:{46:"faster",47:"impatience",48:"expected",49:"that",50:"the",51:"success",52:"kingdom",53:"said",54:"time",55:"also",56:"close",57:"behind",58:"voice",59:"built",60:"involved"}
+};
+const SY=[
+  {num:61,orig:"Peter is the only student in the class who is not going for the excursion.",start:"All ",ans:"All the students in the class, other than Peter, will be going for the excursion."},
+  {num:62,orig:"Alex was considered an accomplice as he had helped to cover up for his friend.",start:"In ",ans:"In helping to cover up for his friend, Alex was considered as an accomplice."},
+  {num:63,orig:'"Don\'t worry," said Tommy, "I\'ll get the work done by tomorrow."',start:"Tommy told me ",ans:"Tommy told me not to worry as he would get the work done by the next day."},
+  {num:64,orig:"The robotic wheelchairs are designed for the elderly folks. The elderly folks come from the welfare homes.",start:"The robotic wheelchairs, for whom ",ans:"The robotic wheelchairs, for whom the elderly folks from the welfare homes are designed, help them get around."},
+  {num:65,orig:"I was annoyed when my brother broke my phone.",start:"Much to ",ans:"Much to my annoyance, my brother had broken my phone."}
+];
+const CPASS=`   It was soon after the results of the class test for the first term had been compiled. I did badly in the test, not unexpectedly. During the December holidays, my family shifted home to Pasir Ris. It was somewhat a disaster that affected my education, especially when I was taking the PSLE at the end of the year. There was too much fun for boys of my age there, from swimming, catching spiders, cycling to mischievous exploits of one sort or another.
+   My teacher, Mr Soon, was a genial person who was not very keen to use the rod. However, he wrote four words in my report book and they told it all: "Can work but lazy." It was the system then that principals would go round to each class and randomly take a look at the report books. The principal, Major John, was a retired army officer. He was about 1.8 metres tall, slim, slightly hunched and wore a thick moustache that seemed to cover his entire lip. His appearance would send shivers down the students' spines; especially if they did not meet his expectations.
+   On that fateful afternoon, Major John sat on the teacher's chair and went through the report books of the 'lucky ones' in the class. For some odd reason, my report book was on top of the pile. Then I heard my name. His voice boomed across the room, "So, you can work, but you are lazy?" That question did not call for a reply. "My boy," the principal bawled, "go to my office. Next to my desk is a wooden cabinet. Open it. Hanging on the cabinet door, find the magic wand you like best and bring it back to me."
+   I did not need any prodding. I stepped out of my class and headed to his office with my heart in my mouth. In the wooden cabinet, I found six canes of various thickness, from the width of one's smallest finger to one's fat thumb. What a decision to make. How I wished the ground would open that very moment and gobble up the whole school. I had heard from other mischievous boys that the thicker the cane, the less the pain, so I took a risk. I walked back to class, stroking the cane which I knew would soon whip my buttocks, but what I could not guess was the number of strokes I would be given.
+   By the time I returned to class, there were about seven others who had formed a line, all having 'qualified' to experience the 'magic wand'. I was the one invited to take the dreaded spot first, bend down and touch my toes. Then like a first-rate magician, the principal brought the cane down on my buttocks. I almost fainted though I held back the beady tears.
+   At that instance, Major John called, "Next." It was music to my ears. I walked back to my desk. When I sat on the hard wooden chair, I shot back up into the air. Instinctively, I pressed my hands on the seat and pretended to sit, remaining in that position till the pain subsided.
+   That one stroke of the 'magic wand' changed my life. All my extracurricular activities around the neighbourhood were put on hold. It was study, study, study, homework, homework and homework almost round the clock.
+   When the results of the Preliminary Examination came in, there was nothing in it to make me qualify for another stroke. If Major John had not used the wand on me, I would have ended up as a dropout and my life would have been ruined. Deep in my heart, I am totally grateful to him for performing his magic.`;
+const CQS=[
+  {num:66,marks:1,type:"text",q:"How did the author perform in the class test for the first term?",ans:"The author performed badly in the class test, not unexpectedly."},
+  {num:67,marks:1,type:"phrase",q:"Which four-word phrase in Paragraph 2 shows Mr Soon's impression of the author?",ans:"Can work but lazy."},
+  {num:68,marks:3,type:"ref",q:"What do the words in the left column refer to in the passage?",rows:[{w:"it (line 3)",a:"the PSLE / the class test"},{w:"it (line 17)",a:"the wooden cabinet"},{w:"one (line 26)",a:"the author / the first boy in line"}]},
+  {num:69,marks:1,type:"order",q:"Write 1, 2 and 3 to show the order in which the events occurred.",events:[{t:"The author was sent to the principal's office.",a:"2"},{t:"The principal looked through selected report books.",a:"1"},{t:"The principal became angry.",a:"3"}]},
+  {num:70,marks:2,type:"explain",q:"Explain what the author meant by 'so I took a risk' (line 22) when he was choosing the cane.",ans:"The author had heard from other mischievous boys that the thicker the cane, the less the pain. So he gambled and chose the thicker cane, hoping to feel less pain, even though he was not sure if this was true."},
+  {num:71,marks:3,type:"emotion",q:"For each situation below, state how the author felt at that moment.",rows:[{s:"The author was walking back to class with the cane in his hand.",e:"Terrified / Afraid",ev:"He was stroking the cane which he knew would soon whip his buttocks."},{s:"The author heard his principal call, 'Next'.",e:"Happy / Relieved",ev:"It was music to my ears."},{s:"The author received his Preliminary Examination results.",e:"Relieved / Grateful",ev:"There was nothing in it to make me qualify for another stroke."}]},
+  {num:72,marks:2,type:"examples",q:"State two examples from the passage that showed that the pain on the author's buttocks was unbearable.",e1:"He almost fainted though he held back the beady tears.",e2:"He shot back up into the air when he sat on the hard wooden chair."},
+  {num:73,marks:3,type:"tf",q:"Based on the story, state whether each statement is true or false, then give one reason.",rows:[{s:"The principal looked through all the students' report books termly.",a:"False",r:"The principal would randomly take a look at the report books, not all and not every term."},{s:"The author was the only student punished that day.",a:"False",r:"There were about seven others who had also formed a line and were punished."},{s:"The boys feared the principal the moment they saw him.",a:"True",r:"His appearance would send shivers down the students' spines."}]},
+  {num:74,marks:2,type:"explain",q:"Explain clearly what you can tell about Major John from the way he described the cane as a 'magic wand'.",ans:"Major John had a sense of humour and believed in the power of discipline. By calling the cane a 'magic wand', he suggested it could transform lazy students into hardworking ones, showing he used punishment as a tool for positive change."},
+  {num:75,marks:2,type:"explain",q:"Explain how the author's life changed after he was given one stroke of the cane.",ans:"The author stopped all his extracurricular activities and focused entirely on studying and homework almost round the clock. As a result, he passed his Preliminary Examination and avoided becoming a dropout."}
+];
+
+// ===================== STATE =====================
+let curSec=null,submitted=false;
+
+function goHome(){
+  document.getElementById('home').classList.remove('hidden');
+  document.getElementById('secview').classList.add('hidden');
+  submitted=false;curSec=null;
+}
+function go(n){
+  curSec=n;submitted=false;
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('secview').classList.remove('hidden');
+  document.getElementById('newbtn').style.display=n==='full'?'none':'';
+  render(n,false);
+}
+async function refresh(){
+  if(!curSec||curSec==='full')return;
+  submitted=false;
+  const b=document.getElementById('newbtn');
+  b.disabled=true;b.textContent='⏳ Generating...';
+  await render(curSec,true);
+  b.disabled=false;b.textContent='✨ New Questions';
+}
+const META={
+  grammar_mcq:{t:"Grammar MCQ",s:"Q1–10 · Choose best answer",m:"10 marks"},
+  vocab_mcq:{t:"Vocabulary MCQ",s:"Q11–15 · Choose best word",m:"5 marks"},
+  vocab_cloze:{t:"Vocabulary Cloze",s:"Q16–20 · Synonym from passage",m:"5 marks"},
+  visual_text:{t:"Visual Text",s:"Q21–25 · Poster & article comprehension",m:"5 marks"},
+  grammar_cloze:{t:"Grammar Cloze",s:"Q26–35 · Word bank A–Q",m:"10 marks"},
+  editing:{t:"Editing",s:"Q36–45 · Spelling & grammatical errors",m:"10 marks"},
+  comp_cloze:{t:"Comprehension Cloze",s:"Q46–60 · Fill in suitable word",m:"15 marks"},
+  synthesis:{t:"Synthesis & Transformation",s:"Q61–65 · Rewrite using given words",m:"10 marks"},
+  comprehension:{t:"Comprehension",s:"Q66–75 · Open-ended questions",m:"20 marks"},
+  full:{t:"Full Paper",s:"All sections — ACS Junior Prelim 2025",m:"90 marks"}
+};
+async function render(n,ai){
+  const m=META[n]||{t:n,s:'',m:''};
+  document.getElementById('stitle').textContent=m.t;
+  document.getElementById('ssub').textContent=m.s;
+  document.getElementById('smarks').textContent=m.m;
+  const c=document.getElementById('seccontent');c.innerHTML='';
+  if(n==='grammar_mcq') await doMCQ(c,G_MCQ,1,'gm',ai,'Grammar MCQ',10);
+  else if(n==='vocab_mcq') await doMCQ(c,V_MCQ,11,'vm',ai,'Vocabulary MCQ',5);
+  else if(n==='vocab_cloze') await doVocabCloze(c,ai);
+  else if(n==='visual_text') await doVT(c,ai);
+  else if(n==='grammar_cloze') await doGC(c,ai);
+  else if(n==='editing') await doED(c,ai);
+  else if(n==='comp_cloze') await doCC(c,ai);
+  else if(n==='synthesis') await doSY(c,ai);
+  else if(n==='comprehension') await doComp(c,ai);
+  else if(n==='full') await doFull(c);
+}
+
+// ===================== CORE AI =====================
+async function streamExplain(prompt, bodyEl, headerEl, isCorrect){
+  // Set header
+  headerEl.className='exp-header '+(isCorrect?'correct-h':'wrong-h');
+  headerEl.textContent=(isCorrect?'✅ Correct — here is why:':'❌ Wrong — here is why:');
+
+  bodyEl.textContent='';
+  bodyEl.classList.add('streaming');
+
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:600,
+        stream:true,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    if(!resp.ok){
+      const err=await resp.text();
+      bodyEl.classList.remove('streaming');
+      bodyEl.textContent='(Explanation unavailable — '+err.slice(0,80)+')';
+      return;
+    }
+
+    const reader=resp.body.getReader();
+    const decoder=new TextDecoder();
+    let buf='';
+
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      buf+=decoder.decode(value,{stream:true});
+      const lines=buf.split('\n');
+      buf=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data: '))continue;
+        const data=line.slice(6).trim();
+        if(data==='[DONE]')break;
+        try{
+          const j=JSON.parse(data);
+          if(j.type==='content_block_delta'&&j.delta?.text){
+            bodyEl.textContent+=j.delta.text;
+          }
+        }catch{}
+      }
+    }
+  }catch(e){
+    bodyEl.textContent='Explanation: The correct answer is shown above. Review the grammar rule or vocabulary meaning carefully.';
+  }
+  bodyEl.classList.remove('streaming');
+}
+
+async function callAI(prompt,max=1200){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:max,messages:[{role:'user',content:prompt}]})
+  });
+  if(!r.ok)throw new Error(await r.text());
+  const d=await r.json();
+  return d.content.map(b=>b.text||'').join('').replace(/```json[\s\S]*?```|```/g,'').trim();
+}
+
+function showLoad(c,msg){
+  const d=document.createElement('div');d.className='load-box';d.id='loaddiv';
+  d.innerHTML=`<div class="spinner"></div><div class="load-txt">${msg}</div>`;
+  c.appendChild(d);
+}
+function removeLoad(){document.getElementById('loaddiv')?.remove();}
+
+// ===================== EXPLAIN QUESTION (pre-submission, all options) =====================
+async function explainQuestion(qText, opts, btnEl, preExpEl){
+  const showing=preExpEl.classList.contains('show');
+  if(showing){preExpEl.classList.remove('show');btnEl.textContent='💡 Explain this question';return;}
+  btnEl.disabled=true;btnEl.textContent='⏳ Thinking...';
+  preExpEl.innerHTML=`<div class="pre-exp-hdr">✨ Claude AI — Explaining all options</div><div id="peBody" class="streaming"></div>`;
+  preExpEl.classList.add('show');
+  const body=preExpEl.querySelector('#peBody');
+  const prompt=`You are a PSLE English tutor for Primary 6 students in Singapore.
+
+A student is about to answer this question:
+"${qText}"
+
+The four options are:
+Option (1): ${opts[0]}
+Option (2): ${opts[1]}
+Option (3): ${opts[2]}
+Option (4): ${opts[3]}
+
+Please explain WITHOUT revealing the correct answer:
+1. What grammar rule or vocabulary concept is this question testing? (1-2 sentences)
+2. For EACH option, explain what it means in the context of this sentence and whether it could fit or why it might not:
+   Option (1) "${opts[0]}": …
+   Option (2) "${opts[1]}": …
+   Option (3) "${opts[2]}": …
+   Option (4) "${opts[3]}": …
+3. Give a short hint to help the student decide.
+
+Keep each option explanation to 1-2 sentences. Do NOT state which option is the answer. Use simple, friendly language.`;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,stream:true,messages:[{role:'user',content:prompt}]})});
+    if(resp.ok){
+      const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';
+      while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const d=line.slice(6).trim();if(d==='[DONE]')break;try{const j=JSON.parse(d);if(j.type==='content_block_delta'&&j.delta?.text)body.textContent+=j.delta.text;}catch{}}}
+    }else{body.textContent='Explanation unavailable — check API key.';}
+  }catch(e){body.textContent='Could not load explanation.';}
+  body.classList.remove('streaming');
+  btnEl.disabled=false;btnEl.textContent='💡 Hide explanation';
+}
+
+// ===================== MCQ =====================
+async function doMCQ(c,staticData,startNum,pfx,ai,label,total){
+  let data=staticData;
+  if(ai){
+    showLoad(c,`Generating new ${label} questions...`);
+    try{
+      const raw=await callAI(`Generate ${staticData.length} PSLE Primary 6 Singapore English ${label} questions. Return ONLY a valid JSON array. Each element: {"q":"full question sentence with _____","opts":["option1","option2","option3","option4"],"ans":0}. The "ans" is the 0-indexed position of the correct option. Make questions realistic PSLE level. No markdown, no extra text, just the JSON array.`,1400);
+      const p=JSON.parse(raw);
+      if(Array.isArray(p)&&p.length>=4)data=p.slice(0,staticData.length);
+    }catch(e){console.log('AI gen failed, using static',e);}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.textContent=`For each question from ${startNum} to ${startNum+data.length-1}, choose the answer that best fits the sentence(s).`;
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated questions';c.appendChild(ch);}
+
+  data.forEach((q,i)=>{
+    const num=startNum+i;
+    const block=mk('div','mcq-block');
+    const qtxt=mk('div','mcq-qtext');
+    const qspan=mk('span','mcq-qnum');qspan.textContent=num+' ';
+    qtxt.appendChild(qspan);qtxt.appendChild(document.createTextNode(q.q));
+    block.appendChild(qtxt);
+    const optsDiv=mk('div','opts');
+    q.opts.forEach((o,j)=>{
+      const opt=mk('div','opt');
+      opt.id=`${pfx}${num}_${j}`;
+      const circ=mk('div','opt-circle');circ.textContent=j+1;
+      opt.appendChild(circ);opt.appendChild(document.createTextNode(o));
+      opt.onclick=()=>pickMCQ(pfx,num,j,q.opts.length);
+      optsDiv.appendChild(opt);
+    });
+    block.appendChild(optsDiv);
+    // pre-submission explain button
+    const expBtn=mk('button','explain-q-btn');expBtn.textContent='💡 Explain this question';
+    const preExp=mk('div','pre-exp');
+    expBtn.onclick=()=>explainQuestion(q.q,q.opts,expBtn,preExp);
+    block.appendChild(expBtn);block.appendChild(preExp);
+    // post-submission explanation area
+    const expArea=mk('div','exp-area');expArea.id=`exp_${pfx}${num}`;
+    const expH=mk('div','exp-header');expArea.appendChild(expH);
+    const expB=mk('div','exp-body');expArea.appendChild(expB);
+    block.appendChild(expArea);
+    block.dataset.ans=q.ans;
+    block.dataset.opts=JSON.stringify(q.opts);
+    block.dataset.q=q.q;
+    c.appendChild(block);
+  });
+
+  c.appendChild(makeBar(async()=>{
+    submitted=true;let score=0;
+    const blocks=c.querySelectorAll('.mcq-block');
+    const streamJobs=[];
+    blocks.forEach((block,i)=>{
+      const num=startNum+i;
+      const ans=parseInt(block.dataset.ans);
+      const opts=JSON.parse(block.dataset.opts);
+      const q=block.dataset.q;
+      const chosen=window[`pick_${pfx}${num}`];
+      // mark options
+      for(let j=0;j<opts.length;j++){
+        const el=document.getElementById(`${pfx}${num}_${j}`);
+        if(!el)continue;
+        el.classList.add('locked');
+        el.classList.remove('picked');
+        if(j===ans){el.classList.add('correct');el.querySelector('.opt-circle').textContent='✓';}
+        else if(j===chosen&&chosen!==ans){el.classList.add('wrong');el.querySelector('.opt-circle').textContent='✗';}
+      }
+      if(chosen===ans)score++;
+      const isCorrect=chosen===ans;
+      const chosenTxt=chosen!==undefined?opts[chosen]:'(not answered)';
+      const correctTxt=opts[ans];
+      // show explanation area
+      const expArea=document.getElementById(`exp_${pfx}${num}`);
+      const expH=expArea.querySelector('.exp-header');
+      const expB=expArea.querySelector('.exp-body');
+      expArea.classList.add('show');
+      expB.textContent='Loading explanation...';
+      const prompt=`You are a helpful PSLE English tutor for Primary 6 students in Singapore.
+
+Question: "${q}"
+The student chose: ${chosen!==undefined?`Option (${chosen+1}) "${chosenTxt}"`:'Nothing (not answered)'}
+The correct answer is: Option (${ans+1}) "${correctTxt}"
+
+Explain this question by going through EACH option individually:
+
+Option (1) "${opts[0]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
+Option (2) "${opts[1]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
+Option (3) "${opts[2]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
+Option (4) "${opts[3]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
+
+End with one sentence naming the grammar rule or vocabulary concept this question tests.
+Use simple, encouraging language suitable for a Primary 6 student.`;
+      streamJobs.push({expH,expB,prompt,isCorrect});
+    });
+    showResult(score,data.length);
+    // stream all explanations
+    for(const job of streamJobs){
+      await streamExplain(job.prompt,job.expB,job.expH,job.isCorrect);
+    }
+  },'mcq'));
+
+  c.appendChild(makeScore());
+}
+function pickMCQ(pfx,num,j,total){
+  if(submitted)return;
+  for(let k=0;k<total;k++){
+    const el=document.getElementById(`${pfx}${num}_${k}`);
+    if(el){el.classList.remove('picked');el.querySelector('.opt-circle').textContent=k+1;}
+  }
+  const sel=document.getElementById(`${pfx}${num}_${j}`);
+  if(sel){sel.classList.add('picked');sel.querySelector('.opt-circle').textContent='✓';}
+  window[`pick_${pfx}${num}`]=j;
+}
+
+// ===================== VOCAB CLOZE =====================
+async function doVocabCloze(c,ai){
+  let pass=SYN_PASS,qs=SYN_MCQ;
+  if(ai){
+    showLoad(c,'Generating new Vocabulary Cloze...');
+    try{
+      const raw=await callAI(`Generate a short 3-paragraph passage (80 words) for PSLE English Vocabulary Cloze. Mark exactly 5 words with square brackets like [word]. Then generate 5 MCQ questions asking for the closest synonym to each underlined word. Return ONLY valid JSON: {"passage":"full passage with [word] markers","questions":[{"num":16,"word":"marked_word","opts":["a","b","c","d"],"ans":0},...5 items...]}. No markdown.`,1000);
+      const p=JSON.parse(raw);
+      if(p.passage&&p.questions&&p.questions.length===5){pass=p.passage;qs=p.questions;}
+    }catch(e){}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.innerHTML='For each question from 16 to 20, choose the word <strong>closest in meaning</strong> to the underlined word(s) from the passage.';
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated';c.appendChild(ch);}
+  const pb=mk('div','passage');
+  pb.innerHTML=`<div style="white-space:pre-line;font-family:'Times New Roman',serif">${pass.replace(/\[([^\]]+)\]/g,'<u><strong>$1</strong></u>')}</div>`;
+  c.appendChild(pb);
+  qs.forEach(q=>{
+    const block=mk('div','mcq-block');
+    const qt=mk('div','mcq-qtext');
+    const qn=mk('span','mcq-qnum');qn.textContent=q.num+' ';
+    qt.appendChild(qn);qt.appendChild(document.createTextNode(`Choose the word closest in meaning to "${q.word}".`));
+    block.appendChild(qt);
+    const od=mk('div','opts');
+    q.opts.forEach((o,j)=>{
+      const opt=mk('div','opt');opt.id=`vc${q.num}_${j}`;
+      const ci=mk('div','opt-circle');ci.textContent=j+1;
+      opt.appendChild(ci);opt.appendChild(document.createTextNode(o));
+      opt.onclick=()=>pickMCQ('vc',q.num,j,4);
+      od.appendChild(opt);
+    });
+    block.appendChild(od);
+    // pre-submission explain button for vocab cloze
+    const vcBtn=mk('button','explain-q-btn');vcBtn.textContent='💡 Explain this question';
+    const vcPre=mk('div','pre-exp');
+    vcBtn.onclick=()=>explainQuestion(`Choose the word closest in meaning to "${q.word}".`,q.opts,vcBtn,vcPre);
+    block.appendChild(vcBtn);block.appendChild(vcPre);
+    const ea=mk('div','exp-area');ea.id=`exp_vc${q.num}`;
+    ea.appendChild(mk('div','exp-header'));ea.appendChild(mk('div','exp-body'));
+    block.appendChild(ea);
+    block.dataset.ans=q.ans;block.dataset.opts=JSON.stringify(q.opts);block.dataset.word=q.word;
+    c.appendChild(block);
+  });
+  c.appendChild(makeBar(async()=>{
+    submitted=true;let score=0;const jobs=[];
+    qs.forEach(q=>{
+      const ans=q.ans;const opts=q.opts;const chosen=window[`pick_vc${q.num}`];
+      for(let j=0;j<4;j++){
+        const el=document.getElementById(`vc${q.num}_${j}`);if(!el)continue;
+        el.classList.add('locked');el.classList.remove('picked');
+        if(j===ans){el.classList.add('correct');el.querySelector('.opt-circle').textContent='✓';}
+        else if(j===chosen&&chosen!==ans){el.classList.add('wrong');el.querySelector('.opt-circle').textContent='✗';}
+      }
+      if(chosen===ans)score++;
+      const ea=document.getElementById(`exp_vc${q.num}`);
+      const expH=ea.querySelector('.exp-header');const expB=ea.querySelector('.exp-body');
+      ea.classList.add('show');expB.textContent='Loading...';
+      const prompt=`You are a PSLE English vocabulary tutor for Primary 6 students in Singapore.
+
+The word from the passage is: "${q.word}"
+The student chose: ${chosen!==undefined?`Option (${chosen+1}) "${opts[chosen]}"`:'Nothing'}
+The correct synonym is: Option (${ans+1}) "${opts[ans]}"
+
+First, in 1-2 sentences, explain what "${q.word}" means.
+
+Then explain EACH option individually:
+Option (1) "${opts[0]}": Does this have the same meaning as "${q.word}"? Why or why not? (1-2 sentences)
+Option (2) "${opts[1]}": Does this have the same meaning as "${q.word}"? Why or why not? (1-2 sentences)
+Option (3) "${opts[2]}": Does this have the same meaning as "${q.word}"? Why or why not? (1-2 sentences)
+Option (4) "${opts[3]}": Does this have the same meaning as "${q.word}"? Why or why not? (1-2 sentences)
+
+Use simple, friendly language for a Primary 6 student.`;
+      jobs.push({expH,expB,prompt,isCorrect:chosen===ans});
+    });
+    showResult(score,5);
+    for(const j of jobs)await streamExplain(j.prompt,j.expB,j.expH,j.isCorrect);
+  },'mcq'));
+  c.appendChild(makeScore());
+}
+
+// ===================== VISUAL TEXT =====================
+async function doVT(c,ai){
+  let qs=VT_MCQ;
+  let posterHTML=`<div style="text-align:center;font-size:1.6rem;font-weight:900;margin-bottom:.5rem">DO YOU SLEEP ENOUGH?</div><div style="text-align:center;font-weight:700;font-size:.95rem;margin-bottom:.4rem">Nearly 3 in 4 teenagers are constantly sleep-deprived!</div><div style="text-align:center;font-size:.88rem;line-height:1.7">Teens need 8–9 hours of sleep a night, but get only about 7. Poor sleep leads to mental health problems, impulsive behaviour, and difficulty retaining information.</div><div style="margin-top:.6rem;text-align:center;font-size:.82rem">Speak to Dr Christine Lee · www.msct.com.sg · Tel: 6442 5678<br><strong>Midvalley Sleep Clinic</strong></div>`;
+  let articleHTML=`Sleep is vital for physical and mental health. During sleep, our bodies repair tissues, strengthen the immune system and consolidate memories.<br><br>To improve sleep, keep a consistent schedule and create a relaxing bedtime routine. Limit screens before bed as they disrupt your natural sleep-wake cycle. Avoid caffeine and heavy meals close to bedtime.<br><br>You can manage your sleeping habits — it's in your hands!`;
+  if(ai){
+    showLoad(c,'Generating new Visual Text section...');
+    try{
+      const raw=await callAI(`Generate a PSLE Singapore English Visual Text comprehension section. Create: 1) a health or community awareness poster (as HTML), 2) a short related article (as HTML), 3) exactly 5 MCQ comprehension questions (Q21-25). Return ONLY valid JSON: {"posterHTML":"html","articleHTML":"html","questions":[{"num":21,"q":"...","opts":["a","b","c","d"],"ans":0},...5 items...]}. No markdown.`,1400);
+      const p=JSON.parse(raw);
+      if(p.questions&&p.questions.length===5&&p.posterHTML){posterHTML=p.posterHTML;articleHTML=p.articleHTML;qs=p.questions;}
+    }catch(e){}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.innerHTML='Study the poster (Text 1) and the extract from an article (Text 2) and answer questions 21 to 25.';
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated';c.appendChild(ch);}
+  const t1l=mk('div','');t1l.style.cssText='font-weight:700;font-size:.85rem;margin-bottom:.4rem';t1l.textContent='Text 1 — Poster';c.appendChild(t1l);
+  const poster=mk('div','');poster.style.cssText='background:#fff;border:2px solid #374151;border-radius:10px;padding:1.25rem;margin-bottom:.9rem;font-size:.88rem;line-height:1.7';poster.innerHTML=posterHTML;c.appendChild(poster);
+  const t2l=mk('div','');t2l.style.cssText='font-weight:700;font-size:.85rem;margin-bottom:.4rem';t2l.textContent='Text 2 — Article';c.appendChild(t2l);
+  const art=mk('div','');art.style.cssText='background:#fff;border:1px solid #d1d5db;border-radius:10px;padding:1.1rem;margin-bottom:.9rem;font-size:.88rem;line-height:1.75;font-style:italic';art.innerHTML=articleHTML;c.appendChild(art);
+  qs.forEach(q=>{
+    const block=mk('div','mcq-block');
+    const qt=mk('div','mcq-qtext');const qn=mk('span','mcq-qnum');qn.textContent=q.num+' ';
+    qt.appendChild(qn);qt.appendChild(document.createTextNode(q.q));block.appendChild(qt);
+    const od=mk('div','opts');
+    q.opts.forEach((o,j)=>{
+      const opt=mk('div','opt');opt.id=`vt${q.num}_${j}`;
+      const ci=mk('div','opt-circle');ci.textContent=j+1;
+      opt.appendChild(ci);opt.appendChild(document.createTextNode(o));
+      opt.onclick=()=>pickMCQ('vt',q.num,j,4);od.appendChild(opt);
+    });
+    block.appendChild(od);
+    // pre-submission explain button for visual text
+    const vtBtn=mk('button','explain-q-btn');vtBtn.textContent='💡 Explain this question';
+    const vtPre=mk('div','pre-exp');
+    vtBtn.onclick=()=>explainQuestion(q.q,q.opts,vtBtn,vtPre);
+    block.appendChild(vtBtn);block.appendChild(vtPre);
+    const ea=mk('div','exp-area');ea.id=`exp_vt${q.num}`;
+    ea.appendChild(mk('div','exp-header'));ea.appendChild(mk('div','exp-body'));
+    block.appendChild(ea);block.dataset.ans=q.ans;block.dataset.opts=JSON.stringify(q.opts);block.dataset.q=q.q;
+    c.appendChild(block);
+  });
+  c.appendChild(makeBar(async()=>{
+    submitted=true;let score=0;const jobs=[];
+    qs.forEach(q=>{
+      const ans=q.ans;const opts=q.opts;const chosen=window[`pick_vt${q.num}`];
+      for(let j=0;j<4;j++){const el=document.getElementById(`vt${q.num}_${j}`);if(!el)continue;el.classList.add('locked');el.classList.remove('picked');if(j===ans){el.classList.add('correct');el.querySelector('.opt-circle').textContent='✓';}else if(j===chosen&&chosen!==ans){el.classList.add('wrong');el.querySelector('.opt-circle').textContent='✗';}}
+      if(chosen===ans)score++;
+      const ea=document.getElementById(`exp_vt${q.num}`);const expH=ea.querySelector('.exp-header');const expB=ea.querySelector('.exp-body');
+      ea.classList.add('show');expB.textContent='Loading...';
+      const prompt=`You are a PSLE English tutor for Primary 6 students in Singapore.
+
+Visual Text MCQ: "${q.q}"
+The student chose: ${chosen!==undefined?`Option (${chosen+1}) "${opts[chosen]}"`:'Nothing'}
+The correct answer is: Option (${ans+1}) "${opts[ans]}"
+
+First explain in 1-2 sentences WHAT clues in the poster or article point to the correct answer (quote specific words if possible).
+
+Then explain EACH option individually:
+Option (1) "${opts[0]}": Is this correct or wrong? Why? (1-2 sentences, referencing the texts)
+Option (2) "${opts[1]}": Is this correct or wrong? Why? (1-2 sentences, referencing the texts)
+Option (3) "${opts[2]}": Is this correct or wrong? Why? (1-2 sentences, referencing the texts)
+Option (4) "${opts[3]}": Is this correct or wrong? Why? (1-2 sentences, referencing the texts)
+
+Use simple, clear language for a Primary 6 student.`;
+      jobs.push({expH,expB,prompt,isCorrect:chosen===ans});
+    });
+    showResult(score,5);
+    for(const j of jobs)await streamExplain(j.prompt,j.expB,j.expH,j.isCorrect);
+  },'mcq'));
+  c.appendChild(makeScore());
+}
+
+// ===================== GRAMMAR CLOZE =====================
+async function doGC(c,ai){
+  let data=GC;
+  if(ai){
+    showLoad(c,'Generating new Grammar Cloze...');
+    try{
+      const raw=await callAI(`Generate a PSLE Singapore English Grammar Cloze passage with exactly 10 blanks numbered 26 to 35. Create a word bank of exactly 15 grammar/function words (conjunctions, prepositions, pronouns, articles, adverbs etc.) labelled with letters A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q (skip I and O). Each answer letter is used exactly once. Return ONLY valid JSON: {"wb":[{"l":"A","w":"word"},...15 items...],"pass":"passage text with [26] [27]... markers","ans":{"26":"M","27":"H",...}}. No markdown.`,1200);
+      const p=JSON.parse(raw);
+      if(p.wb&&p.pass&&p.ans&&Object.keys(p.ans).length===10)data=p;
+    }catch(e){}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.innerHTML='There are 10 blanks numbered 26 to 35. From the list of words, choose the most suitable word for each blank. Write its letter (A–Q) in the blank. <strong>Each word can be used only once. Letters I and O are omitted.</strong>';
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated';c.appendChild(ch);}
+  const wb=mk('div','wb');
+  wb.innerHTML=`<div class="wb-title">Word Bank</div><div class="wb-items">${data.wb.map(w=>`<div class="wb-item">(${w.l}) ${w.w}</div>`).join('')}</div>`;
+  c.appendChild(wb);
+  const pbox=mk('div','cloze-pass');
+  let html=data.pass.replace(/\n/g,'<br><br>');
+  for(let n=26;n<=35;n++){
+    html=html.replace(`[${n}]`,`<span class="bwrap"><span class="bnum">(${n})</span><input class="bi" id="gc${n}" maxlength="2" style="width:46px;text-transform:uppercase" autocomplete="off"/></span>`);
+  }
+  pbox.innerHTML=html;c.appendChild(pbox);
+  const expList=mk('div','exp-list');expList.style.display='none';c.appendChild(expList);
+  c.appendChild(makeBar(async()=>{
+    submitted=true;let score=0;
+    expList.style.display='block';expList.innerHTML='<div style="font-weight:700;font-size:.9rem;color:var(--blue);margin-bottom:.75rem">✨ AI Explanations — Grammar Cloze</div>';
+    const jobs=[];
+    for(let n=26;n<=35;n++){
+      const inp=document.getElementById(`gc${n}`);if(!inp)continue;
+      const val=(inp.value||'').trim().toUpperCase();
+      const correct=(data.ans[n]||'').toUpperCase();
+      const correctWord=data.wb.find(w=>w.l===correct)?.w||correct;
+      const userWord=data.wb.find(w=>w.l===val)?.w||val;
+      inp.classList.remove('ok','bad');
+      const isOk=val===correct;
+      if(isOk){inp.classList.add('ok');score++;}else{inp.classList.add('bad');if(!inp.value.trim())inp.placeholder=correct;}
+      const item=mk('div','exp-item');
+      const head=mk('div','exp-item-head '+(isOk?'ok':'bad'));
+      head.innerHTML=`(${n}) Correct: <strong>${correct} — "${correctWord}"</strong> ${isOk?'✅':'❌ You wrote: '+(val?`${val} (${userWord})`:'nothing')}`;
+      const body=mk('div','');body.style.cssText='font-size:.81rem;line-height:1.6;color:#374151';body.textContent='Loading explanation...';
+      item.appendChild(head);item.appendChild(body);expList.appendChild(item);
+      const prompt=`You are a PSLE English Grammar tutor for Primary 6 students in Singapore.
+
+Grammar Cloze blank number ${n}:
+The correct answer is the letter "${correct}" which stands for the word "${correctWord}".
+The student wrote: "${val?`${val} (${userWord})`:'nothing'}"
+
+Write a clear 2–3 sentence explanation:
+1. Name the grammar category of "${correctWord}" (e.g. conjunction, preposition, relative pronoun, etc.)
+2. Explain exactly WHY this word is needed here — what is the sentence structure or grammar rule that requires it?
+3. If the student's answer was wrong, briefly explain why "${userWord||'their answer'}" doesn't work here.
+Use simple language for a Primary 6 student.`;
+      jobs.push({body,prompt,isOk});
+    }
+    showResult(score,10);
+    for(const j of jobs){
+      try{
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:250,stream:true,messages:[{role:'user',content:j.prompt}]})});
+        if(!resp.ok){j.body.textContent='See the correct answer above.';continue;}
+        const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';
+        j.body.textContent='';j.body.classList.add('streaming');
+        while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const data2=line.slice(6).trim();if(data2==='[DONE]')break;try{const jj=JSON.parse(data2);if(jj.type==='content_block_delta'&&jj.delta?.text)j.body.textContent+=jj.delta.text;}catch{}}}
+        j.body.classList.remove('streaming');
+      }catch(e){j.body.textContent='The correct word fits the grammar structure of this sentence. Review the word bank and the surrounding sentence context.';}
+    }
+  },'cloze'));
+  c.appendChild(makeScore());
+}
+
+// ===================== EDITING =====================
+async function doED(c,ai){
+  let data=ED;
+  if(ai){
+    showLoad(c,'Generating new Editing passage...');
+    try{
+      const raw=await callAI(`Generate a PSLE Singapore English Editing passage with exactly 10 errors numbered 36 to 45. Format each error as [NUMBER:wrongword] in the passage. Mix 5 spelling errors and 5 grammatical errors. Write a narrative passage 4–5 paragraphs long, Primary 6 level. Return ONLY valid JSON: {"pass":"passage with [36:wrongword] markers","ans":{"36":"correct","37":"correct",...all 10...}}. No markdown.`,1200);
+      const p=JSON.parse(raw);
+      if(p.pass&&p.ans&&Object.keys(p.ans).length===10)data=p;
+    }catch(e){}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.innerHTML='Each of the underlined words contains either a <strong>spelling</strong> or <strong>grammatical error</strong>. Write the correct word in the box next to it. <strong>(10 marks)</strong>';
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated';c.appendChild(ch);}
+  const pbox=mk('div','edit-pass');
+  let html=data.pass.replace(/\n/g,'<br><br>');
+  html=html.replace(/\[(\d+):([^\]]+)\]/g,(m,num,word)=>`<span class="eitem"><sup class="enum">(${num})</sup><input class="einput" id="ed${num}" autocomplete="off" placeholder=""/>&nbsp;<span class="eword">${word}</span></span>`);
+  pbox.innerHTML=html;c.appendChild(pbox);
+  const expList=mk('div','exp-list');expList.style.display='none';c.appendChild(expList);
+  c.appendChild(makeBar(async()=>{
+    submitted=true;let score=0;
+    expList.style.display='block';expList.innerHTML='<div style="font-weight:700;font-size:.9rem;color:var(--blue);margin-bottom:.75rem">✨ AI Explanations — Editing</div>';
+    const jobs=[];
+    for(let n=36;n<=45;n++){
+      const inp=document.getElementById(`ed${n}`);if(!inp)continue;
+      const val=(inp.value||'').trim();
+      const correct=data.ans[n]||'';
+      const isOk=val.toLowerCase()===correct.toLowerCase();
+      inp.classList.remove('ok','bad');
+      if(isOk){inp.classList.add('ok');score++;}
+      else{inp.classList.add('bad');if(!val)inp.placeholder=correct;}
+      // find wrong word from passage
+      const match=data.pass.match(new RegExp(`\\[${n}:([^\\]]+)\\]`));
+      const wrongWord=match?match[1]:'(error word)';
+      const item=mk('div','exp-item');
+      const head=mk('div','exp-item-head '+(isOk?'ok':'bad'));
+      head.innerHTML=`(${n}) Correct: <strong>"${correct}"</strong> ${isOk?'✅':'❌ You wrote: "'+(val||'nothing')+'"'}`;
+      const body=mk('div','');body.style.cssText='font-size:.81rem;line-height:1.6;color:#374151';body.textContent='Loading explanation...';
+      item.appendChild(head);item.appendChild(body);expList.appendChild(item);
+      const prompt=`You are a PSLE English Editing tutor for Primary 6 students in Singapore.
+
+Editing question ${n}:
+The wrong word in the passage is: "${wrongWord}"
+The correct answer is: "${correct}"
+The student wrote: "${val||'nothing'}"
+
+Write a clear 3-sentence explanation:
+1. Is this a SPELLING error or a GRAMMAR error? State which one clearly.
+2. Explain exactly what is wrong with "${wrongWord}" and why "${correct}" is the right answer. Give the specific rule (e.g. past tense, adverb form, double letters in spelling, etc.)
+3. If the student's answer was wrong, explain their mistake.
+Use simple language for a Primary 6 student.`;
+      jobs.push({body,prompt,isOk});
+    }
+    showResult(score,10);
+    for(const j of jobs){
+      try{
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:250,stream:true,messages:[{role:'user',content:j.prompt}]})});
+        if(!resp.ok){j.body.textContent='Check the correct answer above and identify whether it was a spelling or grammar error.';continue;}
+        const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';j.body.textContent='';j.body.classList.add('streaming');
+        while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const d2=line.slice(6).trim();if(d2==='[DONE]')break;try{const jj=JSON.parse(d2);if(jj.type==='content_block_delta'&&jj.delta?.text)j.body.textContent+=jj.delta.text;}catch{}}}
+        j.body.classList.remove('streaming');
+      }catch(e){j.body.textContent='Compare the wrong word with the correct answer and identify the spelling or grammar rule that applies.';}
+    }
+  },'cloze'));
+  c.appendChild(makeScore());
+}
+
+// ===================== COMP CLOZE =====================
+async function doCC(c,ai){
+  let data=CC;
+  if(ai){
+    showLoad(c,'Generating new Comprehension Cloze...');
+    try{
+      const raw=await callAI(`Generate a PSLE Singapore English Comprehension Cloze passage with exactly 15 blanks numbered 46 to 60. Write 4–5 paragraphs on an interesting topic (science, history, nature, or society). Each blank must have exactly one best-fitting word. Return ONLY valid JSON: {"pass":"passage with [46] [47]... [60] markers","ans":{"46":"word","47":"word",...all 15...}}. No markdown.`,1200);
+      const p=JSON.parse(raw);
+      if(p.pass&&p.ans&&Object.keys(p.ans).length===15)data=p;
+    }catch(e){}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.innerHTML='Fill in each blank (Q46–60) with <strong>a suitable word</strong>. <strong>(15 marks)</strong>';
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated';c.appendChild(ch);}
+  const pbox=mk('div','cloze-pass');
+  let html=data.pass.replace(/\n/g,'<br><br>');
+  for(let n=46;n<=60;n++){
+    html=html.replace(`[${n}]`,`<span class="bwrap"><span class="bnum">(${n})</span><input class="bi" id="cc${n}" style="width:85px" autocomplete="off"/></span>`);
+  }
+  pbox.innerHTML=html;c.appendChild(pbox);
+  const expList=mk('div','exp-list');expList.style.display='none';c.appendChild(expList);
+  c.appendChild(makeBar(async()=>{
+    submitted=true;let score=0;
+    expList.style.display='block';expList.innerHTML='<div style="font-weight:700;font-size:.9rem;color:var(--blue);margin-bottom:.75rem">✨ AI Explanations — Comprehension Cloze</div>';
+    const jobs=[];
+    for(let n=46;n<=60;n++){
+      const inp=document.getElementById(`cc${n}`);if(!inp)continue;
+      const val=(inp.value||'').trim().toLowerCase();
+      const correct=(data.ans[n]||'').toLowerCase();
+      const isOk=val===correct;
+      inp.classList.remove('ok','bad');
+      if(isOk){inp.classList.add('ok');score++;}else{inp.classList.add('bad');if(!inp.value.trim())inp.placeholder=data.ans[n];}
+      const item=mk('div','exp-item');
+      const head=mk('div','exp-item-head '+(isOk?'ok':'bad'));
+      head.innerHTML=`(${n}) Answer: <strong>"${data.ans[n]}"</strong> ${isOk?'✅':'❌ You wrote: "'+(val||'nothing')+'"'}`;
+      const body=mk('div','');body.style.cssText='font-size:.81rem;line-height:1.6;color:#374151';body.textContent='Loading explanation...';
+      item.appendChild(head);item.appendChild(body);expList.appendChild(item);
+      const prompt=`You are a PSLE English Comprehension Cloze tutor for Primary 6 students in Singapore.
+
+Blank number ${n}: The correct word is "${data.ans[n]}"
+The student wrote: "${val||'nothing'}"
+
+Write a clear 2–3 sentence explanation:
+1. Explain what CONTEXT CLUES in the passage around blank ${n} point to "${data.ans[n]}" (e.g. what words before or after the blank suggest this word?)
+2. Explain the GRAMMAR: what part of speech is "${data.ans[n]}" and why does the sentence structure require this word here?
+3. If the student's answer was wrong, explain why their word doesn't fit.
+Use simple language suitable for a Primary 6 student.`;
+      jobs.push({body,prompt});
+    }
+    showResult(score,15);
+    for(const j of jobs){
+      try{
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:220,stream:true,messages:[{role:'user',content:j.prompt}]})});
+        if(!resp.ok){j.body.textContent='Read the sentence carefully and identify what word fits both the meaning and the grammar of the blank.';continue;}
+        const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';j.body.textContent='';j.body.classList.add('streaming');
+        while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const d2=line.slice(6).trim();if(d2==='[DONE]')break;try{const jj=JSON.parse(d2);if(jj.type==='content_block_delta'&&jj.delta?.text)j.body.textContent+=jj.delta.text;}catch{}}}
+        j.body.classList.remove('streaming');
+      }catch(e){j.body.textContent='Read the surrounding sentences to find context clues that point to the correct word.';}
+    }
+  },'cloze'));
+  c.appendChild(makeScore());
+}
+
+// ===================== SYNTHESIS =====================
+async function doSY(c,ai){
+  let data=SY;
+  if(ai){
+    showLoad(c,'Generating new Synthesis & Transformation questions...');
+    try{
+      const raw=await callAI(`Generate 5 PSLE Singapore English Synthesis and Transformation questions numbered 61 to 65. Each must test a different grammar structure (reported speech, relative clause, conditional, passive voice, or inverted sentence). Return ONLY valid JSON array: [{"num":61,"orig":"original sentence","start":"Starter word/phrase ","ans":"complete model answer sentence"},...5 items...]. No markdown.`,1000);
+      const p=JSON.parse(raw);
+      if(Array.isArray(p)&&p.length===5)data=p;
+    }catch(e){}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.innerHTML='For each question 61–65, rewrite the given sentence(s) using the word(s) provided. Your answer must be in <strong>one sentence</strong>. The meaning must be the same as the original. <strong>(10 marks)</strong>';
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated';c.appendChild(ch);}
+  data.forEach(q=>{
+    const block=mk('div','synth-block');
+    const qnum=mk('div','');qnum.style.cssText='font-size:.82rem;font-weight:700;color:var(--blue);margin-bottom:.4rem';qnum.textContent=`Q${q.num} [2 marks]`;
+    const orig=mk('div','synth-orig');orig.textContent=q.orig||q.original||'';
+    const start=mk('div','synth-start');start.textContent=q.start;
+    const input=mk('input','si');input.id=`sy${q.num}`;input.placeholder='Continue the sentence here...';input.autocomplete='off';
+    const modelBox=mk('div','model-box');modelBox.id=`sy${q.num}_model`;
+    const expH=mk('div','exp-header');expH.style.borderRadius='8px 8px 0 0';expH.style.marginTop='.5rem';
+    const expB=mk('div','exp-body');expB.style.borderRadius='0 0 8px 8px';
+    const expArea=mk('div','exp-area');expArea.id=`sy${q.num}_exp`;expArea.appendChild(expH);expArea.appendChild(expB);
+    block.appendChild(qnum);block.appendChild(orig);block.appendChild(start);block.appendChild(input);block.appendChild(modelBox);block.appendChild(expArea);
+    block.dataset.ans=q.ans||q.answer||'';block.dataset.orig=q.orig||q.original||'';block.dataset.start=q.start;
+    c.appendChild(block);
+  });
+  c.appendChild(makeBar(async()=>{
+    submitted=true;const jobs=[];
+    const blocks=c.querySelectorAll('.synth-block');
+    blocks.forEach((block,i)=>{
+      const q=data[i];const num=q.num;
+      const ans=block.dataset.ans;const orig=block.dataset.orig;const start=block.dataset.start;
+      const userVal=document.getElementById(`sy${num}`)?.value||'';
+      const model=document.getElementById(`sy${num}_model`);
+      const expArea=document.getElementById(`sy${num}_exp`);
+      const expH=expArea.querySelector('.exp-header');const expB=expArea.querySelector('.exp-body');
+      model.style.display='block';model.innerHTML=`<b>✅ Model answer:</b> ${ans}`;
+      expArea.classList.add('show');expB.textContent='Loading explanation...';
+      const prompt=`You are a PSLE English Synthesis & Transformation tutor for Primary 6 students in Singapore.
+
+Original sentence: "${orig}"
+Sentence starter given: "${start}"
+Model answer: "${ans}"
+Student wrote: "${start}${userVal||'(nothing)'}"
+
+Write a clear 3–4 sentence explanation:
+1. Name the grammar structure used (e.g. reported speech, relative clause with 'for whom', conditional, passive voice, etc.)
+2. Explain the specific grammar rules applied — what changed between the original and the rewritten sentence (tense, pronouns, word order, etc.)
+3. If the student's answer differs from the model, explain what they may have done wrong
+4. Give a tip to remember for this type of question in PSLE
+Use simple language suitable for a Primary 6 student.`;
+      jobs.push({expH,expB,prompt,isCorrect:userVal.trim().toLowerCase()===ans.trim().toLowerCase()});
+    });
+    const r=document.getElementById('scorepanel');
+    if(r){r.style.display='block';r.querySelector('.score-num').textContent='✓';r.querySelector('.score-msg').textContent='Model answers shown above — compare yours and read the grammar explanations!';}
+    for(const j of jobs)await streamExplain(j.prompt,j.expB,j.expH,true);
+  },'synth'));
+  c.appendChild(makeScore());
+}
+
+// ===================== COMPREHENSION =====================
+async function doComp(c,ai){
+  let pass=CPASS,qs=CQS;
+  if(ai){
+    showLoad(c,'Generating new Comprehension passage and questions...');
+    try{
+      const raw=await callAI(`Generate a PSLE Singapore English Comprehension passage (about 320 words, narrative or expository, suitable for Primary 6). Then generate 5 open-ended questions (Q66-70 only — simpler set). Each question must have a clear model answer. Return ONLY valid JSON: {"pass":"full passage text","qs":[{"num":66,"marks":1,"type":"text","q":"question?","ans":"model answer"},{"num":67,"marks":1,"type":"text","q":"?","ans":"..."},{"num":68,"marks":2,"type":"explain","q":"?","ans":"..."},{"num":69,"marks":2,"type":"explain","q":"?","ans":"..."},{"num":70,"marks":2,"type":"explain","q":"?","ans":"..."}]}. No markdown.`,1400);
+      const p=JSON.parse(raw);
+      if(p.pass&&p.qs&&p.qs.length>=5){pass=p.pass;qs=p.qs;}
+    }catch(e){}
+    removeLoad();
+  }
+  const inst=mk('div','inst');
+  inst.innerHTML='Read the passage carefully and answer questions 66 to 75. <strong>(20 marks)</strong>';
+  c.appendChild(inst);
+  if(ai){const ch=mk('div','ai-chip');ch.textContent='✨ AI-generated';c.appendChild(ch);}
+  // Passage with line numbers
+  const pbox=mk('div','comp-pass');
+  const lines=pass.split('\n');let ln=0,ph='';
+  lines.forEach(l=>{ln++;ph+=`<div style="display:flex"><span style="min-width:30px;color:#9ca3af;font-size:10px;font-family:sans-serif;padding-top:3px;text-align:right;margin-right:10px;flex-shrink:0">${ln%5===0?ln:''}</span><span>${l}</span></div>`;});
+  pbox.innerHTML=ph;c.appendChild(pbox);
+
+  qs.forEach(q=>{
+    const block=mk('div','comp-q');
+    const qnum=mk('div','comp-qnum');qnum.textContent=`Q${q.num} [${q.marks} mark${q.marks>1?'s':''}]`;
+    const qtext=mk('div','comp-qtext');qtext.textContent=q.q;
+    block.appendChild(qnum);block.appendChild(qtext);
+    // input by type
+    if(q.type==='text'||q.type==='explain'||q.type==='phrase'){
+      const i1=mk('input','tans');i1.id=`cq${q.num}a`;i1.placeholder='Write your answer here';i1.autocomplete='off';
+      const i2=mk('input','tans');i2.id=`cq${q.num}b`;i2.autocomplete='off';
+      block.appendChild(i1);block.appendChild(i2);
+    }else if(q.type==='ref'){
+      const t=mk('table','ctable');t.innerHTML=`<tr><th>Word(s) from passage</th><th>What the word refers to</th></tr>${(q.rows||[]).map((r,i)=>`<tr><td>${r.w}</td><td><input style="width:100%;border:none;border-bottom:1px solid #d1d5db;outline:none;font-family:serif;font-size:.81rem;padding:2px 0" id="cq${q.num}_${i}" autocomplete="off"/></td></tr>`).join('')}`;
+      block.appendChild(t);
+    }else if(q.type==='order'){
+      (q.events||[]).forEach((e,i)=>{
+        const row=mk('div','');row.style.cssText='display:flex;align-items:center;margin:.22rem 0';
+        const inp=mk('input','oi');inp.id=`cq${q.num}_${i}`;inp.maxLength=1;inp.autocomplete='off';
+        row.appendChild(inp);const lbl=mk('span','');lbl.style.fontSize='.85rem';lbl.textContent=e.t;
+        row.appendChild(lbl);block.appendChild(row);
+      });
+    }else if(q.type==='emotion'){
+      const t=mk('table','ctable');t.innerHTML=`<tr><th>Situation</th><th>Emotion (one word)</th><th>Evidence from passage</th></tr>${(q.rows||[]).map((r,i)=>`<tr><td style="font-size:.79rem">${r.s}</td><td><input style="width:100%;border:none;border-bottom:1px solid #d1d5db;outline:none;font-family:serif;font-size:.79rem" id="cq${q.num}_em${i}" autocomplete="off"/></td><td><input style="width:100%;border:none;border-bottom:1px solid #d1d5db;outline:none;font-family:serif;font-size:.79rem" id="cq${q.num}_ev${i}" autocomplete="off"/></td></tr>`).join('')}`;
+      block.appendChild(t);
+    }else if(q.type==='examples'){
+      const e1r=mk('div','');e1r.style.cssText='margin:.2rem 0;font-size:.85rem';
+      const e1l=mk('strong','');e1l.textContent='Example 1: ';
+      const e1i=mk('input','tans');e1i.id=`cq${q.num}_1`;e1i.style.width='85%';e1i.autocomplete='off';
+      e1r.appendChild(e1l);e1r.appendChild(e1i);
+      const e2r=mk('div','');e2r.style.cssText='margin:.2rem 0;font-size:.85rem';
+      const e2l=mk('strong','');e2l.textContent='Example 2: ';
+      const e2i=mk('input','tans');e2i.id=`cq${q.num}_2`;e2i.style.width='85%';e2i.autocomplete='off';
+      e2r.appendChild(e2l);e2r.appendChild(e2i);
+      block.appendChild(e1r);block.appendChild(e2r);
+    }else if(q.type==='tf'){
+      const t=mk('table','ctable');t.innerHTML=`<tr><th>Statement</th><th>True / False</th><th>Reason</th></tr>${(q.rows||[]).map((r,i)=>`<tr><td style="font-size:.79rem">${r.s}</td><td><input style="width:60px;border:none;border-bottom:1px solid #d1d5db;outline:none;text-align:center;font-size:.79rem" id="cq${q.num}_tf${i}" autocomplete="off"/></td><td><input style="width:100%;border:none;border-bottom:1px solid #d1d5db;outline:none;font-family:serif;font-size:.79rem" id="cq${q.num}_r${i}" autocomplete="off"/></td></tr>`).join('')}`;
+      block.appendChild(t);
+    }
+    const model=mk('div','model-box');model.id=`cq${q.num}_model`;
+    const expH=mk('div','exp-header');expH.style.cssText='border-radius:8px 8px 0 0;margin-top:.5rem';
+    const expB=mk('div','exp-body');expB.style.borderRadius='0 0 8px 8px';
+    const expArea=mk('div','exp-area');expArea.id=`cq${q.num}_exp`;expArea.appendChild(expH);expArea.appendChild(expB);
+    block.appendChild(model);block.appendChild(expArea);
+    c.appendChild(block);
+  });
+
+  c.appendChild(makeBar(async()=>{
+    submitted=true;const jobs=[];
+    qs.forEach(q=>{
+      const model=document.getElementById(`cq${q.num}_model`);
+      const expArea=document.getElementById(`cq${q.num}_exp`);
+      const expH=expArea?.querySelector('.exp-header');
+      const expB=expArea?.querySelector('.exp-body');
+      // Show model answer
+      if(model){
+        model.style.display='block';
+        if(q.type==='ref') model.innerHTML='<b>Answers:</b> '+(q.rows||[]).map(r=>`${r.w} → ${r.a}`).join(' &nbsp;|&nbsp; ');
+        else if(q.type==='order') model.innerHTML='<b>Order:</b> '+(q.events||[]).map(e=>`${e.a}. ${e.t}`).join(', ');
+        else if(q.type==='emotion') model.innerHTML='<b>Model:</b> '+(q.rows||[]).map(r=>`<em>${r.e}</em> — "${r.ev}"`).join(' &nbsp;|&nbsp; ');
+        else if(q.type==='examples') model.innerHTML=`<b>Example 1:</b> ${q.e1||''}<br><b>Example 2:</b> ${q.e2||''}`;
+        else if(q.type==='tf') model.innerHTML='<b>Answers:</b> '+(q.rows||[]).map(r=>`${r.s.slice(0,30)}... → <strong>${r.a}</strong>. ${r.r}`).join('<br>');
+        else model.innerHTML=`<b>✅ Model answer:</b> ${q.ans||''}`;
+      }
+      if(expArea&&expH&&expB){
+        expArea.classList.add('show');expB.textContent='Loading explanation...';
+        let prompt='';
+        if(q.type==='tf'){
+          prompt=`You are a PSLE English Comprehension tutor for Primary 6 students in Singapore.
+True/False question: "${q.q}"
+Correct answers: ${(q.rows||[]).map(r=>`"${r.s}" → ${r.a} because: ${r.r}`).join('; ')}
+
+Write 3–4 sentences explaining:
+1. How do students find the True/False answer — what exact words in the passage tell you the answer?
+2. What makes a good reason for a True/False question in PSLE — must it be a quote? Paraphrase?
+3. A common mistake students make with this type of question
+Use simple language for a Primary 6 student.`;
+        }else if(q.type==='emotion'){
+          prompt=`You are a PSLE English Comprehension tutor for Primary 6 students in Singapore.
+Emotion question: "${q.q}"
+Model answers: ${(q.rows||[]).map(r=>`Situation: "${r.s}" → Emotion: ${r.e}, Evidence: "${r.ev}"`).join('; ')}
+
+Write 3 sentences explaining:
+1. How to identify the author's emotion — what language clues to look for (word choice, actions, descriptions)
+2. What counts as valid evidence for an emotion question in PSLE
+3. A tip for answering emotion questions correctly
+Use simple language for a Primary 6 student.`;
+        }else if(q.type==='ref'){
+          prompt=`You are a PSLE English Comprehension tutor for Primary 6 students in Singapore.
+Pronoun reference question: "${q.q}"
+Answers: ${(q.rows||[]).map(r=>`${r.w} refers to: ${r.a}`).join('; ')}
+
+Write 3 sentences explaining:
+1. The technique for finding pronoun references — always look BEFORE the pronoun, not after
+2. How to check your answer by substituting the noun back into the sentence
+3. Why students sometimes get pronoun reference questions wrong
+Use simple language for a Primary 6 student.`;
+        }else if(q.type==='order'){
+          prompt=`You are a PSLE English Comprehension tutor for Primary 6 students in Singapore.
+Sequence of events question: "${q.q}"
+Correct order: ${(q.events||[]).map(e=>`${e.a}. ${e.t}`).join(', ')}
+
+Write 3 sentences explaining:
+1. How to find the order of events — use time words, paragraph order, and cause-effect clues
+2. Why the correct order is what it is — reference specific parts of the passage
+3. A tip to avoid making mistakes in sequence questions
+Use simple language for a Primary 6 student.`;
+        }else{
+          prompt=`You are a PSLE English Comprehension tutor for Primary 6 students in Singapore.
+Question ${q.num} [${q.marks} mark${q.marks>1?'s':''}]: "${q.q}"
+Model answer: "${q.ans||'see above'}"
+
+Write a clear 3–4 sentence explanation:
+1. WHERE in the passage can students find the answer — which paragraph, which lines?
+2. HOW should students structure their answer for ${q.marks} mark${q.marks>1?'s':''} — what must they include?
+3. What is the key information from the passage that makes the model answer correct?
+4. A common mistake students make with this type of question
+Use simple language suitable for a Primary 6 student.`;
+        }
+        jobs.push({expH,expB,prompt,isCorrect:true});
+      }
+    });
+    const r=document.getElementById('scorepanel');
+    if(r){r.style.display='block';r.querySelector('.score-num').textContent='Check';r.querySelector('.score-msg').textContent='Model answers shown — read the AI explanations to improve your technique!';}
+    for(const j of jobs)await streamExplain(j.prompt,j.expB,j.expH,true);
+  },'comp'));
+  c.appendChild(makeScore());
+}
+
+// ===================== FULL PAPER =====================
+async function doFull(c){
+  const note=mk('div','inst');note.innerHTML='<strong>Full Paper Mode.</strong> All ACS Junior Prelim 2025 sections below. Mark each section individually.';c.appendChild(note);
+  const secs=[
+    {l:'Grammar MCQ (Q1–10)',fn:()=>doMCQ(c,G_MCQ,1,'gf',false,'Grammar MCQ',10)},
+    {l:'Vocabulary MCQ (Q11–15)',fn:()=>doMCQ(c,V_MCQ,11,'vf',false,'Vocabulary MCQ',5)},
+    {l:'Vocabulary Cloze (Q16–20)',fn:()=>doVocabCloze(c,false)},
+    {l:'Visual Text (Q21–25)',fn:()=>doVT(c,false)},
+    {l:'Grammar Cloze (Q26–35)',fn:()=>doGC(c,false)},
+    {l:'Editing (Q36–45)',fn:()=>doED(c,false)},
+    {l:'Comprehension Cloze (Q46–60)',fn:()=>doCC(c,false)},
+    {l:'Synthesis & Transformation (Q61–65)',fn:()=>doSY(c,false)},
+    {l:'Comprehension (Q66–75)',fn:()=>doComp(c,false)},
+  ];
+  for(const s of secs){
+    const h=mk('div','sec-hdr');h.textContent='▶ '+s.l;c.appendChild(h);
+    await s.fn();
+  }
+}
+
+// ===================== HELPERS =====================
+function mk(tag,cls){const el=document.createElement(tag);if(cls)el.className=cls;return el;}
+function makeBar(onMark,type){
+  const bar=mk('div','sbar');
+  const mb=mk('button','mark-btn');mb.innerHTML='✔ Mark &amp; explain';
+  mb.onclick=async()=>{mb.disabled=true;mb.innerHTML='⏳ Marking...';await onMark();mb.innerHTML='✔ Marked';};
+  const rb=mk('button','reset-btn');rb.textContent='↺ Reset';
+  rb.onclick=()=>{
+    document.querySelectorAll('input').forEach(i=>{i.value='';i.style.borderColor='';i.style.color='';i.placeholder='';i.className=(i.className||'').replace(/\s*(ok|bad)/g,'');});
+    document.querySelectorAll('.opt').forEach(o=>{o.classList.remove('picked','correct','wrong','locked');const ci=o.querySelector('.opt-circle');if(ci&&/[✓✗]/.test(ci.textContent)){const idx=Array.from(o.parentNode.children).indexOf(o);ci.textContent=idx+1;}});
+    document.querySelectorAll('.exp-area').forEach(e=>e.classList.remove('show'));
+    document.querySelectorAll('.model-box').forEach(b=>b.style.display='none');
+    document.querySelectorAll('.exp-list').forEach(l=>{l.style.display='none';l.innerHTML='';});
+    document.querySelectorAll('.exp-body').forEach(b=>{b.textContent='';b.classList.remove('streaming');});
+    const r=document.getElementById('scorepanel');if(r)r.style.display='none';
+    submitted=false;mb.disabled=false;mb.innerHTML='✔ Mark &amp; explain';
+    Object.keys(window).filter(k=>k.startsWith('pick_')).forEach(k=>delete window[k]);
+  };
+  bar.appendChild(mb);bar.appendChild(rb);return bar;
+}
+function makeScore(){
+  const r=mk('div','score-panel');r.id='scorepanel';
+  r.innerHTML=`<div class="score-num">0</div><div class="score-label">marks</div><div class="score-msg"></div>`;
+  return r;
+}
+function showResult(score,total){
+  const r=document.getElementById('scorepanel');if(!r)return;
+  r.style.display='block';r.querySelector('.score-num').textContent=`${score}/${total}`;
+  const pct=score/total;
+  const msg=pct===1?'Perfect score! Outstanding! 🎉':pct>=.8?'Excellent work! Keep it up! 👍':pct>=.6?'Good effort! Review the explanations carefully.':'Keep practising — read every explanation to learn the rules!';
+  const col=pct>=.8?'#166534':pct>=.6?'#c2410c':'#991b1b';
+  const sm=r.querySelector('.score-msg');sm.textContent=msg;sm.style.color=col;
+}
+</script>
+</body>
+</html>
