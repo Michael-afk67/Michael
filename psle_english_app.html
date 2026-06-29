@@ -156,26 +156,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
 .apikey-status.ok{color:#166534}
 .apikey-status.err{color:#991b1b}
 @media(max-width:560px){.opts{grid-template-columns:1fr}}
-/* CHAT WIDGET */
-.chat-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border:none;font-size:1.55rem;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.4);z-index:9999;display:flex;align-items:center;justify-content:center;transition:transform .2s}
-.chat-fab:hover{transform:scale(1.08)}
-.chat-panel{position:fixed;bottom:4.8rem;right:1.5rem;width:340px;max-height:520px;background:#fff;border:1.5px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:9998;display:flex;flex-direction:column;overflow:hidden;transition:opacity .2s,transform .2s;opacity:0;transform:translateY(12px) scale(.97);pointer-events:none}
-.chat-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
-.chat-head{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;padding:.75rem 1rem;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
-.chat-head-title{flex:1;font-size:.92rem;font-weight:700}
-.chat-close{background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;opacity:.8;line-height:1;padding:0}
-.chat-close:hover{opacity:1}
-.chat-msgs{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.55rem;min-height:200px}
-.chat-msg{padding:.55rem .8rem;border-radius:10px;font-size:.83rem;line-height:1.65;max-width:88%;word-break:break-word;white-space:pre-wrap}
-.chat-msg.user{background:var(--lb);color:var(--dark);align-self:flex-end;border-radius:10px 10px 2px 10px}
-.chat-msg.ai{background:var(--lgray);border:1px solid var(--border);align-self:flex-start;border-radius:10px 10px 10px 2px}
-.chat-msg.ai.streaming::after{content:'▋';animation:blink .7s infinite;color:var(--blue)}
-.chat-input-row{display:flex;gap:.4rem;padding:.6rem;border-top:1px solid var(--border);flex-shrink:0;align-items:flex-end}
-.chat-input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:.4rem .65rem;font-size:.83rem;outline:none;font-family:inherit;resize:none;max-height:80px;min-height:34px;line-height:1.4;overflow-y:auto}
-.chat-input:focus{border-color:var(--purple)}
-.chat-send{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border:none;border-radius:8px;padding:.45rem .75rem;font-size:.88rem;cursor:pointer;flex-shrink:0;height:34px}
-.chat-send:disabled{opacity:.5;cursor:not-allowed}
-@media(max-width:480px){.chat-panel{width:calc(100vw - 2rem);right:1rem}}
+/* AI TUTOR FULL PAGE */
+.aichat-view{max-width:760px;margin:0 auto;padding:1.5rem 1rem;display:flex;flex-direction:column;height:calc(100vh - 2rem)}
+.aichat-msgs-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem;padding:.25rem 0 .75rem;min-height:0}
+.aichat-msg{padding:.8rem 1.05rem;border-radius:14px;font-size:.9rem;line-height:1.72;max-width:82%;word-break:break-word;white-space:pre-wrap}
+.aichat-msg.user{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;align-self:flex-end;border-radius:14px 14px 3px 14px}
+.aichat-msg.ai{background:var(--white);border:1.5px solid var(--border);align-self:flex-start;border-radius:14px 14px 14px 3px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.aichat-msg.ai.streaming::after{content:'▋';animation:blink .7s infinite;color:var(--blue)}
+.aichat-compose{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:.8rem 1rem;box-shadow:0 2px 8px rgba(0,0,0,.07);flex-shrink:0}
+.aichat-ta{width:100%;border:none;outline:none;font-size:.97rem;font-family:inherit;resize:none;line-height:1.55;min-height:54px;max-height:180px;overflow-y:auto;color:var(--dark);background:transparent}
+.aichat-row{display:flex;align-items:center;justify-content:space-between;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+.aichat-hint{font-size:.72rem;color:var(--gray)}
+.aichat-send{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border:none;border-radius:9px;padding:.5rem 1.4rem;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:opacity .15s}
+.aichat-send:hover{opacity:.9}
+.aichat-send:disabled{opacity:.45;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+.chip{background:var(--lp);color:var(--purple);border:1px solid #c4b5fd;border-radius:20px;padding:.3rem .9rem;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s}
+.chip:hover{background:#ddd6fe}
+.aichat-nokey{background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:.65rem 1rem;font-size:.82rem;line-height:1.6;color:var(--purple);text-align:center;margin-bottom:.75rem;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -258,6 +256,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
       <div class="card-desc">Read a passage and answer open-ended questions of all types.</div>
       <div class="ai-tag">✨ AI explains every answer</div>
     </div>
+    <div class="card" onclick="openAiChat()" style="border-color:#c4b5fd;background:linear-gradient(135deg,#faf5ff,#ede9fe)">
+      <div class="card-top"><div class="card-icon" style="background:#7c3aed;color:#fff;font-size:1.5rem">🤖</div><div><div class="card-title" style="color:#5b21b6">AI English Tutor</div><div class="card-sub">Ask any English question</div></div></div>
+      <div class="card-desc" style="margin-top:.3rem">Chat directly with Claude AI. Ask about grammar, vocabulary, comprehension tips, or any PSLE question.</div>
+      <div class="ai-tag" style="margin-top:.4rem">✨ Powered by Claude AI</div>
+    </div>
   </div>
   <button class="full-btn" onclick="go('full')">📋 Full Paper — All Sections (ACS Prelim 2025)</button>
   <button class="full-btn" onclick="downloadApp()" style="margin-top:.75rem;background:linear-gradient(135deg,#059669,#0d9488)">⬇️ Download this app</button>
@@ -273,6 +276,38 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
       <span class="marks-pill" id="smarks"></span>
     </div>
     <div id="seccontent"></div>
+  </div>
+</div>
+
+<!-- AI TUTOR FULL PAGE -->
+<div id="aichatview" class="hidden">
+  <div class="aichat-view">
+    <div class="sec-header" style="flex-shrink:0;margin-bottom:.75rem">
+      <button class="back-btn" onclick="goHome()">← Home</button>
+      <div style="flex:1">
+        <div class="sec-title">🤖 AI English Tutor</div>
+        <div class="sec-sub">Chat with Claude · Ask anything about PSLE English</div>
+      </div>
+      <button class="back-btn" onclick="clearPageChat()" style="color:#dc2626;border-color:#fca5a5" title="Clear chat">🗑 Clear</button>
+    </div>
+    <div class="chips" id="pageChips">
+      <span class="chip" onclick="chipAsk('What is the difference between \"affect\" and \"effect\"?')">affect vs effect</span>
+      <span class="chip" onclick="chipAsk('Explain subject-verb agreement with examples.')">Subject-verb agreement</span>
+      <span class="chip" onclick="chipAsk('How do I find synonyms in a passage for Vocabulary Cloze?')">Vocab Cloze tips</span>
+      <span class="chip" onclick="chipAsk('What are the types of comprehension questions in PSLE Paper 2?')">Comprehension types</span>
+      <span class="chip" onclick="chipAsk('Give me tips for Synthesis and Transformation.')">Synthesis tips</span>
+      <span class="chip" onclick="chipAsk('What is the difference between a simile and a metaphor?')">Simile vs metaphor</span>
+    </div>
+    <div class="aichat-msgs-wrap" id="pageChatMsgs">
+      <div class="aichat-msg ai">Hi there! 😊 I'm your PSLE English tutor powered by Claude AI. You can ask me anything — grammar rules, tricky vocabulary, comprehension strategies, exam tips, or paste a question you're unsure about. Let's get started!</div>
+    </div>
+    <div class="aichat-compose">
+      <textarea class="aichat-ta" id="pageChatInput" placeholder="Type your question here…" onkeydown="pageChatKeydown(event)"></textarea>
+      <div class="aichat-row">
+        <span class="aichat-hint">Enter to send &nbsp;·&nbsp; Shift+Enter for new line</span>
+        <button class="aichat-send" id="pageChatSend" onclick="sendPageChat()">Send ➤</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -559,6 +594,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 function goHome(){
   document.getElementById('home').classList.remove('hidden');
   document.getElementById('secview').classList.add('hidden');
+  document.getElementById('aichatview').classList.add('hidden');
   submitted=false;curSec=null;
 }
 function go(n){
@@ -1506,48 +1542,57 @@ function showResult(score,total){
   const col=pct>=.8?'#166534':pct>=.6?'#c2410c':'#991b1b';
   const sm=r.querySelector('.score-msg');sm.textContent=msg;sm.style.color=col;
 }
-// ===================== CHAT WIDGET =====================
-let chatHistory=[];
-let chatOpen=false;
-function toggleChat(){
-  chatOpen=!chatOpen;
-  const p=document.getElementById('chatPanel');
-  if(chatOpen){p.classList.add('open');setTimeout(()=>document.getElementById('chatInput').focus(),80);}
-  else p.classList.remove('open');
+// ===================== AI TUTOR FULL PAGE =====================
+let pageChatHistory=[];
+function openAiChat(){
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('aichatview').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('pageChatInput').focus(),80);
 }
-function chatKeydown(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
+function pageChatKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendPageChat();}
 }
-async function sendChat(){
-  const inp=document.getElementById('chatInput');
+function chipAsk(text){
+  document.getElementById('pageChatInput').value=text;
+  document.getElementById('pageChips').style.display='none';
+  sendPageChat();
+}
+function clearPageChat(){
+  pageChatHistory=[];
+  const msgs=document.getElementById('pageChatMsgs');
+  msgs.innerHTML='<div class="aichat-msg ai">Chat cleared! 😊 Ask me anything about PSLE English.</div>';
+  document.getElementById('pageChips').style.display='flex';
+}
+async function sendPageChat(){
+  const inp=document.getElementById('pageChatInput');
   const text=inp.value.trim();
   if(!text)return;
-  appendChatMsg('user',text);
+  appendPageMsg('user',text);
   inp.value='';
-  chatHistory.push({role:'user',content:text});
-  if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
-  const sendBtn=document.getElementById('chatSend');
+  pageChatHistory.push({role:'user',content:text});
+  if(pageChatHistory.length>20)pageChatHistory=pageChatHistory.slice(-20);
+  const sendBtn=document.getElementById('pageChatSend');
   sendBtn.disabled=true;
-  const aiEl=appendChatMsg('ai','');
+  const aiEl=appendPageMsg('ai','');
   aiEl.classList.add('streaming');
   const key=getKey();
   if(!key){
     aiEl.classList.remove('streaming');
-    aiEl.textContent='Please enter your Anthropic API key on the home screen first, then you can chat with me! 😊';
-    chatHistory.pop();
+    aiEl.textContent='Please enter your Anthropic API key on the home screen first, then come back to chat! 😊';
+    pageChatHistory.pop();
     sendBtn.disabled=false;
     return;
   }
-  const sysPrompt=`You are a friendly, encouraging PSLE English tutor for Primary 6 students in Singapore. You help students understand English grammar rules, vocabulary, comprehension strategies, and the Paper 2 exam format. Give clear, simple explanations with short examples. Keep responses concise but thorough — around 100–200 words. Use warm, encouraging language suitable for 12-year-olds. When explaining a grammar rule, state the rule then give a short example sentence. When explaining vocabulary, give the meaning then use it in a sentence. If the student seems confused, reassure them and try a different explanation.`;
+  const sysPrompt=`You are a friendly, encouraging PSLE English tutor for Primary 6 students in Singapore. Help students understand English grammar rules, vocabulary, comprehension strategies, and the Paper 2 exam format. Give clear, simple explanations with short examples. Keep responses concise but thorough — 100–200 words. Use warm language for 12-year-olds. For grammar: state the rule then give a short example. For vocabulary: give the meaning then use it in a sentence. If the student is confused, reassure them and try a different approach.`;
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:apiHeaders(),
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
-        max_tokens:512,
+        max_tokens:600,
         system:sysPrompt,
-        messages:chatHistory,
+        messages:pageChatHistory,
         stream:true
       })
     });
@@ -1570,25 +1615,25 @@ async function sendChat(){
           if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){
             aiText+=j.delta.text;
             aiEl.textContent=aiText;
-            const msgs=document.getElementById('chatMsgs');
+            const msgs=document.getElementById('pageChatMsgs');
             msgs.scrollTop=msgs.scrollHeight;
           }
         }catch{}
       }
     }
-    if(aiText)chatHistory.push({role:'assistant',content:aiText});
-    if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+    if(aiText)pageChatHistory.push({role:'assistant',content:aiText});
+    if(pageChatHistory.length>20)pageChatHistory=pageChatHistory.slice(-20);
   }catch(err){
     aiEl.textContent='Oops! Something went wrong: '+err.message+'. Please check your API key and try again.';
-    chatHistory.pop();
+    pageChatHistory.pop();
   }
   aiEl.classList.remove('streaming');
   sendBtn.disabled=false;
 }
-function appendChatMsg(role,text){
-  const msgs=document.getElementById('chatMsgs');
+function appendPageMsg(role,text){
+  const msgs=document.getElementById('pageChatMsgs');
   const el=document.createElement('div');
-  el.className='chat-msg '+role;
+  el.className='aichat-msg '+role;
   el.textContent=text;
   msgs.appendChild(el);
   msgs.scrollTop=msgs.scrollHeight;
@@ -1596,24 +1641,5 @@ function appendChatMsg(role,text){
 }
 </script>
 
-<!-- CHAT WIDGET -->
-<button class="chat-fab" onclick="toggleChat()" title="Chat with AI Tutor">💬</button>
-<div class="chat-panel" id="chatPanel">
-  <div class="chat-head">
-    <span style="font-size:1.1rem">🤖</span>
-    <div>
-      <div class="chat-head-title">AI English Tutor</div>
-      <div style="font-size:.7rem;opacity:.8">Ask me anything!</div>
-    </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-msgs" id="chatMsgs">
-    <div class="chat-msg ai">Hi! I'm your PSLE English tutor 😊 I can help you with grammar rules, vocabulary, comprehension tips, and anything else about Paper 2. What would you like to know?</div>
-  </div>
-  <div class="chat-input-row">
-    <textarea class="chat-input" id="chatInput" placeholder="Ask a question…" rows="1" onkeydown="chatKeydown(event)"></textarea>
-    <button class="chat-send" id="chatSend" onclick="sendChat()">➤</button>
-  </div>
-</div>
 </body>
 </html>
