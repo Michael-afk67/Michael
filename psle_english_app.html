@@ -333,6 +333,185 @@ const CQS=[
   {num:75,marks:2,type:"explain",q:"Explain how the author's life changed after he was given one stroke of the cane.",ans:"The author stopped all his extracurricular activities and focused entirely on studying and homework almost round the clock. As a result, he passed his Preliminary Examination and avoided becoming a dropout."}
 ];
 
+// ===================== STATIC EXPLANATIONS (all 25 MCQ questions) =====================
+// Keyed: g0-g9 = Grammar MCQ, v0-v4 = Vocab MCQ, vc0-vc4 = Vocab Cloze, vt0-vt4 = Visual Text
+const STATIC_EXPL={
+g0:`📚 Tests: subject-verb agreement with "neither…nor" + past tense.
+
+Option (1) "is" ❌ — "Is" is present tense. The word "earlier" tells us this happened in the past, so we need a past-tense verb.
+Option (2) "are" ❌ — "Are" is also present tense and cannot describe a past event.
+Option (3) "was" ❌ — "Was" is singular past tense. When "neither…nor" joins two people, we use the plural past form to reflect both being absent.
+Option (4) "were" ✅ — Correct! "Were" is past tense (matching "earlier") and plural, correctly used when both Jaspal and his brother were absent.`,
+
+g1:`📚 Tests: choosing the right tense when an action has recently started and is still ongoing.
+
+Option (1) "begin" ❌ — "Begin" is the base form and does not agree with the singular subject "Construction" (needs "begins").
+Option (2) "began" ❌ — "Began" (simple past) implies the action is finished, but the sentence continues with "is scheduled," connecting to now.
+Option (3) "begins" ❌ — "Begins" can express a near-future plan, but the sentence implies the construction is already underway.
+Option (4) "has begun" ✅ — Correct! Present perfect shows construction recently started and is still in progress, which links naturally to "is scheduled to end in March."`,
+
+g2:`📚 Tests: forming the correct question tag for "ought to."
+
+Option (1) "hasn't" ❌ — "Hasn't" is the tag for "has." The main sentence uses "ought to," not "has."
+Option (2) "shan't" ❌ — "Shan't" is the negative of "shall," which does not appear in the sentence at all.
+Option (3) "couldn't" ❌ — "Couldn't" is the negative of "could," which is also not used in the main sentence.
+Option (4) "shouldn't" ✅ — Correct! "Ought to" and "should" have the same meaning, so the question tag uses "shouldn't she?" This is the standard PSLE rule.`,
+
+g3:`📚 Tests: the inverted third conditional — "Had + subject + past participle."
+
+Option (1) "come" ✅ — Correct! "Come" is the past participle of "come." "Had Peter come" = "If Peter had come" (inverted third conditional for something that did not happen).
+Option (2) "came" ❌ — "Came" is simple past and cannot follow "had" in a conditional. The conditional requires a past participle.
+Option (3) "comes" ❌ — "Comes" is present tense and makes no sense in a past conditional sentence.
+Option (4) "coming" ❌ — "Coming" is a present participle and cannot follow "had" in this conditional structure.`,
+
+g4:`📚 Tests: the correct preposition for an exchange between exactly two people.
+
+Option (1) "on" ❌ — "Pass on" means to hand something over or to die (informal). It does not describe words exchanged between people.
+Option (2) "over" ❌ — "Pass over" means to skip or overlook someone. It does not describe an argument.
+Option (3) "among" ❌ — "Among" is used for three or more people or things. Here there are only two parties (Shuhui and her neighbour).
+Option (4) "between" ✅ — Correct! "Between" is always used for exactly two parties. "Angry words passed between them" is a set phrase for an argument between two people.`,
+
+g5:`📚 Tests: object pronouns in a compound phrase after a preposition.
+
+Option (1) "I" ❌ — "I" is a subject pronoun (used when the person does the action). After the preposition "to," we need an object pronoun.
+Option (2) "me" ✅ — Correct! "Me" is the object pronoun. Tip: remove "Caleb and" — you would say "return to me," not "return to I."
+Option (3) "mine" ❌ — "Mine" is a possessive pronoun (e.g. "those notes are mine"). It cannot follow "to" in this context.
+Option (4) "myself" ❌ — "Myself" is reflexive, used only when subject and object are the same person (e.g. "I hurt myself"). Here the subject is "you" (implied).`,
+
+g6:`📚 Tests: inverted conditionals — modal verb before the subject instead of "if."
+
+Option (1) "If" ❌ — The sentence is already inverted (verb before subject: "he win"), so adding "If" makes it ungrammatical.
+Option (2) "Since" ❌ — "Since" implies certainty or reason, but the sentence describes a hypothetical future possibility.
+Option (3) "Should" ✅ — Correct! "Should he win" is an inverted conditional = "If he should win." It correctly expresses a future possibility without using "if."
+Option (4) "Unless" ❌ — "Unless" means "except if," reversing the logic. It would mean "If he does NOT win," which is the opposite of the intended meaning.`,
+
+g7:`📚 Tests: choosing the right quantifier with uncountable nouns.
+
+Option (1) "any" ❌ — "Any" is used in questions or negative sentences (e.g. "Is there any doubt?"), not in affirmative statements like this one.
+Option (2) "few" ❌ — "Few" is used with countable nouns (e.g. "few students"). "Doubt" is an uncountable noun.
+Option (3) "little" ✅ — Correct! "Little" is the correct quantifier for uncountable nouns to mean "not much." "There is little doubt" = it is almost certain they will advance.
+Option (4) "much" ❌ — "There is much doubt" would mean great uncertainty, but the team performed outstandingly, so this contradicts the meaning of the sentence.`,
+
+g8:`📚 Tests: the fixed prepositional phrase "in awe."
+
+Option (1) "at" ❌ — "Gazing at" correctly shows the direction (at the waterfall), but the blank is for the feeling of wonder. The phrase needed is "in awe."
+Option (2) "in" ✅ — Correct! "In awe" is a fixed idiom meaning feeling great wonder and admiration. The full phrase "gazing in awe at the waterfall" is correct.
+Option (3) "by" ❌ — "By awe" is not a standard English phrase. "By" does not collocate with "awe."
+Option (4) "with" ❌ — While "with" can show manner, "with awe" is not the established idiom. The correct fixed phrase is always "in awe."`,
+
+g9:`📚 Tests: the fixed correlative structure "No sooner … than."
+
+Option (1) "than" ✅ — Correct! "No sooner … than" is a fixed pair meaning one event happened immediately after another. This is the only grammatically correct completion.
+Option (2) "then" ❌ — This is the most common mistake! "No sooner … then" looks familiar but is WRONG. Always use "no sooner … than."
+Option (3) "when" ❌ — "When" pairs with "hardly" or "scarcely" (e.g. "Hardly had I … when"). For "no sooner," the correct word is always "than."
+Option (4) "while" ❌ — "While" means at the same time as, implying two simultaneous events. "No sooner" means one event happened right after another.`,
+
+v0:`📚 Tests: vocabulary for a place overrun by pests.
+
+Option (1) "inflated" ❌ — "Inflated" means blown up or exaggerated (e.g. inflated balloon, inflated prices). Nothing to do with pests.
+Option (2) "inflicted" ❌ — "Inflicted" means caused suffering to someone (e.g. "inflicted pain"). It describes an action done to a person, not a place filled with insects.
+Option (3) "infected" ❌ — "Infected" means contaminated by germs or bacteria. Cockroaches are pests, not germs — the word for pests is "infested."
+Option (4) "infested" ✅ — Correct! "Infested with cockroaches" is the standard phrase for a place overrun or swarming with pests.`,
+
+v1:`📚 Tests: vocabulary for forming an opinion without direct evidence.
+
+Option (1) "reflected" ❌ — "Reflected" means thought deeply. It implies the person was present and observed the event, but the passers-by did NOT witness the accident.
+Option (2) "estimated" ❌ — "Estimated" means calculated an approximate value or number. It is used for quantities, not for forming theories about events.
+Option (3) "concluded" ❌ — "Concluded" means reached a firm decision based on evidence. But the passers-by had no evidence at all, so they cannot properly conclude anything.
+Option (4) "speculated" ✅ — Correct! "Speculated" means guessed or theorised without direct evidence — perfect for passers-by who did not see the accident.`,
+
+v2:`📚 Tests: vocabulary for excusing or overlooking wrongdoing.
+
+Option (1) "endorsed" ❌ — "Endorsed" means actively approved or promoted something. It is stronger than just overlooking — it implies active support.
+Option (2) "instigated" ❌ — "Instigated" means started or provoked something (e.g. "instigated a fight"). It means causing the act, not excusing it.
+Option (3) "condoned" ✅ — Correct! "Condoned" means accepted or overlooked wrongdoing without punishment. "Should not be condoned" = should not be excused or allowed to pass unpunished.
+Option (4) "prohibited" ❌ — "Prohibited" means officially banned. "Should not be prohibited" would mean "should not be banned" — the opposite of the intended meaning.`,
+
+v3:`📚 Tests: the correct phrasal verb meaning to visit someone in person.
+
+Option (1) "call in" ❌ — "Call in" means to telephone (e.g. "call in sick") or request someone come to you. It does not mean to go and visit someone.
+Option (2) "call on" ✅ — Correct! "Call on" means to pay a personal visit to someone, often unexpectedly. The word "surprise" in the sentence confirms this meaning.
+Option (3) "call over" ❌ — "Call over" means to signal someone to come to you (e.g. "call the waiter over"). This is the opposite direction — you are asking them to come to you.
+Option (4) "call upon" ❌ — "Call upon" more commonly means to formally request or appeal to someone. "Call on" is the natural everyday phrase for a personal visit.`,
+
+v4:`📚 Tests: vocabulary for being blackened and damaged by fire.
+
+Option (1) "sizzled" ❌ — "Sizzled" means made a hissing sound while cooking (like bacon in a pan). It describes a sound, not severe fire destruction.
+Option (2) "charred" ✅ — Correct! "Charred" means burned until the surface is blackened. "Charred beyond recognition" = so badly burned you cannot tell what the item originally was.
+Option (3) "scalded" ❌ — "Scalded" means burned by hot liquid or steam. A shopping mall fire produces flames and smoke, not scalding liquids.
+Option (4) "incinerated" ❌ — "Incinerated" means completely burned to ash. "Incinerated beyond recognition" would be redundant — if fully incinerated, nothing remains to be unrecognisable.`,
+
+vc0:`📚 "Spurred" means motivated or driven to do something.
+
+Option (1) "compelled" ❌ — "Compelled" means forced, often against one's will. The children chose to behave well for a reward — they were not forced.
+Option (2) "persuaded" ❌ — "Persuaded" means convinced through reasoning or argument. The father made a simple offer; there was no argument involved.
+Option (3) "encouraged" ✅ — Correct! "Encouraged" means motivated someone to try harder. The football ticket prize encouraged (spurred) the children to improve their behaviour.
+Option (4) "commanded" ❌ — "Commanded" means ordered someone using authority. The father offered an incentive, not a command.`,
+
+vc1:`📚 "Drift away" means to gradually move away from a goal or path.
+
+Option (1) "lose" ❌ — "Lose" means to no longer have something, but it is incomplete here — lose what? "Drift away from their goal" is more specific and precise.
+Option (2) "stray" ✅ — Correct! "Stray" means to wander off a correct path. "Stray from their goal" matches "drift away from their goal" — both suggest a slow, unintentional moving away.
+Option (3) "leave" ❌ — "Leave" implies a deliberate decision to go. "Drift away" suggests a gradual, almost unnoticed process, which "stray" captures better.
+Option (4) "depart" ❌ — "Depart" means to leave a place (usually a journey). It cannot be used metaphorically to describe moving away from a goal.`,
+
+vc2:`📚 "Wavered" means to be uncertain and unable to decide.
+
+Option (1) "thought" ❌ — "Thought" simply means used the mind. It is too general — "wavered" specifically means hesitating because of uncertainty.
+Option (2) "decided" ❌ — "Decided" is the opposite of "wavered"! To decide is to make up your mind; to waver is to be unable to make up your mind.
+Option (3) "trembled" ❌ — "Trembled" means shook physically from fear or cold. While uncertainty may cause trembling, the word focuses on physical shaking, not mental doubt.
+Option (4) "hesitated" ✅ — Correct! "Hesitated" means paused because of uncertainty. "He wavered for a moment, unsure of what to make of it" = he hesitated, not knowing what to think.`,
+
+vc3:`📚 "Utter" here is used as an adjective meaning complete or total.
+
+Option (1) "huge" ❌ — "Huge" means very large in size. "Huge disbelief" would describe size, but "utter" expresses absolute completeness.
+Option (2) "great" ❌ — "Great" can intensify nouns (e.g. "great surprise"), but "utter" is stronger and more formal, meaning absolutely complete.
+Option (3) "entire" ❌ — "Entire" means the whole of something (e.g. "the entire class"). It does not work as an intensifier before an abstract noun like "disbelief."
+Option (4) "complete" ✅ — Correct! "Complete disbelief" = total, absolute disbelief. "Utter" and "complete" are synonyms when used as intensifying adjectives before nouns like "disbelief" or "silence."`,
+
+vc4:`📚 "Duly" means in the correct, appropriate, or deserved way.
+
+Option (1) "fittingly" ✅ — Correct! "Fittingly" means in a way that is appropriate and well-deserved. "Duly rewarded" = "fittingly rewarded" — he received exactly the reward he earned.
+Option (2) "honestly" ❌ — "Honestly" relates to truthfulness. It does not capture the idea of something being deserved or appropriate.
+Option (3) "peculiarly" ❌ — "Peculiarly" means strangely. A ticket as a reward for good behaviour is expected, not strange.
+Option (4) "surprisingly" ❌ — "Surprisingly" means unexpectedly. But "duly" implies the reward was deserved and expected — the opposite of surprising.`,
+
+vt0:`📚 Tests: the purpose of a direct question in a poster (Text 1).
+
+Option (1) "make readers reflect on their sleeping habits" ✅ — Correct! A direct question is a rhetorical device to make readers pause and think about their own situation — it invites personal reflection.
+Option (2) "persuade readers to improve their sleep schedule" ❌ — The poster overall aims to raise awareness, but this specific question is an opening hook to engage, not a call to action.
+Option (3) "warn the reader about the dangers of sleep deprivation" ❌ — A warning would say "Danger: sleep deprivation is harmful." A question is a gentler, more thought-provoking approach.
+Option (4) "emphasise the importance of sleeping well" ❌ — The whole poster emphasises sleep importance, but this specific question's purpose is to make readers reflect personally.`,
+
+vt1:`📚 Tests: why a visual image is used in a poster (Text 1).
+
+Option (1) "evoke emotions" ✅ — Correct! Images in posters are chosen primarily to create an emotional response (concern, curiosity) so readers engage more deeply with the message.
+Option (2) "convey a clearer message" ❌ — Images help with clarity, but their primary purpose in persuasive posters is emotional connection, not just understanding.
+Option (3) "replace the need for words" ❌ — The poster still contains text alongside the image. The image works with the words, not instead of them.
+Option (4) "introduce Dr Christine Lee" ❌ — The image is a general thematic visual, not a photograph of Dr Christine Lee.`,
+
+vt2:`📚 Tests: identifying a TRUE statement from Text 1 (the poster).
+
+Option (1) "It is natural for teens to be impulsive" ❌ — The poster says poor sleep LEADS TO impulsive behaviour. This is a consequence of sleep deprivation, not a natural trait.
+Option (2) "Teens only need 7 hours of sleep a day" ❌ — The poster says teens NEED 8–9 hours but GET only 7. Getting 7 hours is the problem, not the requirement.
+Option (3) "A small percentage of teens have sleep-related issues" ❌ — The poster says "Nearly 3 in 4 teenagers are sleep-deprived" — that is a large majority (~75%), not a small percentage.
+Option (4) "Well-rested teens are more likely to remember what they learn" ✅ — Correct! The poster says poor sleep causes "difficulty retaining information," so well-rested teens retain (remember) information better.`,
+
+vt3:`📚 Tests: finding what Text 2 says that means we cannot rely on Text 1 alone.
+
+Option (1) "only doctors can help fix the problem" ❌ — Text 2 says the opposite: "You can manage your sleeping habits — it's in your hands!" It encourages self-management.
+Option (2) "we can manage our sleep issues on our own" ✅ — Correct! Text 2 ends with "You can manage your sleeping habits — it's in your hands!" This means we do not need to visit a clinic (as Text 1 suggests).
+Option (3) "our bodies can repair tissues throughout the day" ❌ — Text 2 says repair happens DURING SLEEP, not throughout the day. This actually supports Text 1's message.
+Option (4) "exposure to lights helps adapt our sleep-wake cycle" ❌ — Text 2 says to LIMIT screens as they DISRUPT the sleep-wake cycle. Light is presented as a problem, not a help.`,
+
+vt4:`📚 Tests: finding a point that BOTH Text 1 and Text 2 agree on.
+
+Option (1) "sleep is important for our mental health" ✅ — Correct! Text 1 says poor sleep leads to "mental health problems." Text 2 says sleep is "vital for physical and mental health." Both agree on this.
+Option (2) "keeping a bedtime routine is essential" ❌ — Only Text 2 mentions a bedtime routine. Text 1 does not mention routines at all.
+Option (3) "everyone should have a consistent sleep schedule" ❌ — Only Text 2 mentions a consistent schedule. Text 1 does not, so this is not a shared point.
+Option (4) "getting enough sleep strengthens the immune system" ❌ — Only Text 2 mentions the immune system. Text 1 does not mention this.`
+};
+
 // ===================== STATE =====================
 let curSec=null,submitted=false;
 
@@ -396,8 +575,8 @@ async function render(n,ai){
   document.getElementById('ssub').textContent=m.s;
   document.getElementById('smarks').textContent=m.m;
   const c=document.getElementById('seccontent');c.innerHTML='';
-  if(n==='grammar_mcq') await doMCQ(c,G_MCQ,1,'gm',ai,'Grammar MCQ',10);
-  else if(n==='vocab_mcq') await doMCQ(c,V_MCQ,11,'vm',ai,'Vocabulary MCQ',5);
+  if(n==='grammar_mcq') await doMCQ(c,G_MCQ,1,'gm',ai,'Grammar MCQ',10,'g');
+  else if(n==='vocab_mcq') await doMCQ(c,V_MCQ,11,'vm',ai,'Vocabulary MCQ',5,'v');
   else if(n==='vocab_cloze') await doVocabCloze(c,ai);
   else if(n==='visual_text') await doVT(c,ai);
   else if(n==='grammar_cloze') await doGC(c,ai);
@@ -482,10 +661,24 @@ function showLoad(c,msg){
 }
 function removeLoad(){document.getElementById('loaddiv')?.remove();}
 
+// ===================== STATIC EXPLANATION DISPLAY =====================
+function showStaticExpl(expArea, expH, expB, isCorrect, text){
+  expArea.classList.add('show');
+  expH.className='exp-header '+(isCorrect?'correct-h':'wrong-h');
+  expH.textContent=isCorrect?'✅ Correct — here is why:':'❌ Wrong — here is why:';
+  expB.style.whiteSpace='pre-line';
+  expB.textContent=text;
+}
+
 // ===================== EXPLAIN QUESTION (pre-submission, all options) =====================
 async function explainQuestion(qText, opts, btnEl, preExpEl){
   const showing=preExpEl.classList.contains('show');
   if(showing){preExpEl.classList.remove('show');btnEl.textContent='💡 Explain this question';return;}
+  if(!getKey()){
+    preExpEl.classList.add('show');
+    preExpEl.innerHTML=`<div class="pre-exp-hdr">ℹ️ Tip</div>Enter your Anthropic API key on the home screen to get hints before answering.\n\nNo key needed to see full explanations for all options — just submit your answers!`;
+    btnEl.textContent='💡 Hide';return;
+  }
   btnEl.disabled=true;btnEl.textContent='⏳ Thinking...';
   preExpEl.innerHTML=`<div class="pre-exp-hdr">✨ Claude AI — Explaining all options</div><div id="peBody" class="streaming"></div>`;
   preExpEl.classList.add('show');
@@ -523,7 +716,7 @@ Keep each option explanation to 1-2 sentences. Do NOT state which option is the 
 }
 
 // ===================== MCQ =====================
-async function doMCQ(c,staticData,startNum,pfx,ai,label,total){
+async function doMCQ(c,staticData,startNum,pfx,ai,label,total,explKeyPrefix=''){
   let data=staticData;
   if(ai){
     showLoad(c,`Generating new ${label} questions...`);
@@ -600,23 +793,27 @@ async function doMCQ(c,staticData,startNum,pfx,ai,label,total){
       const expH=expArea.querySelector('.exp-header');
       const expB=expArea.querySelector('.exp-body');
       expArea.classList.add('show');
-      expB.textContent='Loading explanation...';
-      const prompt=`You are a helpful PSLE English tutor for Primary 6 students in Singapore.
+      const sKey=explKeyPrefix+i;
+      const sExpl=!ai&&STATIC_EXPL[sKey];
+      if(sExpl){
+        showStaticExpl(expArea,expH,expB,isCorrect,sExpl);
+      }else{
+        expB.textContent='Loading explanation...';
+        const prompt=`You are a helpful PSLE English tutor for Primary 6 students in Singapore.
 
 Question: "${q}"
 The student chose: ${chosen!==undefined?`Option (${chosen+1}) "${chosenTxt}"`:'Nothing (not answered)'}
 The correct answer is: Option (${ans+1}) "${correctTxt}"
 
 Explain this question by going through EACH option individually:
-
 Option (1) "${opts[0]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
 Option (2) "${opts[1]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
 Option (3) "${opts[2]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
 Option (4) "${opts[3]}": Is this correct or wrong? Give a clear 1-2 sentence reason.
-
 End with one sentence naming the grammar rule or vocabulary concept this question tests.
 Use simple, encouraging language suitable for a Primary 6 student.`;
-      streamJobs.push({expH,expB,prompt,isCorrect});
+        streamJobs.push({expH,expB,prompt,isCorrect});
+      }
     });
     showResult(score,data.length);
     // stream all explanations
@@ -694,10 +891,16 @@ async function doVocabCloze(c,ai){
         else if(j===chosen&&chosen!==ans){el.classList.add('wrong');el.querySelector('.opt-circle').textContent='✗';}
       }
       if(chosen===ans)score++;
+      const isVcOk=chosen===ans;
       const ea=document.getElementById(`exp_vc${q.num}`);
       const expH=ea.querySelector('.exp-header');const expB=ea.querySelector('.exp-body');
-      ea.classList.add('show');expB.textContent='Loading...';
-      const prompt=`You are a PSLE English vocabulary tutor for Primary 6 students in Singapore.
+      ea.classList.add('show');
+      const vcIdx=qs.indexOf(q);
+      const sExpl=!ai&&STATIC_EXPL['vc'+vcIdx];
+      if(sExpl){showStaticExpl(ea,expH,expB,isVcOk,sExpl);}
+      else{
+        expB.textContent='Loading...';
+        const prompt=`You are a PSLE English vocabulary tutor for Primary 6 students in Singapore.
 
 The word from the passage is: "${q.word}"
 The student chose: ${chosen!==undefined?`Option (${chosen+1}) "${opts[chosen]}"`:'Nothing'}
@@ -712,7 +915,8 @@ Option (3) "${opts[2]}": Does this have the same meaning as "${q.word}"? Why or 
 Option (4) "${opts[3]}": Does this have the same meaning as "${q.word}"? Why or why not? (1-2 sentences)
 
 Use simple, friendly language for a Primary 6 student.`;
-      jobs.push({expH,expB,prompt,isCorrect:chosen===ans});
+        jobs.push({expH,expB,prompt,isCorrect:isVcOk});
+      }
     });
     showResult(score,5);
     for(const j of jobs)await streamExplain(j.prompt,j.expB,j.expH,j.isCorrect);
@@ -769,10 +973,16 @@ async function doVT(c,ai){
     qs.forEach(q=>{
       const ans=q.ans;const opts=q.opts;const chosen=window[`pick_vt${q.num}`];
       for(let j=0;j<4;j++){const el=document.getElementById(`vt${q.num}_${j}`);if(!el)continue;el.classList.add('locked');el.classList.remove('picked');if(j===ans){el.classList.add('correct');el.querySelector('.opt-circle').textContent='✓';}else if(j===chosen&&chosen!==ans){el.classList.add('wrong');el.querySelector('.opt-circle').textContent='✗';}}
+      const isVtOk=chosen===ans;
       if(chosen===ans)score++;
       const ea=document.getElementById(`exp_vt${q.num}`);const expH=ea.querySelector('.exp-header');const expB=ea.querySelector('.exp-body');
-      ea.classList.add('show');expB.textContent='Loading...';
-      const prompt=`You are a PSLE English tutor for Primary 6 students in Singapore.
+      ea.classList.add('show');
+      const vtIdx=qs.indexOf(q);
+      const sExpl=!ai&&STATIC_EXPL['vt'+vtIdx];
+      if(sExpl){showStaticExpl(ea,expH,expB,isVtOk,sExpl);}
+      else{
+        expB.textContent='Loading...';
+        const prompt=`You are a PSLE English tutor for Primary 6 students in Singapore.
 
 Visual Text MCQ: "${q.q}"
 The student chose: ${chosen!==undefined?`Option (${chosen+1}) "${opts[chosen]}"`:'Nothing'}
@@ -787,7 +997,8 @@ Option (3) "${opts[2]}": Is this correct or wrong? Why? (1-2 sentences, referenc
 Option (4) "${opts[3]}": Is this correct or wrong? Why? (1-2 sentences, referencing the texts)
 
 Use simple, clear language for a Primary 6 student.`;
-      jobs.push({expH,expB,prompt,isCorrect:chosen===ans});
+        jobs.push({expH,expB,prompt,isCorrect:isVtOk});
+      }
     });
     showResult(score,5);
     for(const j of jobs)await streamExplain(j.prompt,j.expB,j.expH,j.isCorrect);
@@ -1218,8 +1429,8 @@ Use simple language suitable for a Primary 6 student.`;
 async function doFull(c){
   const note=mk('div','inst');note.innerHTML='<strong>Full Paper Mode.</strong> All ACS Junior Prelim 2025 sections below. Mark each section individually.';c.appendChild(note);
   const secs=[
-    {l:'Grammar MCQ (Q1–10)',fn:()=>doMCQ(c,G_MCQ,1,'gf',false,'Grammar MCQ',10)},
-    {l:'Vocabulary MCQ (Q11–15)',fn:()=>doMCQ(c,V_MCQ,11,'vf',false,'Vocabulary MCQ',5)},
+    {l:'Grammar MCQ (Q1–10)',fn:()=>doMCQ(c,G_MCQ,1,'gf',false,'Grammar MCQ',10,'g')},
+    {l:'Vocabulary MCQ (Q11–15)',fn:()=>doMCQ(c,V_MCQ,11,'vf',false,'Vocabulary MCQ',5,'v')},
     {l:'Vocabulary Cloze (Q16–20)',fn:()=>doVocabCloze(c,false)},
     {l:'Visual Text (Q21–25)',fn:()=>doVT(c,false)},
     {l:'Grammar Cloze (Q26–35)',fn:()=>doGC(c,false)},
