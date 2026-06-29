@@ -156,6 +156,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
 .apikey-status.ok{color:#166534}
 .apikey-status.err{color:#991b1b}
 @media(max-width:560px){.opts{grid-template-columns:1fr}}
+/* CHAT WIDGET */
+.chat-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border:none;font-size:1.55rem;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.4);z-index:9999;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.chat-fab:hover{transform:scale(1.08)}
+.chat-panel{position:fixed;bottom:4.8rem;right:1.5rem;width:340px;max-height:520px;background:#fff;border:1.5px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:9998;display:flex;flex-direction:column;overflow:hidden;transition:opacity .2s,transform .2s;opacity:0;transform:translateY(12px) scale(.97);pointer-events:none}
+.chat-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.chat-head{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;padding:.75rem 1rem;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.chat-head-title{flex:1;font-size:.92rem;font-weight:700}
+.chat-close{background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;opacity:.8;line-height:1;padding:0}
+.chat-close:hover{opacity:1}
+.chat-msgs{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.55rem;min-height:200px}
+.chat-msg{padding:.55rem .8rem;border-radius:10px;font-size:.83rem;line-height:1.65;max-width:88%;word-break:break-word;white-space:pre-wrap}
+.chat-msg.user{background:var(--lb);color:var(--dark);align-self:flex-end;border-radius:10px 10px 2px 10px}
+.chat-msg.ai{background:var(--lgray);border:1px solid var(--border);align-self:flex-start;border-radius:10px 10px 10px 2px}
+.chat-msg.ai.streaming::after{content:'▋';animation:blink .7s infinite;color:var(--blue)}
+.chat-input-row{display:flex;gap:.4rem;padding:.6rem;border-top:1px solid var(--border);flex-shrink:0;align-items:flex-end}
+.chat-input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:.4rem .65rem;font-size:.83rem;outline:none;font-family:inherit;resize:none;max-height:80px;min-height:34px;line-height:1.4;overflow-y:auto}
+.chat-input:focus{border-color:var(--purple)}
+.chat-send{background:linear-gradient(135deg,#1a56db,#7c3aed);color:#fff;border:none;border-radius:8px;padding:.45rem .75rem;font-size:.88rem;cursor:pointer;flex-shrink:0;height:34px}
+.chat-send:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:480px){.chat-panel{width:calc(100vw - 2rem);right:1rem}}
 </style>
 </head>
 <body>
@@ -333,8 +353,7 @@ const CQS=[
   {num:75,marks:2,type:"explain",q:"Explain how the author's life changed after he was given one stroke of the cane.",ans:"The author stopped all his extracurricular activities and focused entirely on studying and homework almost round the clock. As a result, he passed his Preliminary Examination and avoided becoming a dropout."}
 ];
 
-// ===================== STATIC EXPLANATIONS (all 25 MCQ questions) =====================
-// Keyed: g0-g9 = Grammar MCQ, v0-v4 = Vocab MCQ, vc0-vc4 = Vocab Cloze, vt0-vt4 = Visual Text
+// ===================== STATIC EXPLANATIONS (all 25 MCQ questions — detailed) =====================
 const STATIC_EXPL={
 g0:`📚 Tests: subject-verb agreement with "neither…nor" + past tense.
 
@@ -1487,6 +1506,114 @@ function showResult(score,total){
   const col=pct>=.8?'#166534':pct>=.6?'#c2410c':'#991b1b';
   const sm=r.querySelector('.score-msg');sm.textContent=msg;sm.style.color=col;
 }
+// ===================== CHAT WIDGET =====================
+let chatHistory=[];
+let chatOpen=false;
+function toggleChat(){
+  chatOpen=!chatOpen;
+  const p=document.getElementById('chatPanel');
+  if(chatOpen){p.classList.add('open');setTimeout(()=>document.getElementById('chatInput').focus(),80);}
+  else p.classList.remove('open');
+}
+function chatKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
+}
+async function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const text=inp.value.trim();
+  if(!text)return;
+  appendChatMsg('user',text);
+  inp.value='';
+  chatHistory.push({role:'user',content:text});
+  if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+  const sendBtn=document.getElementById('chatSend');
+  sendBtn.disabled=true;
+  const aiEl=appendChatMsg('ai','');
+  aiEl.classList.add('streaming');
+  const key=getKey();
+  if(!key){
+    aiEl.classList.remove('streaming');
+    aiEl.textContent='Please enter your Anthropic API key on the home screen first, then you can chat with me! 😊';
+    chatHistory.pop();
+    sendBtn.disabled=false;
+    return;
+  }
+  const sysPrompt=`You are a friendly, encouraging PSLE English tutor for Primary 6 students in Singapore. You help students understand English grammar rules, vocabulary, comprehension strategies, and the Paper 2 exam format. Give clear, simple explanations with short examples. Keep responses concise but thorough — around 100–200 words. Use warm, encouraging language suitable for 12-year-olds. When explaining a grammar rule, state the rule then give a short example sentence. When explaining vocabulary, give the meaning then use it in a sentence. If the student seems confused, reassure them and try a different explanation.`;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:apiHeaders(),
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:512,
+        system:sysPrompt,
+        messages:chatHistory,
+        stream:true
+      })
+    });
+    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+resp.status);}
+    const reader=resp.body.getReader();
+    const dec=new TextDecoder();
+    let buf='';let aiText='';
+    while(true){
+      const{done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');
+      buf=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data:'))continue;
+        const d=line.slice(5).trim();
+        if(d==='[DONE]')continue;
+        try{
+          const j=JSON.parse(d);
+          if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){
+            aiText+=j.delta.text;
+            aiEl.textContent=aiText;
+            const msgs=document.getElementById('chatMsgs');
+            msgs.scrollTop=msgs.scrollHeight;
+          }
+        }catch{}
+      }
+    }
+    if(aiText)chatHistory.push({role:'assistant',content:aiText});
+    if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+  }catch(err){
+    aiEl.textContent='Oops! Something went wrong: '+err.message+'. Please check your API key and try again.';
+    chatHistory.pop();
+  }
+  aiEl.classList.remove('streaming');
+  sendBtn.disabled=false;
+}
+function appendChatMsg(role,text){
+  const msgs=document.getElementById('chatMsgs');
+  const el=document.createElement('div');
+  el.className='chat-msg '+role;
+  el.textContent=text;
+  msgs.appendChild(el);
+  msgs.scrollTop=msgs.scrollHeight;
+  return el;
+}
 </script>
+
+<!-- CHAT WIDGET -->
+<button class="chat-fab" onclick="toggleChat()" title="Chat with AI Tutor">💬</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <span style="font-size:1.1rem">🤖</span>
+    <div>
+      <div class="chat-head-title">AI English Tutor</div>
+      <div style="font-size:.7rem;opacity:.8">Ask me anything!</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="chat-msg ai">Hi! I'm your PSLE English tutor 😊 I can help you with grammar rules, vocabulary, comprehension tips, and anything else about Paper 2. What would you like to know?</div>
+  </div>
+  <div class="chat-input-row">
+    <textarea class="chat-input" id="chatInput" placeholder="Ask a question…" rows="1" onkeydown="chatKeydown(event)"></textarea>
+    <button class="chat-send" id="chatSend" onclick="sendChat()">➤</button>
+  </div>
+</div>
 </body>
 </html>
