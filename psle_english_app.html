@@ -207,16 +207,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
     </div>
   </div>
 
-  <!-- API KEY ENTRY -->
-  <div class="apikey-box">
-    <label>🔑 Anthropic API Key (required for AI explanations)</label>
-    <div class="apikey-row">
-      <input class="apikey-input" id="apikeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off" oninput="apikeyStatus('')"/>
-      <button class="apikey-save" onclick="saveApiKey()">Save</button>
-    </div>
-    <div class="apikey-status" id="apikeyStatus">Enter your key from <strong>console.anthropic.com</strong> → API Keys. It is only stored in your browser.</div>
-  </div>
-
   <div class="grid">
     <div class="card" onclick="go('grammar_mcq')" style="--c:#1a56db">
       <div class="card-top"><div class="card-icon" style="background:#dbeafe">🔤</div><div><div class="card-title">Grammar MCQ</div><div class="card-sub">Q1–10 · Choose best answer</div></div></div>
@@ -319,6 +309,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
       <span class="claude-chip" onclick="claudeChip('Give me tips for Synthesis and Transformation questions.')">Synthesis tips</span>
       <span class="claude-chip" onclick="claudeChip('What is the difference between a simile and a metaphor?')">Simile vs metaphor</span>
       <span class="claude-chip" onclick="claudeChip('How do I find synonyms for Vocabulary Cloze?')">Vocabulary Cloze</span>
+    </div>
+  </div>
+  <!-- inline key entry, shown only when no key saved -->
+  <div id="claudeKeyBanner" style="display:none;background:#faf5ff;border-top:1.5px solid #e9d5ff;padding:.65rem 1rem;flex-shrink:0">
+    <div style="max-width:800px;margin:0 auto">
+      <div style="font-size:.8rem;color:#5b21b6;font-weight:700;margin-bottom:.4rem">🔑 Enter Anthropic API key to chat</div>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <input id="claudeKeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off"
+          style="flex:1;border:1.5px solid #c4b5fd;border-radius:8px;padding:.4rem .75rem;font-size:.84rem;font-family:monospace;outline:none;color:#111827"
+          onkeydown="if(event.key==='Enter')saveClaudeKey()"/>
+        <button onclick="saveClaudeKey()"
+          style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:.4rem 1rem;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap">Save</button>
+      </div>
+      <div style="font-size:.72rem;color:#9ca3af;margin-top:.3rem">Get a free key at <strong>console.anthropic.com</strong> → API Keys. Stored only in your browser.</div>
     </div>
   </div>
   <div class="claude-bottom">
@@ -1566,7 +1570,20 @@ function showResult(score,total){
 let claudeHistory=[];
 function openClaude(){
   document.getElementById('claudeOverlay').classList.add('open');
-  setTimeout(()=>document.getElementById('claudeInput').focus(),220);
+  const banner=document.getElementById('claudeKeyBanner');
+  if(getKey()){banner.style.display='none';}
+  else{banner.style.display='block';}
+  setTimeout(()=>{
+    if(getKey())document.getElementById('claudeInput').focus();
+    else document.getElementById('claudeKeyInput').focus();
+  },220);
+}
+function saveClaudeKey(){
+  const v=document.getElementById('claudeKeyInput').value.trim();
+  if(!v){return;}
+  localStorage.setItem('anthropic_key',v);
+  document.getElementById('claudeKeyBanner').style.display='none';
+  document.getElementById('claudeInput').focus();
 }
 function closeClaude(){
   document.getElementById('claudeOverlay').classList.remove('open');
@@ -1600,8 +1617,9 @@ async function sendClaude(){
   const key=getKey();
   if(!key){
     aiEl.classList.remove('streaming');
-    aiEl.textContent='To chat with me you need an Anthropic API key. Go to the home screen, enter your key (from console.anthropic.com → API Keys), then come back and chat! 😊';
+    aiEl.textContent='Enter your Anthropic API key in the box above to start chatting! 😊';
     claudeHistory.pop();
+    document.getElementById('claudeKeyBanner').style.display='block';
     sendBtn.disabled=false;
     return;
   }
