@@ -144,6 +144,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
 .pre-exp{background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:.75rem .95rem;margin-top:.5rem;font-size:.82rem;line-height:1.7;display:none;white-space:pre-wrap}
 .pre-exp.show{display:block}
 .pre-exp-hdr{font-size:.78rem;font-weight:700;color:var(--purple);margin-bottom:.45rem;display:flex;align-items:center;gap:.3rem}
+/* API KEY BOX */
+.apikey-box{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;flex-direction:column;gap:.5rem}
+.apikey-box label{font-size:.82rem;font-weight:700;color:var(--dark)}
+.apikey-row{display:flex;gap:.5rem;align-items:center}
+.apikey-input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:.45rem .75rem;font-size:.85rem;font-family:monospace;outline:none;color:var(--dark)}
+.apikey-input:focus{border-color:var(--blue)}
+.apikey-save{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.apikey-save:hover{opacity:.88}
+.apikey-status{font-size:.76rem;color:var(--gray)}
+.apikey-status.ok{color:#166534}
+.apikey-status.err{color:#991b1b}
 @media(max-width:560px){.opts{grid-template-columns:1fr}}
 </style>
 </head>
@@ -161,6 +172,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--
       <span class="badge">✨ AI explains why</span>
     </div>
   </div>
+
+  <!-- API KEY ENTRY -->
+  <div class="apikey-box">
+    <label>🔑 Anthropic API Key (required for AI explanations)</label>
+    <div class="apikey-row">
+      <input class="apikey-input" id="apikeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off" oninput="apikeyStatus('')"/>
+      <button class="apikey-save" onclick="saveApiKey()">Save</button>
+    </div>
+    <div class="apikey-status" id="apikeyStatus">Enter your key from <strong>console.anthropic.com</strong> → API Keys. It is only stored in your browser.</div>
+  </div>
+
   <div class="grid">
     <div class="card" onclick="go('grammar_mcq')" style="--c:#1a56db">
       <div class="card-top"><div class="card-icon" style="background:#dbeafe">🔤</div><div><div class="card-title">Grammar MCQ</div><div class="card-sub">Q1–10 · Choose best answer</div></div></div>
@@ -314,6 +336,28 @@ const CQS=[
 // ===================== STATE =====================
 let curSec=null,submitted=false;
 
+// ===================== API KEY =====================
+function getKey(){return localStorage.getItem('anthropic_key')||'';}
+function saveApiKey(){
+  const v=document.getElementById('apikeyInput').value.trim();
+  if(!v.startsWith('sk-')){apikeyStatus('Key must start with sk-','err');return;}
+  localStorage.setItem('anthropic_key',v);
+  apikeyStatus('Key saved ✓','ok');
+}
+function apikeyStatus(msg,cls){
+  const el=document.getElementById('apikeyStatus');if(!el)return;
+  el.textContent=msg||'Enter your key from console.anthropic.com → API Keys. It is only stored in your browser.';
+  el.className='apikey-status'+(cls?' '+cls:'');
+}
+function apiHeaders(){
+  return {'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true','x-api-key':getKey()};
+}
+// Load saved key into input on page load
+window.addEventListener('DOMContentLoaded',()=>{
+  const k=getKey();const inp=document.getElementById('apikeyInput');
+  if(k&&inp){inp.value=k;apikeyStatus('Key loaded ✓','ok');}
+});
+
 function goHome(){
   document.getElementById('home').classList.remove('hidden');
   document.getElementById('secview').classList.add('hidden');
@@ -376,11 +420,7 @@ async function streamExplain(prompt, bodyEl, headerEl, isCorrect){
   try{
     const resp = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
+      headers:apiHeaders(),
       body: JSON.stringify({
         model:'claude-sonnet-4-6',
         max_tokens:600,
@@ -427,11 +467,7 @@ async function streamExplain(prompt, bodyEl, headerEl, isCorrect){
 async function callAI(prompt,max=1200){
   const r=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
+    headers:apiHeaders(),
     body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:max,messages:[{role:'user',content:prompt}]})
   });
   if(!r.ok)throw new Error(await r.text());
@@ -476,7 +512,7 @@ Please explain WITHOUT revealing the correct answer:
 
 Keep each option explanation to 1-2 sentences. Do NOT state which option is the answer. Use simple, friendly language.`;
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,stream:true,messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,stream:true,messages:[{role:'user',content:prompt}]})});
     if(resp.ok){
       const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';
       while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const d=line.slice(6).trim();if(d==='[DONE]')break;try{const j=JSON.parse(d);if(j.type==='content_block_delta'&&j.delta?.text)body.textContent+=j.delta.text;}catch{}}}
@@ -819,7 +855,7 @@ Use simple language for a Primary 6 student.`;
     showResult(score,10);
     for(const j of jobs){
       try{
-        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:250,stream:true,messages:[{role:'user',content:j.prompt}]})});
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:250,stream:true,messages:[{role:'user',content:j.prompt}]})});
         if(!resp.ok){j.body.textContent='See the correct answer above.';continue;}
         const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';
         j.body.textContent='';j.body.classList.add('streaming');
@@ -889,7 +925,7 @@ Use simple language for a Primary 6 student.`;
     showResult(score,10);
     for(const j of jobs){
       try{
-        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:250,stream:true,messages:[{role:'user',content:j.prompt}]})});
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:250,stream:true,messages:[{role:'user',content:j.prompt}]})});
         if(!resp.ok){j.body.textContent='Check the correct answer above and identify whether it was a spelling or grammar error.';continue;}
         const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';j.body.textContent='';j.body.classList.add('streaming');
         while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const d2=line.slice(6).trim();if(d2==='[DONE]')break;try{const jj=JSON.parse(d2);if(jj.type==='content_block_delta'&&jj.delta?.text)j.body.textContent+=jj.delta.text;}catch{}}}
@@ -954,7 +990,7 @@ Use simple language suitable for a Primary 6 student.`;
     showResult(score,15);
     for(const j of jobs){
       try{
-        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:220,stream:true,messages:[{role:'user',content:j.prompt}]})});
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:220,stream:true,messages:[{role:'user',content:j.prompt}]})});
         if(!resp.ok){j.body.textContent='Read the sentence carefully and identify what word fits both the meaning and the grammar of the blank.';continue;}
         const reader=resp.body.getReader();const decoder=new TextDecoder();let buf='';j.body.textContent='';j.body.classList.add('streaming');
         while(true){const{done,value}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const d2=line.slice(6).trim();if(d2==='[DONE]')break;try{const jj=JSON.parse(d2);if(jj.type==='content_block_delta'&&jj.delta?.text)j.body.textContent+=jj.delta.text;}catch{}}}
