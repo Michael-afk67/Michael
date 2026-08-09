@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Arena Tag</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Main menu -->
+  <section id="screen-menu" class="screen active">
+    <div class="panel">
+      <div class="coin-badge">🪙 <span class="coin-value">0</span></div>
+      <h1 class="title">ARENA TAG</h1>
+      <p class="subtitle">6-player tag arena · drum pads, floating platforms, zero lag.</p>
+
+      <div class="section-label">Local Players</div>
+      <div id="player-count" class="chip-row"></div>
+      <div id="controls-panel">
+        <div id="controls-list"></div>
+        <div id="bot-note"></div>
+      </div>
+
+      <div class="section-label">Game Mode</div>
+      <div id="mode-select" class="chip-row"></div>
+
+      <div class="section-label">Map</div>
+      <div id="map-select" class="chip-row"></div>
+
+      <div class="btn-row">
+        <button id="btn-store" class="btn secondary">Character Store</button>
+        <button id="btn-play" class="btn primary">Play Match ▶</button>
+      </div>
+      <p class="hint">Esc to pause mid-match · F3 toggles the FPS counter</p>
+    </div>
+  </section>
+
+  <!-- Store -->
+  <section id="screen-store" class="screen">
+    <div class="panel wide" style="position:relative;">
+      <div id="store-flash"></div>
+      <div class="coin-badge">🪙 <span class="coin-value">0</span></div>
+      <div class="store-head">
+        <div>
+          <h1 class="title" style="font-size:26px;">Character Store</h1>
+          <p class="subtitle" style="margin-bottom:8px;">Spend coins earned from matches to unlock skins.</p>
+        </div>
+      </div>
+      <div class="section-label">Equip for</div>
+      <div id="store-slots" class="chip-row"></div>
+      <p id="store-hint"></p>
+      <div id="store-grid" class="skin-grid"></div>
+      <div class="btn-row">
+        <button id="btn-store-back" class="btn ghost">Back to Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results / leaderboard -->
+  <section id="screen-results" class="screen">
+    <div class="panel">
+      <h1 id="results-title" class="title" style="font-size:26px;">Match Over</h1>
+      <p id="results-sub" class="subtitle"></p>
+      <div id="results-list" class="results-list"></div>
+      <p id="results-earned" class="hint" style="font-size:14px;color:#ffd35c;"></p>
+      <div class="btn-row">
+        <button id="btn-results-menu" class="btn ghost">Main Menu</button>
+        <button id="btn-results-again" class="btn primary">Play Again ▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="screen-pause" class="screen">
+    <div class="panel" style="width:360px; text-align:center;">
+      <h1 class="title" style="font-size:24px;">Paused</h1>
+      <div class="btn-row">
+        <button id="btn-quit" class="btn ghost">Quit to Menu</button>
+        <button id="btn-resume" class="btn primary">Resume</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
