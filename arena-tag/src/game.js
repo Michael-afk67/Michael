@@ -43,7 +43,7 @@ export class Game {
     this.map = buildMap(this.rng.int(1, 0x7ffffff), forcedMap);
     this.world = new World(this.map);
     this.mode = pickMode(this.rng, forcedMode);
-    this.renderer.setTint(this.map.tint);
+    this.renderer.setPalette(this.map);
 
     const save = store.load();
     this.entities.length = 0;

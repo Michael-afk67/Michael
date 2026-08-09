@@ -32,9 +32,12 @@ export class Renderer {
     this.dpr = 1;
     this.cull = [];
     this.starPattern = null;
+    this.nebulaPattern = null;
     this.skyGrad = null;
-    this.tint = COLORS.bg1;
+    this.sky = { top: '#1c2c56', mid: '#243866' };
+    this.glow = ['#5ab0ff', '#c26bff'];
     this._buildStars();
+    this._buildNebula();
   }
 
   _buildStars() {
@@ -59,6 +62,38 @@ export class Renderer {
     this.starPattern = this.ctx.createPattern(c, 'repeat');
   }
 
+  /** Big soft color blobs, tiled as a slow parallax layer behind the stars. */
+  _buildNebula() {
+    const size = 768;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const g = c.getContext('2d');
+    g.clearRect(0, 0, size, size);
+    let seed = 91;
+    const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+    const spots = [
+      { x: 0.18, y: 0.22, r: 0.30, c: this.glow[0] },
+      { x: 0.78, y: 0.18, r: 0.26, c: this.glow[1] },
+      { x: 0.55, y: 0.62, r: 0.34, c: this.glow[0] },
+      { x: 0.1, y: 0.75, r: 0.24, c: this.glow[1] },
+    ];
+    g.globalCompositeOperation = 'lighter';
+    for (const s of spots) {
+      const cx = (s.x + (rand() - 0.5) * 0.08) * size;
+      const cy = (s.y + (rand() - 0.5) * 0.08) * size;
+      const r = s.r * size;
+      const rg = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+      rg.addColorStop(0, s.c + '55');
+      rg.addColorStop(1, s.c + '00');
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(cx, cy, r, 0, Math.PI * 2);
+      g.fill();
+    }
+    this.nebulaTile = c;
+    this.nebulaPattern = this.ctx.createPattern(c, 'repeat');
+  }
+
   resize() {
     const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
     const w = this.canvas.clientWidth || window.innerWidth;
@@ -73,15 +108,19 @@ export class Renderer {
     return true;
   }
 
-  setTint(tint) {
-    this.tint = tint || COLORS.bg1;
+  /** Called once per match: swaps in the map's vivid sky + nebula colors. */
+  setPalette(map) {
+    this.sky = (map && map.sky) || this.sky;
+    this.glow = (map && map.glow) || this.glow;
     this._buildSky();
+    this._buildNebula();
   }
 
   _buildSky() {
     if (!this.height) return;
     const g = this.ctx.createLinearGradient(0, 0, 0, this.height);
-    g.addColorStop(0, this.tint);
+    g.addColorStop(0, this.sky.top);
+    g.addColorStop(0.45, this.sky.mid);
     g.addColorStop(1, COLORS.bg0);
     this.skyGrad = g;
   }
@@ -133,6 +172,16 @@ export class Renderer {
     // --- background (screen space, parallax scrolled)
     ctx.fillStyle = this.skyGrad;
     ctx.fillRect(0, 0, cam.vw, cam.vh);
+    if (this.nebulaPattern) {
+      const nx = -(cam.x * 0.10) % 768;
+      const ny = -(cam.y * 0.10) % 768;
+      ctx.save();
+      ctx.globalAlpha = 0.8;
+      ctx.translate(nx, ny);
+      ctx.fillStyle = this.nebulaPattern;
+      ctx.fillRect(-nx - 768, -ny - 768, cam.vw + 1536, cam.vh + 1536);
+      ctx.restore();
+    }
     if (this.starPattern) {
       const ox = -(cam.x * 0.25) % 256;
       const oy = -(cam.y * 0.25) % 256;

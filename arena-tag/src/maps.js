@@ -113,12 +113,15 @@ function lattice(rng, plats) {
   }
 }
 
+// Each map carries its own vivid sky gradient + a pair of glow colors used
+// to paint soft nebula blobs in the background — built once per match, never
+// touched again during play, so the extra color costs nothing per frame.
 export const MAP_POOL = [
-  { id: 'skyline', name: 'Neon Skyline', build: skyline, tint: '#16204a' },
-  { id: 'cavern',  name: 'Hollow Cavern', build: cavern,  tint: '#1a1630' },
-  { id: 'towers',  name: 'Sky Towers',   build: towers,  tint: '#0f2438' },
-  { id: 'rings',   name: 'Orbit Rings',  build: rings,   tint: '#231a35' },
-  { id: 'lattice', name: 'Grid Gardens', build: lattice, tint: '#12262b' },
+  { id: 'skyline', name: 'Neon Skyline',  build: skyline, sky: { top: '#2a0d52', mid: '#7b2ff7' }, glow: ['#ff2fd8', '#33e6ff'] },
+  { id: 'cavern',  name: 'Hollow Cavern', build: cavern,  sky: { top: '#2b0f3d', mid: '#8a2a5c' }, glow: ['#ff7a3d', '#a63bff'] },
+  { id: 'towers',  name: 'Sky Towers',    build: towers,  sky: { top: '#0d2b52', mid: '#1d7fa8' }, glow: ['#ffb703', '#00d2ff'] },
+  { id: 'rings',   name: 'Orbit Rings',   build: rings,   sky: { top: '#1a0f3d', mid: '#6a1ab0' }, glow: ['#00ffc8', '#ff3df0'] },
+  { id: 'lattice', name: 'Grid Gardens',  build: lattice, sky: { top: '#0a2e2b', mid: '#0f8a6a' }, glow: ['#4dff9f', '#ffe14d'] },
 ];
 
 /* ------------------------------------------------------------------- build */
@@ -194,7 +197,8 @@ export function buildMap(seed, forcedId) {
   return {
     id: preset.id,
     name: preset.name,
-    tint: preset.tint,
+    sky: preset.sky,
+    glow: preset.glow,
     width: WORLD_W,
     height: WORLD_H,
     groundY: GROUND_Y,

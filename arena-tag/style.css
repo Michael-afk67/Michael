@@ -143,7 +143,11 @@ html, body {
   display: none;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 50% 0%, #17223f 0%, #070a16 70%);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,79,216,0.20) 0%, transparent 42%),
+    radial-gradient(circle at 88% 12%, rgba(0,210,255,0.18) 0%, transparent 45%),
+    radial-gradient(circle at 50% 92%, rgba(124,47,247,0.22) 0%, transparent 50%),
+    radial-gradient(circle at 50% 0%, #1c2a52 0%, #070a16 70%);
   padding: 24px;
   overflow-y: auto;
 }
@@ -152,10 +156,10 @@ html, body {
 .panel {
   width: min(680px, 100%);
   background: linear-gradient(180deg, var(--panel), #0c1226);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 20px;
   padding: 28px 32px 32px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(122,63,255,0.08) inset;
 }
 
 .panel.wide { width: min(920px, 100%); }
