@@ -2,13 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Arena Tag</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <div id="app">
   <canvas id="game-canvas"></canvas>
+
+  <!-- Touch controls (P1 only): floating joystick + jump/pause buttons -->
+  <div id="touch-controls">
+    <div id="stick-zone">
+      <div id="stick-base"><div id="stick-knob"></div></div>
+    </div>
+    <button id="touch-jump" type="button">JUMP</button>
+    <button id="touch-pause" type="button" aria-label="Pause">II</button>
+  </div>
+  <div id="rotate-hint">Rotate your device for a wider view ↻</div>
 
   <!-- Main menu -->
   <section id="screen-menu" class="screen active">
@@ -30,11 +40,14 @@
       <div class="section-label">Map</div>
       <div id="map-select" class="chip-row"></div>
 
+      <div class="section-label">Controls (Player 1)</div>
+      <div id="control-scheme" class="chip-row"></div>
+
       <div class="btn-row">
         <button id="btn-store" class="btn secondary">Character Store</button>
         <button id="btn-play" class="btn primary">Play Match ▶</button>
       </div>
-      <p class="hint">Esc to pause mid-match · F3 toggles the FPS counter</p>
+      <p class="hint">Esc to pause mid-match · F3 toggles the FPS counter · touch devices get an on-screen joystick automatically</p>
     </div>
   </section>
 

@@ -16,9 +16,10 @@ import * as store from './storage.js';
 const BOT_NAMES = ['Nova', 'Blitz', 'Echo', 'Pixel', 'Rocket', 'Zap', 'Comet', 'Dash'];
 
 export class Game {
-  constructor(renderer, input) {
+  constructor(renderer, input, touch) {
     this.renderer = renderer;
     this.input = input;
+    this.touch = touch || null;
     this.state = 'idle'; // idle | countdown | playing | paused | over
     this.entities = [];
     this.cameras = [];
@@ -133,7 +134,10 @@ export class Game {
     // Human input is sampled once per frame and held across the fixed steps.
     for (let i = 0; i < this.entities.length; i++) {
       const e = this.entities[i];
-      if (e.isHuman) this.input.applyTo(e, e.slot);
+      if (!e.isHuman) continue;
+      this.input.applyTo(e, e.slot);
+      // Touch is a single physical device, so it only ever drives slot 0.
+      if (e.slot === 0 && this.touch) this.touch.applyTo(e);
     }
 
     this.accumulator += dt;

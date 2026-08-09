@@ -3,13 +3,15 @@
 
 import { Renderer } from './renderer.js';
 import { Input } from './input.js';
+import { TouchControls } from './touch.js';
 import { Game } from './game.js';
 import { UI } from './ui.js';
 
 const canvas = document.getElementById('game-canvas');
 const renderer = new Renderer(canvas);
 const input = new Input();
-const game = new Game(renderer, input);
+const touch = new TouchControls();
+const game = new Game(renderer, input, touch);
 
 const ui = new UI({
   onPlay(players, mode, map) {
@@ -27,9 +29,18 @@ const ui = new UI({
     ui.show('menu');
     ui.refreshCoins();
   },
-});
+}, touch);
 
-window.__arenaTag = { game, renderer, ui }; // handy for debugging in devtools
+touch.onPause = () => {
+  if (game.state === 'playing' || game.state === 'countdown') {
+    game.togglePause();
+    ui.show('pause');
+  }
+};
+
+const rotateHint = document.getElementById('rotate-hint');
+
+window.__arenaTag = { game, renderer, ui, touch }; // handy for debugging in devtools
 
 game.onMatchEnd = (result) => {
   setTimeout(() => ui.showResults(result), 500);
@@ -78,6 +89,10 @@ function frame(now) {
     renderer.draw(game, game.state === 'paused' ? 1 : game.alpha);
   }
   input.endFrame();
+
+  const live = game.state === 'playing' || game.state === 'countdown';
+  touch.setVisible(live);
+  rotateHint.classList.toggle('show', live);
 }
 requestAnimationFrame(frame);
 

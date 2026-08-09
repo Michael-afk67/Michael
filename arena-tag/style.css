@@ -17,6 +17,7 @@ html, body {
   color: var(--text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 #app {
@@ -32,8 +33,109 @@ html, body {
   height: 100%;
   display: block;
   visibility: hidden;
+  touch-action: none;
 }
 #game-canvas.playing { visibility: visible; }
+
+/* ------------------------------------------------------- touch controls */
+
+#touch-controls {
+  position: absolute;
+  inset: 0;
+  display: none;
+  z-index: 5;
+  touch-action: none;
+}
+#touch-controls.show { display: block; }
+
+#stick-zone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 52%;
+  height: 60%;
+  touch-action: none;
+}
+
+#stick-base {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.28);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+#stick-base.show { opacity: 1; }
+
+#stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  border: 2px solid rgba(255,255,255,0.65);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+#touch-jump {
+  position: absolute;
+  right: 6%;
+  bottom: 10%;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(255,71,87,0.32);
+  border: 2px solid rgba(255,255,255,0.45);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#touch-jump.pressed { background: rgba(255,71,87,0.65); transform: scale(0.94); }
+
+#touch-pause {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#rotate-hint {
+  display: none;
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.55);
+  color: #ffd35c;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  z-index: 6;
+  pointer-events: none;
+  white-space: nowrap;
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate-hint.show { display: block; }
+}
 
 .screen {
   position: absolute;
@@ -218,4 +320,6 @@ h1.title {
 @media (max-width: 640px) {
   .skin-grid { grid-template-columns: repeat(3, 1fr); }
   .panel { padding: 20px; }
+  .chip { padding: 11px 16px; font-size: 15px; }
+  .btn { padding: 16px 18px; font-size: 16px; }
 }

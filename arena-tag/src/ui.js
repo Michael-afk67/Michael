@@ -11,8 +11,9 @@ import * as store from './storage.js';
 const $ = (id) => document.getElementById(id);
 
 export class UI {
-  constructor(hooks) {
+  constructor(hooks, touch) {
     this.hooks = hooks;
+    this.touch = touch || null;
     this.screens = {
       menu: $('screen-menu'),
       store: $('screen-store'),
@@ -97,6 +98,8 @@ export class UI {
       mapRow.appendChild(b);
     }
 
+    this._buildControlScheme();
+
     $('btn-play').onclick = () => this.hooks.onPlay(this.players, this.mode, this.map);
     $('btn-store').onclick = () => { this.show('store'); this._renderStore(); };
     $('btn-store-back').onclick = () => this.show('menu');
@@ -121,6 +124,28 @@ export class UI {
     $('bot-note').textContent = bots > 0
       ? `${bots} AI bot${bots === 1 ? '' : 's'} will fill the arena — always 6 competitors.`
       : 'Full lobby: 6 local players.';
+  }
+
+  _buildControlScheme() {
+    const row = $('control-scheme');
+    if (!row) return;
+    row.innerHTML = '';
+    const options = [
+      { id: 'auto', name: this.touch && this.touch.isTouch ? 'Auto (Joystick)' : 'Auto (Keyboard)' },
+      { id: 'on', name: 'Joystick' },
+      { id: 'off', name: 'Keyboard' },
+    ];
+    for (const opt of options) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (opt.id === 'auto' ? ' on' : '');
+      b.textContent = opt.name;
+      b.onclick = () => {
+        if (this.touch) this.touch.setMode(opt.id);
+        for (const c of row.children) c.classList.remove('on');
+        b.classList.add('on');
+      };
+      row.appendChild(b);
+    }
   }
 
   /* ---------------------------------------------------------------- store */
