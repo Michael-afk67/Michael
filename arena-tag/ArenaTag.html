@@ -1,0 +1,2682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Arena Tag</title>
+<style>
+:root {
+  --bg: #070a16;
+  --panel: #121a30;
+  --panel2: #182449;
+  --accent: #5ab0ff;
+  --text: #eaf0ff;
+  --muted: #90a0c7;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  visibility: hidden;
+  touch-action: none;
+}
+#game-canvas.playing { visibility: visible; }
+
+/* ------------------------------------------------------- touch controls */
+
+#touch-controls {
+  position: absolute;
+  inset: 0;
+  display: none;
+  z-index: 5;
+  touch-action: none;
+}
+#touch-controls.show { display: block; }
+
+#stick-zone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 52%;
+  height: 60%;
+  touch-action: none;
+}
+
+#stick-base {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.28);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+#stick-base.show { opacity: 1; }
+
+#stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  border: 2px solid rgba(255,255,255,0.65);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+#touch-jump {
+  position: absolute;
+  right: 6%;
+  bottom: 10%;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(255,71,87,0.32);
+  border: 2px solid rgba(255,255,255,0.45);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#touch-jump.pressed { background: rgba(255,71,87,0.65); transform: scale(0.94); }
+
+#touch-pause {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#rotate-hint {
+  display: none;
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.55);
+  color: #ffd35c;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  z-index: 6;
+  pointer-events: none;
+  white-space: nowrap;
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate-hint.show { display: block; }
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,79,216,0.20) 0%, transparent 42%),
+    radial-gradient(circle at 88% 12%, rgba(0,210,255,0.18) 0%, transparent 45%),
+    radial-gradient(circle at 50% 92%, rgba(124,47,247,0.22) 0%, transparent 50%),
+    radial-gradient(circle at 50% 0%, #1c2a52 0%, #070a16 70%);
+  padding: 24px;
+  overflow-y: auto;
+}
+.screen.active { display: flex; }
+
+.panel {
+  width: min(680px, 100%);
+  background: linear-gradient(180deg, var(--panel), #0c1226);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 28px 32px 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(122,63,255,0.08) inset;
+}
+
+.panel.wide { width: min(920px, 100%); }
+
+h1.title {
+  font-size: 32px;
+  margin: 0 0 4px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #7fd1ff, #ff8fd6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.subtitle { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+
+.coin-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.coin-value { color: #ffd35c; }
+
+.section-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin: 18px 0 8px;
+}
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  background: var(--panel2);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.chip:hover { background: #223160; transform: translateY(-1px); }
+.chip.on { background: linear-gradient(135deg, #3f7fe0, #7c5cff); border-color: transparent; font-weight: 600; }
+
+#controls-panel {
+  margin-top: 14px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.ctrl-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+.ctrl-name { color: var(--accent); font-weight: 600; }
+.ctrl-keys { color: var(--muted); font-family: 'Courier New', monospace; }
+#bot-note { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.btn-row { display: flex; gap: 10px; margin-top: 24px; }
+
+.btn {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  color: white;
+}
+.btn.primary { background: linear-gradient(135deg, #ff6b9d, #ff4757); box-shadow: 0 8px 20px rgba(255,71,87,0.35); }
+.btn.secondary { background: var(--panel2); }
+.btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.15); }
+.btn:hover { filter: brightness(1.1); }
+.btn:active { transform: scale(0.98); }
+
+/* -------------------------------------------------------------- store */
+
+.store-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#store-flash {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translate(-50%, -140%);
+  background: #1c2b52;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: none;
+}
+#store-flash.show { transform: translate(-50%, 0); opacity: 1; }
+
+#store-hint { font-size: 12px; color: var(--muted); margin: 10px 0 6px; }
+
+.skin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-height: 46vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.skin-card {
+  background: var(--panel2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text);
+}
+.skin-card:hover { background: #223160; }
+.skin-card.equipped { outline: 2px solid #5ee06a; }
+.skin-art {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.skin-body { width: 30px; height: 34px; border-radius: 7px; background: var(--body); display: block; }
+.skin-mark { position: absolute; }
+.skin-mark.stripe { width: 30px; height: 4px; background: var(--accent); top: 24px; }
+.skin-mark.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); bottom: 10px; }
+.skin-name { font-size: 12px; font-weight: 600; }
+.skin-cost { font-size: 11px; color: #ffd35c; }
+.skin-card.owned:not(.equipped) .skin-cost { color: #8fe6a0; }
+
+/* ----------------------------------------------------------- results */
+
+.results-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0 8px; max-height: 44vh; overflow-y: auto; }
+.result-row {
+  display: grid;
+  grid-template-columns: 28px 14px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.result-row.first { background: linear-gradient(90deg, #3a2f10, #2a2244); border: 1px solid #ffd35c55; }
+.result-row .place { font-weight: 800; color: var(--muted); }
+.result-row.first .place { color: #ffd35c; }
+.result-row .chip-dot { width: 12px; height: 12px; border-radius: 50%; }
+.result-row .who em { color: var(--muted); font-style: normal; font-size: 11px; }
+.result-row .detail { color: var(--muted); font-size: 12px; justify-self: end; }
+.result-row .reward { color: #8fe6a0; font-weight: 700; justify-self: end; }
+
+/* --------------------------------------------------------------- misc */
+
+.hint { font-size: 12px; color: var(--muted); margin-top: 16px; text-align: center; }
+
+@media (max-width: 640px) {
+  .skin-grid { grid-template-columns: repeat(3, 1fr); }
+  .panel { padding: 20px; }
+  .chip { padding: 11px 16px; font-size: 15px; }
+  .btn { padding: 16px 18px; font-size: 16px; }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Touch controls (P1 only): floating joystick + jump/pause buttons -->
+  <div id="touch-controls">
+    <div id="stick-zone">
+      <div id="stick-base"><div id="stick-knob"></div></div>
+    </div>
+    <button id="touch-jump" type="button">JUMP</button>
+    <button id="touch-pause" type="button" aria-label="Pause">II</button>
+  </div>
+  <div id="rotate-hint">Rotate your device for a wider view ↻</div>
+
+  <!-- Main menu -->
+  <section id="screen-menu" class="screen active">
+    <div class="panel">
+      <div class="coin-badge">🪙 <span class="coin-value">0</span></div>
+      <h1 class="title">ARENA TAG</h1>
+      <p class="subtitle">6-player tag arena · drum pads, floating platforms, zero lag.</p>
+
+      <div class="section-label">Local Players</div>
+      <div id="player-count" class="chip-row"></div>
+      <div id="controls-panel">
+        <div id="controls-list"></div>
+        <div id="bot-note"></div>
+      </div>
+
+      <div class="section-label">Game Mode</div>
+      <div id="mode-select" class="chip-row"></div>
+
+      <div class="section-label">Map</div>
+      <div id="map-select" class="chip-row"></div>
+
+      <div class="section-label">Controls (Player 1)</div>
+      <div id="control-scheme" class="chip-row"></div>
+
+      <div class="btn-row">
+        <button id="btn-store" class="btn secondary">Character Store</button>
+        <button id="btn-play" class="btn primary">Play Match ▶</button>
+      </div>
+      <p class="hint">Esc to pause mid-match · F3 toggles the FPS counter · touch devices get an on-screen joystick automatically</p>
+    </div>
+  </section>
+
+  <!-- Store -->
+  <section id="screen-store" class="screen">
+    <div class="panel wide" style="position:relative;">
+      <div id="store-flash"></div>
+      <div class="coin-badge">🪙 <span class="coin-value">0</span></div>
+      <div class="store-head">
+        <div>
+          <h1 class="title" style="font-size:26px;">Character Store</h1>
+          <p class="subtitle" style="margin-bottom:8px;">Spend coins earned from matches to unlock skins.</p>
+        </div>
+      </div>
+      <div class="section-label">Equip for</div>
+      <div id="store-slots" class="chip-row"></div>
+      <p id="store-hint"></p>
+      <div id="store-grid" class="skin-grid"></div>
+      <div class="btn-row">
+        <button id="btn-store-back" class="btn ghost">Back to Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results / leaderboard -->
+  <section id="screen-results" class="screen">
+    <div class="panel">
+      <h1 id="results-title" class="title" style="font-size:26px;">Match Over</h1>
+      <p id="results-sub" class="subtitle"></p>
+      <div id="results-list" class="results-list"></div>
+      <p id="results-earned" class="hint" style="font-size:14px;color:#ffd35c;"></p>
+      <div class="btn-row">
+        <button id="btn-results-menu" class="btn ghost">Main Menu</button>
+        <button id="btn-results-again" class="btn primary">Play Again ▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="screen-pause" class="screen">
+    <div class="panel" style="width:360px; text-align:center;">
+      <h1 class="title" style="font-size:24px;">Paused</h1>
+      <div class="btn-row">
+        <button id="btn-quit" class="btn ghost">Quit to Menu</button>
+        <button id="btn-resume" class="btn primary">Resume</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(function () {
+'use strict';
+
+/* ---- config.js ---- */
+// Central tuning values. Everything gameplay-related lives here so balance
+// changes never require touching systems code.
+
+const PHYS = {
+  fixedDt: 1 / 60,   // deterministic simulation step
+  maxSteps: 5,       // spiral-of-death guard
+  gravity: 2100,
+  groundAccel: 4600,
+  airAccel: 2800,
+  friction: 4000,
+  airDrag: 500,
+  maxFall: 1500,
+  coyote: 0.10,      // grace period for late jumps
+  jumpBuffer: 0.12,  // grace period for early jumps
+  jumpVel: 760,
+  jumpCut: 0.45,     // velocity kept when jump is released early
+  padBounce: 1300,
+  padCooldown: 0.14,
+  ceiling: 40,
+};
+
+const BODY = { w: 26, h: 34 };
+
+const SPEED = {
+  runner: 300,
+  taggerMul: 1.16,   // requirement: the tagger is slightly faster
+  zombieMul: 0.66,   // requirement: zombies are very slow
+};
+
+const MATCH = {
+  slots: 6,          // requirement: always exactly 6 competitors
+  countdown: 3,
+  duration: 120,
+  zombieDuration: 105,
+  tagCooldown: 1.0,  // new tagger cannot tag for this long
+  tagBackLock: 1.8,  // ...and cannot tag the previous tagger for this long
+  tagFreeze: 0.45,   // new tagger is briefly frozen (anti tag-back spam)
+  tagPad: 4,         // extra pixels on the tag hitbox
+};
+
+// 1st .. 6th place payouts.
+const COINS = [120, 90, 70, 50, 35, 20];
+
+const CAM = {
+  lerp: 9,
+  lookAhead: 0.16,
+  // Zoom shrinks as the split-screen viewports shrink.
+  scaleFor: [1, 1, 0.86, 0.76, 0.76],
+};
+
+const GRID_CELL = 256;
+
+const COLORS = {
+  bg0: '#0a0d1c',
+  bg1: '#131b34',
+  platform: '#2c3757',
+  platformTop: '#4b5f92',
+  pad: '#ff3d7f',
+  padTop: '#ffa3c6',
+  it: '#ff4757',
+  zombie: '#5ee06a',
+};
+
+
+/* ---- rng.js ---- */
+// Tiny deterministic PRNG (mulberry32). Seeded generation means a map layout
+// is reproducible from a single integer, which keeps map data at ~4 bytes.
+
+function makeRng(seed) {
+  let a = seed >>> 0;
+  const rng = function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  rng.range = (min, max) => min + rng() * (max - min);
+  rng.int = (min, max) => Math.floor(min + rng() * (max - min + 1));
+  rng.pick = (arr) => arr[Math.floor(rng() * arr.length)];
+  rng.chance = (p) => rng() < p;
+  return rng;
+}
+
+
+/* ---- skins.js ---- */
+// Character skins for the store. Pure data + flat colors: no image assets,
+// so there is nothing to download or decode at runtime.
+
+const SKINS = [
+  { id: 'rookie',  name: 'Rookie',   cost: 0,    body: '#5ab0ff', accent: '#d7ecff', pattern: 'none'   },
+  { id: 'ember',   name: 'Ember',    cost: 150,  body: '#ff7043', accent: '#ffd0b0', pattern: 'stripe' },
+  { id: 'aqua',    name: 'Aqua',     cost: 150,  body: '#22c7c7', accent: '#c8fbff', pattern: 'dot'    },
+  { id: 'mint',    name: 'Mint',     cost: 250,  body: '#4ade80', accent: '#e7ffe9', pattern: 'stripe' },
+  { id: 'violet',  name: 'Violet',   cost: 250,  body: '#a06bff', accent: '#ece0ff', pattern: 'dot'    },
+  { id: 'sunset',  name: 'Sunset',   cost: 400,  body: '#ff5c8a', accent: '#ffe0aa', pattern: 'stripe' },
+  { id: 'toxic',   name: 'Toxic',    cost: 400,  body: '#b4ff2e', accent: '#2b3a00', pattern: 'dot'    },
+  { id: 'cosmic',  name: 'Cosmic',   cost: 700,  body: '#6c5ce7', accent: '#ffd93d', pattern: 'dot'    },
+  { id: 'shadow',  name: 'Shadow',   cost: 700,  body: '#2f3542', accent: '#8e9bb3', pattern: 'stripe' },
+  { id: 'gold',    name: 'Gold',     cost: 1200, body: '#ffc312', accent: '#7a4b00', pattern: 'stripe' },
+  { id: 'prism',   name: 'Prism',    cost: 1600, body: '#00d2ff', accent: '#ff4fd8', pattern: 'dot'    },
+  { id: 'void',    name: 'Void',     cost: 2500, body: '#12121c', accent: '#c400ff', pattern: 'stripe' },
+];
+
+const BOT_SKINS = ['ember', 'aqua', 'mint', 'violet', 'sunset', 'toxic', 'shadow', 'gold'];
+
+const BY_ID = new Map(SKINS.map((s) => [s.id, s]));
+
+function getSkin(id) {
+  return BY_ID.get(id) || SKINS[0];
+}
+
+
+/* ---- storage.js ---- */
+// Persistent wallet + skin ownership (localStorage). Falls back to an
+// in-memory object when storage is unavailable (private mode / file://).
+
+const KEY = 'arena-tag-save-v1';
+
+const DEFAULT_SAVE = {
+  coins: 0,
+  owned: ['rookie'],
+  equipped: ['rookie', 'rookie', 'rookie', 'rookie'],
+  matches: 0,
+  wins: 0,
+};
+
+let cache = null;
+
+function readRaw() {
+  try {
+    return window.localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeRaw(value) {
+  try {
+    window.localStorage.setItem(KEY, value);
+  } catch {
+    /* storage blocked: keep the in-memory copy only */
+  }
+}
+
+function load() {
+  if (cache) return cache;
+  const raw = readRaw();
+  let data = null;
+  if (raw) {
+    try { data = JSON.parse(raw); } catch { data = null; }
+  }
+  cache = Object.assign({}, DEFAULT_SAVE, data || {});
+  cache.owned = Array.isArray(cache.owned) && cache.owned.length ? cache.owned.slice() : ['rookie'];
+  if (!cache.owned.includes('rookie')) cache.owned.push('rookie');
+  cache.equipped = Array.isArray(cache.equipped) ? cache.equipped.slice(0, 4) : [];
+  while (cache.equipped.length < 4) cache.equipped.push('rookie');
+  cache.equipped = cache.equipped.map((id) => (cache.owned.includes(id) ? id : 'rookie'));
+  cache.coins = Math.max(0, Math.floor(cache.coins) || 0);
+  return cache;
+}
+
+function save() {
+  writeRaw(JSON.stringify(load()));
+}
+
+function addCoins(amount) {
+  const s = load();
+  s.coins = Math.max(0, s.coins + Math.floor(amount));
+  save();
+  return s.coins;
+}
+
+function buySkin(skin) {
+  const s = load();
+  if (s.owned.includes(skin.id)) return true;
+  if (s.coins < skin.cost) return false;
+  s.coins -= skin.cost;
+  s.owned.push(skin.id);
+  save();
+  return true;
+}
+
+function equipSkin(slot, skinId) {
+  const s = load();
+  if (!s.owned.includes(skinId)) return false;
+  s.equipped[slot] = skinId;
+  save();
+  return true;
+}
+
+function recordMatch(won) {
+  const s = load();
+  s.matches += 1;
+  if (won) s.wins += 1;
+  save();
+}
+
+
+const store = { load, save, addCoins, buySkin, equipSkin, recordMatch };
+
+/* ---- modes.js ---- */
+// The three game modes. Every mode shares the same map pool and only swaps
+// physics constants + the tag rule, which keeps the simulation branch-free.
+
+
+
+const MODES = {
+  standard: {
+    id: 'standard',
+    name: 'Standard Tag',
+    blurb: 'One tagger. Whoever is IT when the clock runs out finishes last.',
+    rule: 'tag',            // "IT" is passed on contact
+    gravity: PHYS.gravity,
+    jumpVel: PHYS.jumpVel,
+    padBounce: PHYS.padBounce,
+    duration: MATCH.duration,
+    runnerSpeed: SPEED.runner,
+    itSpeed: SPEED.runner * SPEED.taggerMul,
+    accent: '#ff4757',
+  },
+  zombie: {
+    id: 'zombie',
+    name: 'Zombie Outbreak',
+    blurb: 'Zombies are slow but every runner they touch joins the horde.',
+    rule: 'infect',
+    gravity: PHYS.gravity,
+    jumpVel: PHYS.jumpVel,
+    padBounce: PHYS.padBounce,
+    duration: MATCH.zombieDuration,
+    runnerSpeed: SPEED.runner,
+    itSpeed: SPEED.runner * SPEED.zombieMul,
+    accent: '#5ee06a',
+  },
+  moon: {
+    id: 'moon',
+    name: 'Moon Gravity',
+    blurb: 'Low gravity: jump between platforms and never touch the floor.',
+    rule: 'tag',
+    gravity: PHYS.gravity * 0.30,
+    jumpVel: PHYS.jumpVel * 1.05,
+    // Bounce is scaled with sqrt(gravity) so pads stay powerful without
+    // launching anyone off the top of the world.
+    padBounce: PHYS.padBounce * Math.sqrt(0.30) * 1.35,
+    duration: MATCH.duration,
+    runnerSpeed: SPEED.runner * 0.95,
+    itSpeed: SPEED.runner * 0.95 * SPEED.taggerMul,
+    accent: '#8ab4ff',
+  },
+};
+
+const MODE_IDS = Object.keys(MODES);
+
+function pickMode(rng, forced) {
+  if (forced && MODES[forced]) return MODES[forced];
+  return MODES[rng.pick(MODE_IDS)];
+}
+
+
+/* ---- maps.js ---- */
+// Procedural map pool. Each preset is a small generator, so a "map" costs a
+// name + a seed instead of megabytes of level data. One preset is picked at
+// random before every round and re-rolled with a fresh seed.
+
+
+
+const WORLD_W = 4200;
+const WORLD_H = 2400;
+
+const GROUND_H = 110;
+const WALL_W = 70;
+const PLAT_H = 22;
+const PAD_W = 76;
+const PAD_H = 16;
+
+// Minimum spacing between floating platforms so a player always fits through.
+const MARGIN_X = 70;
+const MARGIN_Y = 120;
+
+const GROUND_Y = WORLD_H - GROUND_H;
+
+function overlapsAny(list, x, y, w, h, mx, my) {
+  for (let i = 0; i < list.length; i++) {
+    const p = list[i];
+    if (x - mx < p.x + p.w && x + w + mx > p.x && y - my < p.y + p.h && y + h + my > p.y) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function addPlatform(list, x, y, w, h = PLAT_H) {
+  x = Math.round(Math.max(WALL_W + 20, Math.min(WORLD_W - WALL_W - 20 - w, x)));
+  y = Math.round(Math.max(220, Math.min(GROUND_Y - 130, y)));
+  if (w < 60) return false;
+  if (overlapsAny(list, x, y, w, h, MARGIN_X, MARGIN_Y)) return false;
+  list.push({ x, y, w, h });
+  return true;
+}
+
+/* ------------------------------------------------------------------ presets */
+
+function skyline(rng, plats) {
+  // Dense vertical columns: lots of short hops, good for chases.
+  for (let x = WALL_W + 140; x < WORLD_W - WALL_W - 200; x += rng.range(240, 320)) {
+    const count = rng.int(3, 6);
+    let y = GROUND_Y - rng.range(180, 300);
+    for (let i = 0; i < count; i++) {
+      addPlatform(plats, x + rng.range(-70, 70), y, rng.range(110, 240));
+      y -= rng.range(190, 300);
+      if (y < 260) break;
+    }
+  }
+}
+
+function cavern(rng, plats) {
+  // Wide ledges with open air between them.
+  for (let i = 0; i < 14; i++) {
+    addPlatform(plats, rng.range(WALL_W, WORLD_W - WALL_W - 380), rng.range(300, GROUND_Y - 160), rng.range(240, 420));
+  }
+  for (let i = 0; i < 40; i++) {
+    addPlatform(plats, rng.range(WALL_W, WORLD_W - WALL_W - 200), rng.range(260, GROUND_Y - 150), rng.range(90, 200));
+  }
+}
+
+function towers(rng, plats) {
+  // Tall stacks separated by wide gaps: pads are the only way up fast.
+  const towerCount = rng.int(5, 7);
+  const step = (WORLD_W - 2 * WALL_W - 300) / towerCount;
+  for (let t = 0; t < towerCount; t++) {
+    const cx = WALL_W + 200 + t * step + rng.range(-50, 50);
+    let y = GROUND_Y - rng.range(200, 260);
+    let w = rng.range(260, 340);
+    while (y > 280) {
+      addPlatform(plats, cx - w / 2, y, w);
+      y -= rng.range(200, 260);
+      w = Math.max(90, w - rng.range(30, 70));
+    }
+  }
+}
+
+function rings(rng, plats) {
+  // Concentric ledges around an open middle: circular chases.
+  const cx = WORLD_W / 2;
+  const cy = GROUND_Y - 620;
+  for (let ring = 0; ring < 5; ring++) {
+    const rx = 300 + ring * 340;
+    const ry = 200 + ring * 230;
+    const segs = 4 + ring * 2;
+    for (let s = 0; s < segs; s++) {
+      const a = (s / segs) * Math.PI * 2 + rng.range(0, 0.4);
+      const w = rng.range(130, 250);
+      addPlatform(plats, cx + Math.cos(a) * rx - w / 2, cy + Math.sin(a) * ry * 0.9, w);
+    }
+  }
+  for (let i = 0; i < 18; i++) {
+    addPlatform(plats, rng.range(WALL_W, WORLD_W - WALL_W - 200), rng.range(280, GROUND_Y - 150), rng.range(100, 200));
+  }
+}
+
+function lattice(rng, plats) {
+  // Regular grid with random holes: predictable parkour, great for Moon mode.
+  const cols = 12;
+  const rows = 7;
+  const cw = (WORLD_W - 2 * WALL_W - 200) / cols;
+  const ch = (GROUND_Y - 320) / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (rng.chance(0.32)) continue;
+      const w = rng.range(120, cw - 40);
+      addPlatform(plats, WALL_W + 100 + c * cw + rng.range(0, 30), 300 + r * ch + rng.range(-20, 20), w);
+    }
+  }
+}
+
+// Each map carries its own vivid sky gradient + a pair of glow colors used
+// to paint soft nebula blobs in the background — built once per match, never
+// touched again during play, so the extra color costs nothing per frame.
+const MAP_POOL = [
+  { id: 'skyline', name: 'Neon Skyline',  build: skyline, sky: { top: '#2a0d52', mid: '#7b2ff7' }, glow: ['#ff2fd8', '#33e6ff'] },
+  { id: 'cavern',  name: 'Hollow Cavern', build: cavern,  sky: { top: '#2b0f3d', mid: '#8a2a5c' }, glow: ['#ff7a3d', '#a63bff'] },
+  { id: 'towers',  name: 'Sky Towers',    build: towers,  sky: { top: '#0d2b52', mid: '#1d7fa8' }, glow: ['#ffb703', '#00d2ff'] },
+  { id: 'rings',   name: 'Orbit Rings',   build: rings,   sky: { top: '#1a0f3d', mid: '#6a1ab0' }, glow: ['#00ffc8', '#ff3df0'] },
+  { id: 'lattice', name: 'Grid Gardens',  build: lattice, sky: { top: '#0a2e2b', mid: '#0f8a6a' }, glow: ['#4dff9f', '#ffe14d'] },
+];
+
+/* ------------------------------------------------------------------- build */
+
+function addPads(rng, plats, pads) {
+  // Drum pads on top of wide platforms...
+  const wide = [];
+  for (let i = 0; i < plats.length; i++) if (plats[i].w >= 130) wide.push(plats[i]);
+  const target = Math.min(wide.length, Math.max(10, Math.round(wide.length * 0.4)));
+  for (let i = wide.length - 1; i > 0; i--) {
+    const j = rng.int(0, i);
+    const tmp = wide[i]; wide[i] = wide[j]; wide[j] = tmp;
+  }
+  for (let i = 0; i < target; i++) {
+    const p = wide[i];
+    const x = p.x + rng.range(10, Math.max(10, p.w - PAD_W - 10));
+    pads.push({ x: Math.round(x), y: p.y - PAD_H, w: PAD_W, h: PAD_H, anim: 0 });
+  }
+  // ...and a row along the ground so anyone can get airborne from spawn.
+  const groundPads = 9;
+  const span = (WORLD_W - 2 * WALL_W - 300) / groundPads;
+  for (let i = 0; i < groundPads; i++) {
+    const x = WALL_W + 150 + i * span + rng.range(-40, 40);
+    pads.push({ x: Math.round(x), y: GROUND_Y - PAD_H, w: PAD_W, h: PAD_H, anim: 0 });
+  }
+}
+
+function buildSpawns(rng, plats) {
+  const spawns = [];
+  const pool = plats.filter((p) => p.w >= 120 && p.y < GROUND_Y - 200);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = rng.int(0, i);
+    const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+  }
+  // Spread spawns horizontally so nobody starts on top of the tagger.
+  for (let i = 0; i < pool.length && spawns.length < 12; i++) {
+    const p = pool[i];
+    const x = p.x + p.w / 2;
+    let tooClose = false;
+    for (const s of spawns) if (Math.abs(s.x - x) < 420) { tooClose = true; break; }
+    if (tooClose) continue;
+    spawns.push({ x, y: p.y - 40 });
+  }
+  for (let i = 0; spawns.length < 8; i++) {
+    spawns.push({ x: WALL_W + 250 + i * 480, y: GROUND_Y - 60 });
+  }
+  return spawns;
+}
+
+/**
+ * Build a full map instance.
+ * @param {number} seed
+ * @param {string} [forcedId] optional preset id, otherwise random from the pool
+ */
+function buildMap(seed, forcedId) {
+  const rng = makeRng(seed);
+  const preset = (forcedId && MAP_POOL.find((m) => m.id === forcedId)) || rng.pick(MAP_POOL);
+
+  const solids = [];
+  // Static shell: ground slab + side walls.
+  solids.push({ x: 0, y: GROUND_Y, w: WORLD_W, h: GROUND_H + 40 });
+  solids.push({ x: 0, y: -400, w: WALL_W, h: WORLD_H + 400 });
+  solids.push({ x: WORLD_W - WALL_W, y: -400, w: WALL_W, h: WORLD_H + 400 });
+
+  const plats = [];
+  preset.build(rng, plats);
+
+  const pads = [];
+  addPads(rng, plats, pads);
+
+  const spawns = buildSpawns(rng, plats);
+
+  return {
+    id: preset.id,
+    name: preset.name,
+    sky: preset.sky,
+    glow: preset.glow,
+    width: WORLD_W,
+    height: WORLD_H,
+    groundY: GROUND_Y,
+    solids: solids.concat(plats),
+    shellCount: solids.length,
+    pads,
+    spawns,
+    seed,
+  };
+}
+
+
+/* ---- world.js ---- */
+// World = static geometry + a uniform-grid broadphase.
+//
+// Every query (physics, ledge probes, render culling) goes through the same
+// grid and writes into a reusable output array, so the hot loop allocates
+// nothing. That is the single biggest reason the frame time stays flat even
+// on the largest maps.
+
+
+
+class World {
+  constructor(map) {
+    this.map = map;
+    this.solids = map.solids;
+    this.pads = map.pads;
+    this.width = map.width;
+    this.height = map.height;
+
+    this.cell = GRID_CELL;
+    this.cols = Math.ceil(map.width / this.cell) + 1;
+    this.rows = Math.ceil((map.height + 400) / this.cell) + 1;
+    this.originY = -400; // walls start above the world
+
+    this.buckets = new Array(this.cols * this.rows);
+    for (let i = 0; i < this.buckets.length; i++) this.buckets[i] = null;
+
+    this.stamps = new Int32Array(this.solids.length);
+    this.stamp = 0;
+    this.out = [];
+
+    for (let i = 0; i < this.solids.length; i++) this._insert(i, this.solids[i]);
+  }
+
+  _cellX(x) { return Math.max(0, Math.min(this.cols - 1, Math.floor(x / this.cell))); }
+  _cellY(y) { return Math.max(0, Math.min(this.rows - 1, Math.floor((y - this.originY) / this.cell))); }
+
+  _insert(index, r) {
+    const cx0 = this._cellX(r.x);
+    const cx1 = this._cellX(r.x + r.w);
+    const cy0 = this._cellY(r.y);
+    const cy1 = this._cellY(r.y + r.h);
+    for (let cy = cy0; cy <= cy1; cy++) {
+      for (let cx = cx0; cx <= cx1; cx++) {
+        const k = cy * this.cols + cx;
+        if (!this.buckets[k]) this.buckets[k] = [];
+        this.buckets[k].push(index);
+      }
+    }
+  }
+
+  /** Solids overlapping the given AABB. Returns a shared array — do not keep it. */
+  query(x, y, w, h) {
+    const out = this.out;
+    out.length = 0;
+    this.stamp++;
+    const stamp = this.stamp;
+    const cx0 = this._cellX(x);
+    const cx1 = this._cellX(x + w);
+    const cy0 = this._cellY(y);
+    const cy1 = this._cellY(y + h);
+    for (let cy = cy0; cy <= cy1; cy++) {
+      const row = cy * this.cols;
+      for (let cx = cx0; cx <= cx1; cx++) {
+        const bucket = this.buckets[row + cx];
+        if (!bucket) continue;
+        for (let i = 0; i < bucket.length; i++) {
+          const idx = bucket[i];
+          if (this.stamps[idx] === stamp) continue;
+          this.stamps[idx] = stamp;
+          const s = this.solids[idx];
+          if (x < s.x + s.w && x + w > s.x && y < s.y + s.h && y + h > s.y) out.push(s);
+        }
+      }
+    }
+    return out;
+  }
+
+  /** Same as query() but writes into a caller-owned array (used by the renderer). */
+  queryInto(x, y, w, h, dest) {
+    dest.length = 0;
+    this.stamp++;
+    const stamp = this.stamp;
+    const cx0 = this._cellX(x);
+    const cx1 = this._cellX(x + w);
+    const cy0 = this._cellY(y);
+    const cy1 = this._cellY(y + h);
+    for (let cy = cy0; cy <= cy1; cy++) {
+      const row = cy * this.cols;
+      for (let cx = cx0; cx <= cx1; cx++) {
+        const bucket = this.buckets[row + cx];
+        if (!bucket) continue;
+        for (let i = 0; i < bucket.length; i++) {
+          const idx = bucket[i];
+          if (this.stamps[idx] === stamp) continue;
+          this.stamps[idx] = stamp;
+          const s = this.solids[idx];
+          if (x < s.x + s.w && x + w > s.x && y < s.y + s.h && y + h > s.y) dest.push(s);
+        }
+      }
+    }
+    return dest;
+  }
+
+  /** Cheap boolean test used by the AI probes. */
+  isSolid(x, y, w, h) {
+    return this.query(x, y, w, h).length > 0;
+  }
+}
+
+
+/* ---- entity.js ---- */
+// A single competitor (human or bot). One class, no inheritance: the only
+// difference between a player and a bot is who writes `input` each step.
+
+
+
+class Entity {
+  constructor(index, name, isHuman, skin, controllerSlot) {
+    this.index = index;
+    this.name = name;
+    this.isHuman = isHuman;
+    this.skin = skin;
+    this.slot = controllerSlot; // 0..3 for humans, -1 for bots
+
+    this.w = BODY.w;
+    this.h = BODY.h;
+    this.x = 0; this.y = 0;
+    this.px = 0; this.py = 0;    // previous position, for render interpolation
+    this.vx = 0; this.vy = 0;
+    this.face = 1;
+    this.onGround = false;
+
+    this.input = { left: false, right: false, jump: false, jumpHeld: false };
+
+    this.coyote = 0;
+    this.jumpBuf = 0;
+    this.padCd = 0;
+    this.launched = false;       // true while riding a drum-pad bounce
+    this.squash = 0;             // visual-only bounce feedback
+
+    // Role state
+    this.isIt = false;
+    this.isZombie = false;
+    this.itTime = 0;
+    this.infectedAt = Infinity;
+    this.tagCd = 0;
+    this.freeze = 0;
+    this.lockTarget = -1;
+    this.lockTime = 0;
+
+    // AI scratch
+    this.think = 0;
+    this.wanderX = 0;
+    this.jumpHold = 0;
+  }
+
+  get left() { return this.x - this.w / 2; }
+  get top() { return this.y - this.h / 2; }
+
+  reset(x, y) {
+    this.x = this.px = x;
+    this.y = this.py = y;
+    this.vx = this.vy = 0;
+    this.onGround = false;
+    this.coyote = this.jumpBuf = this.padCd = 0;
+    this.launched = false;
+    this.freeze = 0;
+    this.squash = 0;
+    this.input.left = this.input.right = this.input.jump = this.input.jumpHeld = false;
+  }
+
+  get speed() {
+    return this.isIt || this.isZombie ? this.mode.itSpeed : this.mode.runnerSpeed;
+  }
+
+  step(dt, world, mode) {
+    this.mode = mode;
+    this.px = this.x;
+    this.py = this.y;
+
+    if (this.freeze > 0) {
+      this.freeze -= dt;
+      this.input.left = this.input.right = false;
+    }
+    if (this.tagCd > 0) this.tagCd -= dt;
+    if (this.lockTime > 0) { this.lockTime -= dt; if (this.lockTime <= 0) this.lockTarget = -1; }
+    if (this.padCd > 0) this.padCd -= dt;
+    if (this.squash > 0) this.squash = Math.max(0, this.squash - dt * 3);
+
+    const dir = (this.input.right ? 1 : 0) - (this.input.left ? 1 : 0);
+    if (dir !== 0) this.face = dir;
+
+    // ---- horizontal: accelerate toward the target speed
+    const target = dir * this.speed;
+    const accel = this.onGround ? PHYS.groundAccel : PHYS.airAccel;
+    if (dir !== 0) {
+      if (this.vx < target) this.vx = Math.min(target, this.vx + accel * dt);
+      else if (this.vx > target) this.vx = Math.max(target, this.vx - accel * dt);
+    } else {
+      const drag = (this.onGround ? PHYS.friction : PHYS.airDrag) * dt;
+      if (this.vx > 0) this.vx = Math.max(0, this.vx - drag);
+      else this.vx = Math.min(0, this.vx + drag);
+    }
+
+    // ---- jumping (with coyote time + input buffering for a responsive feel)
+    if (this.onGround) this.coyote = PHYS.coyote;
+    else if (this.coyote > 0) this.coyote -= dt;
+
+    if (this.input.jump) { this.jumpBuf = PHYS.jumpBuffer; this.input.jump = false; }
+    else if (this.jumpBuf > 0) this.jumpBuf -= dt;
+
+    if (this.jumpBuf > 0 && this.coyote > 0 && this.freeze <= 0) {
+      this.vy = -mode.jumpVel;
+      this.jumpBuf = 0;
+      this.coyote = 0;
+      this.onGround = false;
+    }
+    // Variable jump height: releasing the button clamps upward velocity.
+    // Pad launches are exempt, otherwise letting go would cancel the bounce.
+    if (this.vy >= 0 || this.onGround) this.launched = false;
+    if (this.vy < 0 && !this.input.jumpHeld && !this.launched) {
+      const cut = -mode.jumpVel * PHYS.jumpCut;
+      if (this.vy < cut) this.vy = cut;
+    }
+
+    // ---- gravity
+    this.vy = Math.min(PHYS.maxFall, this.vy + mode.gravity * dt);
+
+    this._moveX(this.vx * dt, world);
+    this._moveY(this.vy * dt, world);
+
+    // Soft ceiling: the world is open at the top, so clamp instead of walling.
+    if (this.top < PHYS.ceiling) {
+      this.y = PHYS.ceiling + this.h / 2;
+      if (this.vy < 0) this.vy = 0;
+    }
+
+    this._pads(world, mode);
+  }
+
+  _moveX(dx, world) {
+    if (dx === 0) return;
+    this.x += dx;
+    const hw = this.w / 2;
+    const hh = this.h / 2;
+    const hits = world.query(this.x - hw, this.y - hh, this.w, this.h);
+    for (let i = 0; i < hits.length; i++) {
+      const s = hits[i];
+      if (this.x - hw < s.x + s.w && this.x + hw > s.x && this.y - hh < s.y + s.h && this.y + hh > s.y) {
+        this.x = dx > 0 ? s.x - hw : s.x + s.w + hw;
+        this.vx = 0;
+      }
+    }
+  }
+
+  _moveY(dy, world) {
+    if (dy === 0) return;
+    this.y += dy;
+    const hw = this.w / 2;
+    const hh = this.h / 2;
+    const hits = world.query(this.x - hw, this.y - hh, this.w, this.h);
+    let grounded = false;
+    for (let i = 0; i < hits.length; i++) {
+      const s = hits[i];
+      if (this.x - hw < s.x + s.w && this.x + hw > s.x && this.y - hh < s.y + s.h && this.y + hh > s.y) {
+        if (dy > 0) { this.y = s.y - hh; grounded = true; }
+        else { this.y = s.y + s.h + hh; }
+        this.vy = 0;
+      }
+    }
+    this.onGround = grounded;
+  }
+
+  /** Drum pads: touching one flings the entity upward. */
+  _pads(world, mode) {
+    if (this.padCd > 0) return;
+    const pads = world.pads;
+    const hw = this.w / 2;
+    const hh = this.h / 2;
+    const l = this.x - hw, r = this.x + hw, t = this.y - hh, b = this.y + hh;
+    for (let i = 0; i < pads.length; i++) {
+      const p = pads[i];
+      if (l < p.x + p.w && r > p.x && t < p.y + p.h && b > p.y + 2) {
+        this.vy = -mode.padBounce;
+        this.y = p.y - hh;
+        this.onGround = false;
+        this.padCd = PHYS.padCooldown;
+        this.launched = true;
+        this.squash = 1;
+        p.anim = 1;
+        return;
+      }
+    }
+  }
+
+  /** AABB overlap test used for tagging. */
+  touches(other, pad = MATCH.tagPad) {
+    return (
+      Math.abs(this.x - other.x) < (this.w + other.w) / 2 + pad &&
+      Math.abs(this.y - other.y) < (this.h + other.h) / 2 + pad
+    );
+  }
+}
+
+
+/* ---- ai.js ---- */
+// Bot brains. Deliberately cheap: a bot re-plans ~12 times a second and in
+// between just holds its last decision, so 5 bots cost far less than one
+// pathfinding query would.
+
+
+
+const THINK_MIN = 0.07;
+const THINK_MAX = 0.11;
+
+const FLEE_RANGE = 620;
+const PANIC_RANGE = 260;
+
+function clearInput(e) {
+  e.input.left = false;
+  e.input.right = false;
+}
+
+function press(e, dir) {
+  e.input.left = dir < 0;
+  e.input.right = dir > 0;
+}
+
+function requestJump(e, hold = 0.3) {
+  e.input.jump = true;
+  e.jumpHold = hold;
+}
+
+/** Is there ground just ahead of the entity's feet? */
+function groundAhead(world, e, dir) {
+  const probeX = e.x + dir * (e.w / 2 + 16);
+  return world.isSolid(probeX - 6, e.y + e.h / 2 + 2, 12, 26);
+}
+
+/** Is there a wall directly in front? */
+function wallAhead(world, e, dir) {
+  const probeX = e.x + dir * (e.w / 2 + 4);
+  return world.isSolid(probeX - 4, e.y - e.h / 2 + 4, 10, e.h - 8);
+}
+
+/** Nearest drum pad within `range`, preferring ones on the way to `biasX`. */
+function nearestPad(world, e, range, biasX) {
+  let best = null;
+  let bestScore = Infinity;
+  const pads = world.pads;
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    const cx = p.x + p.w / 2;
+    const dx = cx - e.x;
+    const dy = p.y - e.y;
+    if (Math.abs(dx) > range || dy > 140 || dy < -240) continue;
+    let score = Math.abs(dx) + Math.abs(dy) * 0.6;
+    if (biasX !== undefined && Math.sign(dx) !== Math.sign(biasX - e.x)) score += 260;
+    if (score < bestScore) { bestScore = score; best = p; }
+  }
+  return best;
+}
+
+function nearestOpponent(game, e, wantIt) {
+  let best = null;
+  let bestD = Infinity;
+  const list = game.entities;
+  for (let i = 0; i < list.length; i++) {
+    const o = list[i];
+    if (o === e) continue;
+    const hostile = o.isIt || o.isZombie;
+    if (wantIt !== hostile) continue;
+    const d = Math.abs(o.x - e.x) + Math.abs(o.y - e.y) * 0.8;
+    if (d < bestD) { bestD = d; best = o; }
+  }
+  return best;
+}
+
+function moveToward(world, e, targetX, targetY, urgent) {
+  const dx = targetX - e.x;
+  const dir = Math.abs(dx) < 14 ? 0 : Math.sign(dx);
+  press(e, dir);
+
+  if (dir === 0) { clearInput(e); return; }
+
+  // Obstacle handling: hop walls, hop gaps, and never walk off a high ledge
+  // unless we actually want to go down.
+  if (e.onGround) {
+    if (wallAhead(world, e, dir)) {
+      requestJump(e, 0.35);
+    } else if (!groundAhead(world, e, dir)) {
+      if (urgent || Math.abs(dx) > 120) requestJump(e, 0.4);
+      else press(e, -dir);
+    } else if (targetY !== undefined && targetY < e.y - 70) {
+      requestJump(e, 0.4);
+    }
+  }
+}
+
+function decide(game, e) {
+  const world = game.world;
+  const hostile = e.isIt || e.isZombie;
+
+  if (hostile) {
+    const prey = nearestOpponent(game, e, false);
+    if (!prey) { clearInput(e); return; }
+
+    // Chase directly; use a pad when the target is meaningfully above us.
+    if (prey.y < e.y - 120) {
+      const pad = nearestPad(world, e, 520, prey.x);
+      if (pad) {
+        moveToward(world, e, pad.x + pad.w / 2, pad.y, true);
+        return;
+      }
+    }
+    moveToward(world, e, prey.x, prey.y, true);
+    if (e.onGround && prey.y < e.y - 40 && Math.abs(prey.x - e.x) < 90) requestJump(e, 0.45);
+    return;
+  }
+
+  const threat = nearestOpponent(game, e, true);
+  if (threat) {
+    const dist = Math.hypot(threat.x - e.x, (threat.y - e.y) * 0.7);
+    if (dist < FLEE_RANGE) {
+      // Prefer escaping upward via a pad, that is what pads are for.
+      const pad = nearestPad(world, e, 420);
+      const padGood = pad && Math.abs(pad.x + pad.w / 2 - threat.x) > 150;
+      if (padGood && dist > 150) {
+        moveToward(world, e, pad.x + pad.w / 2, pad.y, true);
+        return;
+      }
+      let away = Math.sign(e.x - threat.x) || 1;
+      // Do not flee into a wall — turn around if we are cornered.
+      if (e.x < 260) away = 1;
+      if (e.x > WORLD_W - 260) away = -1;
+      moveToward(world, e, e.x + away * 700, undefined, true);
+      if (e.onGround && dist < PANIC_RANGE) requestJump(e, 0.45);
+      return;
+    }
+  }
+
+  // Idle: roam toward a wander point, re-picking when we arrive.
+  if (e.wanderX === 0 || Math.abs(e.wanderX - e.x) < 90) {
+    e.wanderX = 260 + game.rng() * (WORLD_W - 520);
+  }
+  moveToward(world, e, e.wanderX, undefined, false);
+}
+
+function updateAI(game, e, dt) {
+  if (e.jumpHold > 0) {
+    e.jumpHold -= dt;
+    e.input.jumpHeld = true;
+  } else {
+    e.input.jumpHeld = false;
+  }
+
+  e.think -= dt;
+  if (e.think > 0) return;
+  e.think = THINK_MIN + game.rng() * (THINK_MAX - THINK_MIN);
+  decide(game, e);
+}
+
+
+/* ---- camera.js ---- */
+// One camera per split-screen viewport. Smooth follow with look-ahead,
+// clamped to the world so the void never shows.
+
+
+
+class Camera {
+  constructor(target, scale) {
+    this.target = target;
+    this.scale = scale;
+    this.x = target ? target.x : 0;
+    this.y = target ? target.y : 0;
+    this.vx = 0; this.vy = 0; this.vw = 0; this.vh = 0;
+  }
+
+  setViewport(x, y, w, h) {
+    this.vx = x; this.vy = y; this.vw = w; this.vh = h;
+  }
+
+  snap() {
+    if (!this.target) return;
+    this.x = this.target.x;
+    this.y = this.target.y;
+  }
+
+  update(dt, world) {
+    const t = this.target;
+    if (!t) return;
+    const tx = t.x + t.vx * CAM.lookAhead;
+    const ty = t.y + t.vy * CAM.lookAhead * 0.5 - 40;
+    const k = 1 - Math.exp(-CAM.lerp * dt);
+    this.x += (tx - this.x) * k;
+    this.y += (ty - this.y) * k;
+
+    const halfW = this.vw / (2 * this.scale);
+    const halfH = this.vh / (2 * this.scale);
+    this.x = Math.max(halfW, Math.min(world.width - halfW, this.x));
+    this.y = Math.max(halfH, Math.min(world.height - halfH, this.y));
+  }
+}
+
+/**
+ * Split-screen layout for n viewports inside a w*h canvas.
+ * 1 -> full, 2 -> side by side, 3 -> two on top + one wide below, 4 -> 2x2.
+ */
+function layoutViewports(n, w, h, out) {
+  out.length = 0;
+  if (n <= 1) {
+    out.push({ x: 0, y: 0, w, h });
+  } else if (n === 2) {
+    const hw = Math.floor(w / 2);
+    out.push({ x: 0, y: 0, w: hw, h });
+    out.push({ x: hw, y: 0, w: w - hw, h });
+  } else if (n === 3) {
+    const hw = Math.floor(w / 2);
+    const hh = Math.floor(h / 2);
+    out.push({ x: 0, y: 0, w: hw, h: hh });
+    out.push({ x: hw, y: 0, w: w - hw, h: hh });
+    out.push({ x: 0, y: hh, w, h: h - hh });
+  } else {
+    const hw = Math.floor(w / 2);
+    const hh = Math.floor(h / 2);
+    out.push({ x: 0, y: 0, w: hw, h: hh });
+    out.push({ x: hw, y: 0, w: w - hw, h: hh });
+    out.push({ x: 0, y: hh, w: hw, h: h - hh });
+    out.push({ x: hw, y: hh, w: w - hw, h: h - hh });
+  }
+  return out;
+}
+
+
+/* ---- renderer.js ---- */
+// Canvas renderer.
+//
+// Performance rules followed here:
+//  * one canvas, one context, no per-frame object allocation
+//  * static geometry culled through the world grid before drawing
+//  * gradients / star tiles built once on resize, never per frame
+//  * interpolated positions computed once per frame, reused by every viewport
+
+
+
+
+const MAX_DPR = 2;
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return; }
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+class Renderer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    this.width = 0;
+    this.height = 0;
+    this.dpr = 1;
+    this.cull = [];
+    this.starPattern = null;
+    this.nebulaPattern = null;
+    this.skyGrad = null;
+    this.sky = { top: '#1c2c56', mid: '#243866' };
+    this.glow = ['#5ab0ff', '#c26bff'];
+    this._buildStars();
+    this._buildNebula();
+  }
+
+  _buildStars() {
+    const size = 256;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const g = c.getContext('2d');
+    g.clearRect(0, 0, size, size);
+    let seed = 1337;
+    const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+    for (let i = 0; i < 42; i++) {
+      const x = rand() * size;
+      const y = rand() * size;
+      const r = 0.6 + rand() * 1.4;
+      g.globalAlpha = 0.25 + rand() * 0.5;
+      g.fillStyle = '#9fc2ff';
+      g.beginPath();
+      g.arc(x, y, r, 0, Math.PI * 2);
+      g.fill();
+    }
+    this.starTile = c;
+    this.starPattern = this.ctx.createPattern(c, 'repeat');
+  }
+
+  /** Big soft color blobs, tiled as a slow parallax layer behind the stars. */
+  _buildNebula() {
+    const size = 768;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const g = c.getContext('2d');
+    g.clearRect(0, 0, size, size);
+    let seed = 91;
+    const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+    const spots = [
+      { x: 0.18, y: 0.22, r: 0.30, c: this.glow[0] },
+      { x: 0.78, y: 0.18, r: 0.26, c: this.glow[1] },
+      { x: 0.55, y: 0.62, r: 0.34, c: this.glow[0] },
+      { x: 0.1, y: 0.75, r: 0.24, c: this.glow[1] },
+    ];
+    g.globalCompositeOperation = 'lighter';
+    for (const s of spots) {
+      const cx = (s.x + (rand() - 0.5) * 0.08) * size;
+      const cy = (s.y + (rand() - 0.5) * 0.08) * size;
+      const r = s.r * size;
+      const rg = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+      rg.addColorStop(0, s.c + '55');
+      rg.addColorStop(1, s.c + '00');
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(cx, cy, r, 0, Math.PI * 2);
+      g.fill();
+    }
+    this.nebulaTile = c;
+    this.nebulaPattern = this.ctx.createPattern(c, 'repeat');
+  }
+
+  resize() {
+    const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
+    const w = this.canvas.clientWidth || window.innerWidth;
+    const h = this.canvas.clientHeight || window.innerHeight;
+    if (this.width === w && this.height === h && this.dpr === dpr) return false;
+    this.width = w;
+    this.height = h;
+    this.dpr = dpr;
+    this.canvas.width = Math.round(w * dpr);
+    this.canvas.height = Math.round(h * dpr);
+    this._buildSky();
+    return true;
+  }
+
+  /** Called once per match: swaps in the map's vivid sky + nebula colors. */
+  setPalette(map) {
+    this.sky = (map && map.sky) || this.sky;
+    this.glow = (map && map.glow) || this.glow;
+    this._buildSky();
+    this._buildNebula();
+  }
+
+  _buildSky() {
+    if (!this.height) return;
+    const g = this.ctx.createLinearGradient(0, 0, 0, this.height);
+    g.addColorStop(0, this.sky.top);
+    g.addColorStop(0.45, this.sky.mid);
+    g.addColorStop(1, COLORS.bg0);
+    this.skyGrad = g;
+  }
+
+  draw(game, alpha) {
+    const ctx = this.ctx;
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.fillStyle = COLORS.bg0;
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // Interpolate once, reuse in every viewport.
+    const ents = game.entities;
+    for (let i = 0; i < ents.length; i++) {
+      const e = ents[i];
+      e.rx = e.px + (e.x - e.px) * alpha;
+      e.ry = e.py + (e.y - e.py) * alpha;
+    }
+
+    for (let i = 0; i < game.cameras.length; i++) {
+      this._viewport(game, game.cameras[i]);
+    }
+
+    // Split-screen dividers
+    if (game.cameras.length > 1) {
+      ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      ctx.fillStyle = 'rgba(0,0,0,0.85)';
+      for (let i = 0; i < game.cameras.length; i++) {
+        const c = game.cameras[i];
+        ctx.fillRect(c.vx, c.vy, c.vw, 2);
+        ctx.fillRect(c.vx, c.vy, 2, c.vh);
+      }
+    }
+
+    this._hud(game);
+  }
+
+  _viewport(game, cam) {
+    const ctx = this.ctx;
+    const world = game.world;
+    const s = cam.scale;
+
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(cam.vx, cam.vy, cam.vw, cam.vh);
+    ctx.clip();
+    ctx.translate(cam.vx, cam.vy);
+
+    // --- background (screen space, parallax scrolled)
+    ctx.fillStyle = this.skyGrad;
+    ctx.fillRect(0, 0, cam.vw, cam.vh);
+    if (this.nebulaPattern) {
+      const nx = -(cam.x * 0.10) % 768;
+      const ny = -(cam.y * 0.10) % 768;
+      ctx.save();
+      ctx.globalAlpha = 0.8;
+      ctx.translate(nx, ny);
+      ctx.fillStyle = this.nebulaPattern;
+      ctx.fillRect(-nx - 768, -ny - 768, cam.vw + 1536, cam.vh + 1536);
+      ctx.restore();
+    }
+    if (this.starPattern) {
+      const ox = -(cam.x * 0.25) % 256;
+      const oy = -(cam.y * 0.25) % 256;
+      ctx.save();
+      ctx.translate(ox, oy);
+      ctx.fillStyle = this.starPattern;
+      ctx.fillRect(-ox - 256, -oy - 256, cam.vw + 512, cam.vh + 512);
+      ctx.restore();
+    }
+
+    // --- world space
+    const viewW = cam.vw / s;
+    const viewH = cam.vh / s;
+    const camLeft = cam.x - viewW / 2;
+    const camTop = cam.y - viewH / 2;
+
+    ctx.scale(s, s);
+    ctx.translate(-camLeft, -camTop);
+
+    // Platforms (grid-culled to the visible rect)
+    const list = world.queryInto(camLeft - 40, camTop - 40, viewW + 80, viewH + 80, this.cull);
+    ctx.fillStyle = COLORS.platform;
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+    }
+    ctx.fillStyle = COLORS.platformTop;
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
+      ctx.fillRect(p.x, p.y, p.w, 4);
+    }
+
+    // Drum pads
+    const pads = world.pads;
+    for (let i = 0; i < pads.length; i++) {
+      const p = pads[i];
+      if (p.x + p.w < camLeft || p.x > camLeft + viewW || p.y + p.h < camTop || p.y > camTop + viewH) continue;
+      const squish = p.anim * 6;
+      ctx.fillStyle = COLORS.pad;
+      roundRect(ctx, p.x, p.y + squish, p.w, p.h - squish, 6);
+      ctx.fill();
+      ctx.fillStyle = COLORS.padTop;
+      ctx.fillRect(p.x + 6, p.y + squish + 3, p.w - 12, 3);
+    }
+
+    // Entities
+    const ents = game.entities;
+    for (let i = 0; i < ents.length; i++) {
+      const e = ents[i];
+      if (e.rx + 60 < camLeft || e.rx - 60 > camLeft + viewW || e.ry + 80 < camTop || e.ry - 80 > camTop + viewH) continue;
+      this._entity(ctx, e);
+    }
+
+    ctx.restore();
+
+    // --- viewport overlay (screen space)
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(cam.vx, cam.vy, cam.vw, cam.vh);
+    ctx.clip();
+    ctx.translate(cam.vx, cam.vy);
+    this._offscreenMarkers(ctx, cam, game);
+    this._viewportLabel(ctx, cam, game);
+    ctx.restore();
+  }
+
+  _entity(ctx, e) {
+    const skin = getSkin(e.skin);
+    const hostile = e.isIt || e.isZombie;
+    const squash = e.squash;
+    const w = e.w * (1 - squash * 0.18);
+    const h = e.h * (1 + squash * 0.22);
+    const x = e.rx - w / 2;
+    const y = e.ry + e.h / 2 - h;
+
+    if (hostile) {
+      ctx.fillStyle = e.isZombie ? 'rgba(94,224,106,0.20)' : 'rgba(255,71,87,0.22)';
+      ctx.beginPath();
+      ctx.arc(e.rx, e.ry, 34, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = e.isZombie ? '#3f9b4a' : skin.body;
+    roundRect(ctx, x, y, w, h, 7);
+    ctx.fill();
+
+    if (skin.pattern === 'stripe') {
+      ctx.fillStyle = skin.accent;
+      ctx.fillRect(x, y + h * 0.45, w, 4);
+    } else if (skin.pattern === 'dot') {
+      ctx.fillStyle = skin.accent;
+      ctx.beginPath();
+      ctx.arc(x + w / 2, y + h * 0.72, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Eyes (face direction)
+    const ex = x + w / 2 + e.face * 4;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(ex - 5, y + 8, 4, 5);
+    ctx.fillRect(ex + 2, y + 8, 4, 5);
+    ctx.fillStyle = '#101018';
+    ctx.fillRect(ex - 4 + e.face, y + 10, 2, 3);
+    ctx.fillRect(ex + 3 + e.face, y + 10, 2, 3);
+
+    // IT crown / zombie tag
+    if (hostile) {
+      ctx.fillStyle = e.isZombie ? COLORS.zombie : COLORS.it;
+      ctx.beginPath();
+      ctx.moveTo(e.rx - 9, y - 5);
+      ctx.lineTo(e.rx, y - 16);
+      ctx.lineTo(e.rx + 9, y - 5);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    if (e.freeze > 0) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, x - 2, y - 2, w + 4, h + 4, 8);
+      ctx.stroke();
+    }
+
+    // Name plate
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = e.isHuman ? '#ffffff' : 'rgba(255,255,255,0.55)';
+    ctx.fillText(e.name, e.rx, y - (hostile ? 22 : 8));
+  }
+
+  /** Edge arrows pointing at off-screen taggers/zombies. */
+  _offscreenMarkers(ctx, cam, game) {
+    const s = cam.scale;
+    const ents = game.entities;
+    for (let i = 0; i < ents.length; i++) {
+      const e = ents[i];
+      if (!(e.isIt || e.isZombie) || e === cam.target) continue;
+      const sx = (e.rx - cam.x) * s + cam.vw / 2;
+      const sy = (e.ry - cam.y) * s + cam.vh / 2;
+      if (sx > 20 && sx < cam.vw - 20 && sy > 20 && sy < cam.vh - 20) continue;
+      const cx = Math.max(18, Math.min(cam.vw - 18, sx));
+      const cy = Math.max(18, Math.min(cam.vh - 18, sy));
+      const ang = Math.atan2(sy - cam.vh / 2, sx - cam.vw / 2);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(ang);
+      ctx.fillStyle = e.isZombie ? COLORS.zombie : COLORS.it;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(9, 0);
+      ctx.lineTo(-7, -6);
+      ctx.lineTo(-7, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  _viewportLabel(ctx, cam, game) {
+    const t = cam.target;
+    if (!t) return;
+    const hostile = t.isIt || t.isZombie;
+    if (hostile) {
+      ctx.strokeStyle = t.isZombie ? 'rgba(94,224,106,0.55)' : 'rgba(255,71,87,0.55)';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(3, 3, cam.vw - 6, cam.vh - 6);
+    }
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(8, 8, 116, 22);
+    ctx.fillStyle = hostile ? (t.isZombie ? COLORS.zombie : COLORS.it) : '#cfe0ff';
+    const state = game.mode.rule === 'infect'
+      ? (t.isZombie ? 'ZOMBIE' : 'SURVIVOR')
+      : (t.isIt ? "YOU'RE IT" : 'RUNNER');
+    ctx.fillText(`${t.name} · ${state}`, 14, 23);
+  }
+
+  _hud(game) {
+    const ctx = this.ctx;
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    const cx = this.width / 2;
+
+    ctx.fillStyle = 'rgba(6,10,22,0.72)';
+    roundRect(ctx, cx - 130, 8, 260, 52, 12);
+    ctx.fill();
+
+    const time = Math.max(0, game.timeLeft);
+    const mm = Math.floor(time / 60);
+    const ss = Math.floor(time % 60);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 26px system-ui, sans-serif';
+    ctx.fillStyle = time <= 10 ? '#ff6b6b' : '#ffffff';
+    ctx.fillText(`${mm}:${ss < 10 ? '0' : ''}${ss}`, cx, 34);
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.fillStyle = game.mode.accent;
+    ctx.fillText(`${game.mode.name.toUpperCase()} · ${game.map.name.toUpperCase()}`, cx, 51);
+
+    if (game.mode.rule === 'infect') {
+      const alive = game.entities.reduce((n, e) => n + (e.isZombie ? 0 : 1), 0);
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillStyle = COLORS.zombie;
+      ctx.fillText(`${alive} SURVIVOR${alive === 1 ? '' : 'S'} LEFT`, cx, 74);
+    }
+
+    if (game.bannerTime > 0 && game.countdown <= 0) {
+      const a = Math.min(1, game.bannerTime / 0.4);
+      ctx.globalAlpha = a;
+      ctx.font = 'bold 20px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(6,10,22,0.72)';
+      const tw = ctx.measureText(game.banner).width + 28;
+      roundRect(ctx, cx - tw / 2, this.height - 62, tw, 34, 10);
+      ctx.fill();
+      ctx.fillStyle = game.mode.accent;
+      ctx.fillText(game.banner, cx, this.height - 39);
+      ctx.globalAlpha = 1;
+    }
+
+    if (game.countdown > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(0, 0, this.width, this.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 90px system-ui, sans-serif';
+      const n = Math.ceil(game.countdown);
+      ctx.fillText(n > 0 ? String(n) : 'GO!', cx, this.height / 2);
+      ctx.font = '16px system-ui, sans-serif';
+      ctx.fillStyle = game.mode.accent;
+      ctx.fillText(game.mode.blurb, cx, this.height / 2 + 44);
+    }
+
+    if (game.showFps) {
+      ctx.textAlign = 'right';
+      ctx.font = '12px monospace';
+      ctx.fillStyle = '#8fe6a0';
+      ctx.fillText(`${game.fps.toFixed(0)} fps`, this.width - 10, 20);
+    }
+  }
+}
+
+
+/* ---- touch.js ---- */
+// Touch controls: a floating virtual joystick + a jump button + a pause
+// button. They write into the same input.left/right/jump/jumpHeld fields the
+// keyboard uses, so entity.step() never needs to know which device produced
+// the input — Game just merges touch on top of keyboard for the P1 slot.
+
+const DEAD_ZONE = 0.28;
+const RADIUS = 50;
+
+function isTouchDevice() {
+  return ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
+}
+
+class TouchControls {
+  constructor() {
+    this.mode = 'auto'; // 'auto' | 'on' | 'off'
+    this.isTouch = isTouchDevice();
+
+    this.root = document.getElementById('touch-controls');
+    this.stickZone = document.getElementById('stick-zone');
+    this.stickBase = document.getElementById('stick-base');
+    this.stickKnob = document.getElementById('stick-knob');
+    this.jumpBtn = document.getElementById('touch-jump');
+    this.pauseBtn = document.getElementById('touch-pause');
+
+    this.state = { left: false, right: false, jump: false, jumpHeld: false };
+    this.onPause = null;
+
+    this._stickId = null;
+    this._baseX = 0;
+    this._baseY = 0;
+    this._visible = false;
+
+    this._bind();
+  }
+
+  get enabled() {
+    if (this.mode === 'off') return false;
+    if (this.mode === 'on') return true;
+    return this.isTouch;
+  }
+
+  setMode(mode) {
+    this.mode = mode;
+    this.setVisible(this._visible);
+  }
+
+  _bind() {
+    this.stickZone.addEventListener('pointerdown', (e) => {
+      if (this._stickId !== null) return;
+      this._stickId = e.pointerId;
+      this.stickZone.setPointerCapture(e.pointerId);
+      this._baseX = e.clientX;
+      this._baseY = e.clientY;
+      this.stickBase.style.left = `${e.clientX}px`;
+      this.stickBase.style.top = `${e.clientY}px`;
+      this.stickBase.classList.add('show');
+      this._updateStick(e.clientX, e.clientY);
+    });
+    this.stickZone.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== this._stickId) return;
+      this._updateStick(e.clientX, e.clientY);
+    });
+    const releaseStick = (e) => {
+      if (e.pointerId !== this._stickId) return;
+      this._stickId = null;
+      this.state.left = false;
+      this.state.right = false;
+      this.stickBase.classList.remove('show');
+      this.stickKnob.style.transform = 'translate(-50%, -50%)';
+    };
+    this.stickZone.addEventListener('pointerup', releaseStick);
+    this.stickZone.addEventListener('pointercancel', releaseStick);
+
+    this.jumpBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      this.state.jumpHeld = true;
+      this.state.jump = true;
+      this.jumpBtn.classList.add('pressed');
+    });
+    const releaseJump = () => {
+      this.state.jumpHeld = false;
+      this.jumpBtn.classList.remove('pressed');
+    };
+    this.jumpBtn.addEventListener('pointerup', releaseJump);
+    this.jumpBtn.addEventListener('pointercancel', releaseJump);
+    this.jumpBtn.addEventListener('pointerleave', releaseJump);
+
+    this.pauseBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      if (this.onPause) this.onPause();
+    });
+  }
+
+  _updateStick(clientX, clientY) {
+    let dx = clientX - this._baseX;
+    let dy = clientY - this._baseY;
+    const dist = Math.hypot(dx, dy);
+    if (dist > RADIUS) {
+      dx = (dx / dist) * RADIUS;
+      dy = (dy / dist) * RADIUS;
+    }
+    this.stickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    const norm = dx / RADIUS;
+    this.state.left = norm < -DEAD_ZONE;
+    this.state.right = norm > DEAD_ZONE;
+  }
+
+  setVisible(visible) {
+    this._visible = visible;
+    this.root.classList.toggle('show', visible && this.enabled);
+  }
+
+  /** Merge touch state onto an entity's input (OR'd with any keyboard state). */
+  applyTo(entity) {
+    const inp = entity.input;
+    if (this.state.left) inp.left = true;
+    if (this.state.right) inp.right = true;
+    if (this.state.jumpHeld) inp.jumpHeld = true;
+    if (this.state.jump) {
+      inp.jump = true;
+      this.state.jump = false;
+    }
+  }
+}
+
+
+/* ---- input.js ---- */
+// Keyboard input for up to 4 local players on one keyboard.
+// A flat key-state map + per-slot bindings; no per-frame allocation.
+
+const BINDINGS = [
+  { name: 'P1', left: 'KeyA',      right: 'KeyD',       jump: 'KeyW',    label: 'A / D + W' },
+  { name: 'P2', left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp', label: '← / → + ↑' },
+  { name: 'P3', left: 'KeyJ',      right: 'KeyL',       jump: 'KeyI',    label: 'J / L + I' },
+  { name: 'P4', left: 'KeyF',      right: 'KeyH',       jump: 'KeyT',    label: 'F / H + T' },
+];
+
+const BLOCKED = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space']);
+
+class Input {
+  constructor() {
+    this.down = new Set();
+    this.pressed = new Set();   // edge: cleared at the end of each frame
+    this.enabled = true;
+
+    this._onDown = (e) => {
+      if (BLOCKED.has(e.code)) e.preventDefault();
+      if (e.repeat) return;
+      this.down.add(e.code);
+      this.pressed.add(e.code);
+    };
+    this._onUp = (e) => { this.down.delete(e.code); };
+    this._onBlur = () => { this.down.clear(); this.pressed.clear(); };
+
+    window.addEventListener('keydown', this._onDown);
+    window.addEventListener('keyup', this._onUp);
+    window.addEventListener('blur', this._onBlur);
+  }
+
+  isDown(code) { return this.down.has(code); }
+  wasPressed(code) { return this.pressed.has(code); }
+
+  /** Copy the bindings for `slot` into an entity's input object. */
+  applyTo(entity, slot) {
+    const b = BINDINGS[slot];
+    const inp = entity.input;
+    if (!this.enabled || !b) {
+      inp.left = inp.right = inp.jumpHeld = false;
+      return;
+    }
+    inp.left = this.down.has(b.left);
+    inp.right = this.down.has(b.right);
+    inp.jumpHeld = this.down.has(b.jump);
+    if (this.pressed.has(b.jump)) inp.jump = true;
+  }
+
+  endFrame() { this.pressed.clear(); }
+
+  destroy() {
+    window.removeEventListener('keydown', this._onDown);
+    window.removeEventListener('keyup', this._onUp);
+    window.removeEventListener('blur', this._onBlur);
+  }
+}
+
+
+/* ---- game.js ---- */
+// Match orchestration: builds the arena, owns the entities, runs the fixed
+// timestep simulation and produces the end-of-match ranking.
+
+
+
+
+
+
+
+
+
+
+
+
+
+const BOT_NAMES = ['Nova', 'Blitz', 'Echo', 'Pixel', 'Rocket', 'Zap', 'Comet', 'Dash'];
+
+class Game {
+  constructor(renderer, input, touch) {
+    this.renderer = renderer;
+    this.input = input;
+    this.touch = touch || null;
+    this.state = 'idle'; // idle | countdown | playing | paused | over
+    this.entities = [];
+    this.cameras = [];
+    this.viewports = [];
+    this.accumulator = 0;
+    this.fps = 60;
+    this.showFps = false;
+    this.timeLeft = 0;
+    this.countdown = 0;
+    this.onMatchEnd = null;
+    this.banner = '';
+    this.bannerTime = 0;
+  }
+
+  get humanCount() { return this.cameras.length; }
+
+  /** Build a brand new match. `humans` is 1..4. */
+  start(humans, forcedMode, forcedMap) {
+    const seed = (Date.now() ^ (Math.random() * 0xffffffff)) >>> 0;
+    this.rng = makeRng(seed);
+    this.map = buildMap(this.rng.int(1, 0x7ffffff), forcedMap);
+    this.world = new World(this.map);
+    this.mode = pickMode(this.rng, forcedMode);
+    this.renderer.setPalette(this.map);
+
+    const save = store.load();
+    this.entities.length = 0;
+
+    for (let i = 0; i < humans; i++) {
+      this.entities.push(new Entity(i, BINDINGS[i].name, true, save.equipped[i], i));
+    }
+    const names = BOT_NAMES.slice();
+    for (let i = names.length - 1; i > 0; i--) {
+      const j = this.rng.int(0, i);
+      const t = names[i]; names[i] = names[j]; names[j] = t;
+    }
+    for (let i = humans; i < MATCH.slots; i++) {
+      const skin = BOT_SKINS[(i * 3 + this.rng.int(0, 7)) % BOT_SKINS.length];
+      this.entities.push(new Entity(i, names[i - humans], false, skin, -1));
+    }
+
+    // Spread everyone across the spawn points.
+    const spawns = this.map.spawns.slice();
+    for (let i = spawns.length - 1; i > 0; i--) {
+      const j = this.rng.int(0, i);
+      const t = spawns[i]; spawns[i] = spawns[j]; spawns[j] = t;
+    }
+    for (let i = 0; i < this.entities.length; i++) {
+      const s = spawns[i % spawns.length];
+      this.entities[i].reset(s.x, s.y);
+    }
+
+    // Who starts as IT / patient zero.
+    const first = this.rng.int(0, this.entities.length - 1);
+    for (const e of this.entities) {
+      e.isIt = false;
+      e.isZombie = false;
+      e.itTime = 0;
+      e.infectedAt = Infinity;
+      e.tagCd = 0;
+      e.lockTarget = -1;
+      e.think = this.rng() * 0.2;
+    }
+    if (this.mode.rule === 'infect') {
+      this.entities[first].isZombie = true;
+      this.entities[first].infectedAt = 0;
+    } else {
+      this.entities[first].isIt = true;
+      this.entities[first].tagCd = MATCH.tagCooldown;
+    }
+
+    // Cameras: one viewport per local human.
+    this.cameras.length = 0;
+    const scale = CAM.scaleFor[Math.min(humans, 4)];
+    for (let i = 0; i < humans; i++) this.cameras.push(new Camera(this.entities[i], scale));
+    this.layout();
+    for (const c of this.cameras) c.snap();
+
+    this.timeLeft = this.mode.duration;
+    this.countdown = MATCH.countdown;
+    this.accumulator = 0;
+    this.result = null;
+    this.banner = '';
+    this.bannerTime = 0;
+    this.state = 'countdown';
+  }
+
+  layout() {
+    const vps = layoutViewports(this.cameras.length, this.renderer.width, this.renderer.height, this.viewports);
+    for (let i = 0; i < this.cameras.length; i++) {
+      const v = vps[i];
+      this.cameras[i].setViewport(v.x, v.y, v.w, v.h);
+    }
+  }
+
+  togglePause() {
+    if (this.state === 'playing' || this.state === 'countdown') { this.state = 'paused'; return true; }
+    if (this.state === 'paused') { this.state = 'countdown'; this.countdown = Math.max(this.countdown, 1); return false; }
+    return false;
+  }
+
+  quit() {
+    this.state = 'idle';
+    this.entities.length = 0;
+    this.cameras.length = 0;
+  }
+
+  /** Called once per rendered frame. Runs 0..maxSteps fixed simulation steps. */
+  update(dt) {
+    if (this.state === 'idle' || this.state === 'over' || this.state === 'paused') return;
+
+    // Human input is sampled once per frame and held across the fixed steps.
+    for (let i = 0; i < this.entities.length; i++) {
+      const e = this.entities[i];
+      if (!e.isHuman) continue;
+      this.input.applyTo(e, e.slot);
+      // Touch is a single physical device, so it only ever drives slot 0.
+      if (e.slot === 0 && this.touch) this.touch.applyTo(e);
+    }
+
+    this.accumulator += dt;
+    const step = PHYS.fixedDt;
+    let steps = 0;
+    while (this.accumulator >= step && steps < PHYS.maxSteps) {
+      this.fixedStep(step);
+      this.accumulator -= step;
+      steps++;
+    }
+    if (steps === PHYS.maxSteps) this.accumulator = 0; // drop the backlog
+
+    for (let i = 0; i < this.cameras.length; i++) this.cameras[i].update(dt, this.world);
+    if (this.bannerTime > 0) this.bannerTime -= dt;
+
+    const pads = this.world.pads;
+    for (let i = 0; i < pads.length; i++) if (pads[i].anim > 0) pads[i].anim = Math.max(0, pads[i].anim - dt * 4);
+  }
+
+  get alpha() { return this.accumulator / PHYS.fixedDt; }
+
+  fixedStep(dt) {
+    const ents = this.entities;
+
+    if (this.countdown > 0) {
+      this.countdown -= dt;
+      for (let i = 0; i < ents.length; i++) {
+        const e = ents[i];
+        e.input.left = e.input.right = e.input.jump = e.input.jumpHeld = false;
+        e.step(dt, this.world, this.mode);
+      }
+      if (this.countdown <= 0) this.state = 'playing';
+      return;
+    }
+
+    this.timeLeft -= dt;
+
+    for (let i = 0; i < ents.length; i++) {
+      const e = ents[i];
+      if (!e.isHuman) updateAI(this, e, dt);
+      e.step(dt, this.world, this.mode);
+      if (e.isIt || e.isZombie) e.itTime += dt;
+    }
+
+    this.resolveTags();
+
+    if (this.timeLeft <= 0) this.finish('time');
+    else if (this.mode.rule === 'infect' && ents.every((e) => e.isZombie)) this.finish('infected');
+  }
+
+  resolveTags() {
+    const ents = this.entities;
+    const infect = this.mode.rule === 'infect';
+    for (let i = 0; i < ents.length; i++) {
+      const a = ents[i];
+      if (!(a.isIt || a.isZombie)) continue;
+      if (a.tagCd > 0 || a.freeze > 0) continue;
+      for (let j = 0; j < ents.length; j++) {
+        const b = ents[j];
+        if (b === a || b.isIt || b.isZombie) continue;
+        if (a.lockTarget === b.index) continue;
+        if (!a.touches(b)) continue;
+
+        if (infect) {
+          b.isZombie = true;
+          b.infectedAt = this.mode.duration - this.timeLeft;
+          b.freeze = MATCH.tagFreeze * 0.8;
+          b.tagCd = MATCH.tagCooldown;
+          a.tagCd = 0.5;
+          this.setBanner(`${a.name} infected ${b.name}!`);
+        } else {
+          a.isIt = false;
+          a.lockTarget = -1;
+          b.isIt = true;
+          b.tagCd = MATCH.tagCooldown;
+          b.freeze = MATCH.tagFreeze;
+          b.lockTarget = a.index;
+          b.lockTime = MATCH.tagBackLock;
+          this.setBanner(`${b.name} is IT!`);
+        }
+        break;
+      }
+    }
+  }
+
+  setBanner(text) {
+    this.banner = text;
+    this.bannerTime = 1.6;
+  }
+
+  finish(reason) {
+    if (this.state === 'over') return;
+    this.state = 'over';
+
+    const ents = this.entities.slice();
+    const dur = this.mode.duration;
+
+    if (this.mode.rule === 'infect') {
+      // Survive longest = win. Never infected ranks above everyone.
+      ents.sort((a, b) => {
+        const sa = a.infectedAt === Infinity ? dur + 1000 : a.infectedAt;
+        const sb = b.infectedAt === Infinity ? dur + 1000 : b.infectedAt;
+        return sb - sa || a.index - b.index;
+      });
+    } else {
+      // Least time spent as IT wins; whoever is IT at the buzzer is last.
+      ents.sort((a, b) => {
+        const sa = a.itTime + (a.isIt ? 1e6 : 0);
+        const sb = b.itTime + (b.isIt ? 1e6 : 0);
+        return sa - sb || a.index - b.index;
+      });
+    }
+
+    let earned = 0;
+    const rows = ents.map((e, i) => {
+      const coins = COINS[Math.min(i, COINS.length - 1)];
+      if (e.isHuman) earned += coins;
+      let detail;
+      if (this.mode.rule === 'infect') {
+        detail = e.infectedAt === Infinity ? 'Survived the outbreak' : `Infected at ${e.infectedAt.toFixed(1)}s`;
+      } else {
+        detail = e.isIt ? `IT at the buzzer · ${e.itTime.toFixed(1)}s tagged` : `${e.itTime.toFixed(1)}s spent as IT`;
+      }
+      return { place: i + 1, name: e.name, isHuman: e.isHuman, skin: e.skin, coins, detail };
+    });
+
+    if (earned > 0) store.addCoins(earned);
+    store.recordMatch(rows[0].isHuman);
+
+    this.result = {
+      reason,
+      rows,
+      earned,
+      mode: this.mode,
+      map: this.map,
+      coins: store.load().coins,
+    };
+    if (this.onMatchEnd) this.onMatchEnd(this.result);
+  }
+}
+
+
+/* ---- ui.js ---- */
+// DOM-based menus (main menu, store, leaderboard, pause). Menus are plain
+// HTML so they cost nothing while the match is running — the canvas is only
+// visible during play.
+
+
+
+
+
+
+
+const $ = (id) => document.getElementById(id);
+
+class UI {
+  constructor(hooks, touch) {
+    this.hooks = hooks;
+    this.touch = touch || null;
+    this.screens = {
+      menu: $('screen-menu'),
+      store: $('screen-store'),
+      results: $('screen-results'),
+      pause: $('screen-pause'),
+    };
+    this.players = 1;
+    this.mode = '';   // '' = random
+    this.map = '';    // '' = random
+    this.storeSlot = 0;
+
+    this._buildMenu();
+    this._buildStore();
+    this.show('menu');
+    this.refreshCoins();
+  }
+
+  show(name) {
+    for (const key of Object.keys(this.screens)) {
+      this.screens[key].classList.toggle('active', key === name);
+    }
+    $('game-canvas').classList.toggle('playing', name === null || name === 'pause');
+    this.current = name;
+  }
+
+  hideAll() {
+    for (const key of Object.keys(this.screens)) this.screens[key].classList.remove('active');
+    $('game-canvas').classList.add('playing');
+    this.current = null;
+  }
+
+  refreshCoins() {
+    const coins = store.load().coins;
+    for (const el of document.querySelectorAll('.coin-value')) el.textContent = coins.toLocaleString();
+  }
+
+  /* ------------------------------------------------------------ main menu */
+
+  _buildMenu() {
+    const playerRow = $('player-count');
+    playerRow.innerHTML = '';
+    for (let n = 1; n <= 4; n++) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (n === 1 ? ' on' : '');
+      b.textContent = n === 1 ? '1 Player' : `${n} Players`;
+      b.onclick = () => {
+        this.players = n;
+        for (const c of playerRow.children) c.classList.remove('on');
+        b.classList.add('on');
+        this._renderControls();
+      };
+      playerRow.appendChild(b);
+    }
+
+    const modeRow = $('mode-select');
+    modeRow.innerHTML = '';
+    const modeOptions = [{ id: '', name: 'Random Mode' }].concat(Object.values(MODES).map((m) => ({ id: m.id, name: m.name })));
+    for (const opt of modeOptions) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (opt.id === '' ? ' on' : '');
+      b.textContent = opt.name;
+      b.onclick = () => {
+        this.mode = opt.id;
+        for (const c of modeRow.children) c.classList.remove('on');
+        b.classList.add('on');
+      };
+      modeRow.appendChild(b);
+    }
+
+    const mapRow = $('map-select');
+    mapRow.innerHTML = '';
+    const mapOptions = [{ id: '', name: 'Random Map' }].concat(MAP_POOL.map((m) => ({ id: m.id, name: m.name })));
+    for (const opt of mapOptions) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (opt.id === '' ? ' on' : '');
+      b.textContent = opt.name;
+      b.onclick = () => {
+        this.map = opt.id;
+        for (const c of mapRow.children) c.classList.remove('on');
+        b.classList.add('on');
+      };
+      mapRow.appendChild(b);
+    }
+
+    this._buildControlScheme();
+
+    $('btn-play').onclick = () => this.hooks.onPlay(this.players, this.mode, this.map);
+    $('btn-store').onclick = () => { this.show('store'); this._renderStore(); };
+    $('btn-store-back').onclick = () => this.show('menu');
+    $('btn-results-again').onclick = () => this.hooks.onPlay(this.players, this.mode, this.map);
+    $('btn-results-menu').onclick = () => { this.show('menu'); this.refreshCoins(); };
+    $('btn-resume').onclick = () => this.hooks.onResume();
+    $('btn-quit').onclick = () => this.hooks.onQuit();
+
+    this._renderControls();
+  }
+
+  _renderControls() {
+    const el = $('controls-list');
+    el.innerHTML = '';
+    for (let i = 0; i < this.players; i++) {
+      const row = document.createElement('div');
+      row.className = 'ctrl-row';
+      row.innerHTML = `<span class="ctrl-name">${BINDINGS[i].name}</span><span class="ctrl-keys">${BINDINGS[i].label}</span>`;
+      el.appendChild(row);
+    }
+    const bots = 6 - this.players;
+    $('bot-note').textContent = bots > 0
+      ? `${bots} AI bot${bots === 1 ? '' : 's'} will fill the arena — always 6 competitors.`
+      : 'Full lobby: 6 local players.';
+  }
+
+  _buildControlScheme() {
+    const row = $('control-scheme');
+    if (!row) return;
+    row.innerHTML = '';
+    const options = [
+      { id: 'auto', name: this.touch && this.touch.isTouch ? 'Auto (Joystick)' : 'Auto (Keyboard)' },
+      { id: 'on', name: 'Joystick' },
+      { id: 'off', name: 'Keyboard' },
+    ];
+    for (const opt of options) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (opt.id === 'auto' ? ' on' : '');
+      b.textContent = opt.name;
+      b.onclick = () => {
+        if (this.touch) this.touch.setMode(opt.id);
+        for (const c of row.children) c.classList.remove('on');
+        b.classList.add('on');
+      };
+      row.appendChild(b);
+    }
+  }
+
+  /* ---------------------------------------------------------------- store */
+
+  _buildStore() {
+    const slotRow = $('store-slots');
+    slotRow.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (i === 0 ? ' on' : '');
+      b.textContent = BINDINGS[i].name;
+      b.onclick = () => {
+        this.storeSlot = i;
+        for (const c of slotRow.children) c.classList.remove('on');
+        b.classList.add('on');
+        this._renderStore();
+      };
+      slotRow.appendChild(b);
+    }
+  }
+
+  _renderStore() {
+    const save = store.load();
+    const grid = $('store-grid');
+    grid.innerHTML = '';
+    for (const skin of SKINS) {
+      const owned = save.owned.includes(skin.id);
+      const equipped = save.equipped[this.storeSlot] === skin.id;
+      const card = document.createElement('button');
+      card.className = 'skin-card' + (equipped ? ' equipped' : '') + (owned ? ' owned' : '');
+      card.innerHTML = `
+        <span class="skin-art" style="--body:${skin.body};--accent:${skin.accent}">
+          <span class="skin-body"></span>
+          <span class="skin-mark ${skin.pattern}"></span>
+        </span>
+        <span class="skin-name">${skin.name}</span>
+        <span class="skin-cost">${equipped ? 'EQUIPPED' : owned ? 'Select' : `${skin.cost} ⬤`}</span>`;
+      card.onclick = () => {
+        const s = store.load();
+        if (!s.owned.includes(skin.id)) {
+          if (!store.buySkin(skin)) { this._flash('Not enough coins'); return; }
+          this._flash(`Unlocked ${skin.name}!`);
+        }
+        store.equipSkin(this.storeSlot, skin.id);
+        this.refreshCoins();
+        this._renderStore();
+      };
+      grid.appendChild(card);
+    }
+    $('store-hint').textContent = `Equipping for ${BINDINGS[this.storeSlot].name} · currently ${getSkin(save.equipped[this.storeSlot]).name}`;
+  }
+
+  _flash(msg) {
+    const el = $('store-flash');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(this._flashTimer);
+    this._flashTimer = setTimeout(() => el.classList.remove('show'), 1400);
+  }
+
+  /* ---------------------------------------------------------- leaderboard */
+
+  showResults(result) {
+    const list = $('results-list');
+    list.innerHTML = '';
+    for (const row of result.rows) {
+      const skin = getSkin(row.skin);
+      const li = document.createElement('div');
+      li.className = 'result-row' + (row.isHuman ? ' human' : '') + (row.place === 1 ? ' first' : '');
+      li.innerHTML = `
+        <span class="place">${row.place}</span>
+        <span class="chip-dot" style="background:${skin.body}"></span>
+        <span class="who">${row.name}${row.isHuman ? '' : ' <em>bot</em>'}</span>
+        <span class="detail">${row.detail}</span>
+        <span class="reward">+${row.coins} ⬤</span>`;
+      list.appendChild(li);
+    }
+    $('results-title').textContent = result.rows[0].isHuman ? `${result.rows[0].name} wins!` : `${result.rows[0].name} wins!`;
+    $('results-sub').textContent = `${result.mode.name} · ${result.map.name}`;
+    $('results-earned').textContent = `You earned ${result.earned} coins`;
+    this.refreshCoins();
+    this.show('results');
+  }
+}
+
+
+/* ---- main.js ---- */
+// Entry point: owns the requestAnimationFrame loop and wires the Game to
+// the UI. Kept deliberately thin — all real logic lives in game.js.
+
+
+
+
+
+
+
+const canvas = document.getElementById('game-canvas');
+const renderer = new Renderer(canvas);
+const input = new Input();
+const touch = new TouchControls();
+const game = new Game(renderer, input, touch);
+
+const ui = new UI({
+  onPlay(players, mode, map) {
+    ui.hideAll();
+    renderer.resize();
+    game.start(players, mode || undefined, map || undefined);
+  },
+  onResume() {
+    ui.hideAll();
+    const wasPaused = game.togglePause();
+    if (wasPaused) game.togglePause(); // ensure we land on "playing"
+  },
+  onQuit() {
+    game.quit();
+    ui.show('menu');
+    ui.refreshCoins();
+  },
+}, touch);
+
+touch.onPause = () => {
+  if (game.state === 'playing' || game.state === 'countdown') {
+    game.togglePause();
+    ui.show('pause');
+  }
+};
+
+const rotateHint = document.getElementById('rotate-hint');
+
+window.__arenaTag = { game, renderer, ui, touch }; // handy for debugging in devtools
+
+game.onMatchEnd = (result) => {
+  setTimeout(() => ui.showResults(result), 500);
+};
+
+function resize() {
+  if (renderer.resize()) game.layout();
+}
+window.addEventListener('resize', resize);
+resize();
+
+window.addEventListener('keydown', (e) => {
+  if (e.code !== 'Escape') return;
+  if (game.state === 'playing' || game.state === 'countdown') {
+    game.togglePause();
+    ui.show('pause');
+  } else if (game.state === 'paused') {
+    game.togglePause();
+    ui.hideAll();
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && (game.state === 'playing' || game.state === 'countdown')) {
+    game.togglePause();
+    ui.show('pause');
+  }
+});
+
+let last = performance.now();
+let fpsAcc = 0, fpsN = 0, fpsTimer = 0;
+const MAX_FRAME = 1 / 15; // clamp huge gaps (tab switches) so physics doesn't explode
+
+function frame(now) {
+  requestAnimationFrame(frame);
+  let dt = (now - last) / 1000;
+  last = now;
+  if (dt > MAX_FRAME) dt = MAX_FRAME;
+
+  fpsAcc += dt; fpsN++;
+  fpsTimer += dt;
+  if (fpsTimer >= 0.5) { game.fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; fpsTimer = 0; }
+
+  game.update(dt);
+  if (game.state !== 'idle') {
+    renderer.draw(game, game.state === 'paused' ? 1 : game.alpha);
+  }
+  input.endFrame();
+
+  const live = game.state === 'playing' || game.state === 'countdown';
+  touch.setVisible(live);
+  rotateHint.classList.toggle('show', live);
+}
+requestAnimationFrame(frame);
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'F3') game.showFps = !game.showFps;
+});
+
+
+})();
+
+</script>
+</body>
+</html>
