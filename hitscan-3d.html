@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hitscan Aim Trainer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Single-file WebGL aim trainer inside a gridded sphere: hand-written 3D renderer with a physically based pistol, procedural weapon finishes bought with coins, a Demon level, procedural Web Audio, adaptive difficulty and a local leaderboard.">
+<meta name="description" content="Single-file WebGL aim trainer inside a gridded sphere: hand-written 3D renderer with a physically based pistol, procedural weapon finishes bought with coins, Easy to Demon levels, a Training Ground, bullseye and streak bonuses, procedural Web Audio and a local leaderboard.">
 <meta name="theme-color" content="#06080d">
 <style>
 /* Layout: a full-bleed WebGL firing sphere with a 2D overlay for the reticle; thin HUD rails pinned to the edges; every menu is one gunmetal console trimmed in cartridge brass, centered over the live range. */
@@ -785,25 +785,31 @@ kbd {
   height: 46px;
 }
 
+/* Every orb carries the small bullseye circle in its middle, like the targets in the range. */
 .orb-icon {
+  --orb-bullseye: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.95) 0 9%, transparent 11% 25%, rgba(255, 255, 255, 0.85) 27% 33%, transparent 35%);
   width: var(--orb-size, 30px);
   height: var(--orb-size, 30px);
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%,
-    hsl(var(--orb-hue) 100% 93%) 0%,
-    hsl(var(--orb-hue) 96% 64%) 26%,
-    hsl(var(--orb-hue) 86% 38%) 68%,
-    hsl(var(--orb-hue) 80% 15%) 100%);
+  background:
+    var(--orb-bullseye),
+    radial-gradient(circle at 34% 30%,
+      hsl(var(--orb-hue) 100% 93%) 0%,
+      hsl(var(--orb-hue) 96% 64%) 26%,
+      hsl(var(--orb-hue) 86% 38%) 68%,
+      hsl(var(--orb-hue) 80% 15%) 100%);
   box-shadow: 0 0 16px hsl(var(--orb-hue) 100% 60% / 0.42);
 }
 
-.orb-icon--adaptive {
-  animation: orb-adapt 2.6s ease-in-out infinite;
+/* Training Ground: a practice target with dashed range rings. */
+.orb-icon--training {
+  outline: 1px dashed hsl(var(--orb-hue) 90% 70% / 0.7);
+  outline-offset: 4px;
+  animation: orb-train 3.2s linear infinite;
 }
 
-@keyframes orb-adapt {
-  0%, 100% { transform: scale(0.42); filter: hue-rotate(0deg); }
-  50% { transform: scale(1); filter: hue-rotate(80deg); }
+@keyframes orb-train {
+  to { outline-offset: 7px; outline-color: hsl(var(--orb-hue) 90% 70% / 0); }
 }
 
 .mode-card__name {
@@ -879,6 +885,86 @@ kbd {
   margin: 0;
   font-size: var(--step--1);
   color: var(--steel-muted);
+}
+
+/* Round length: presets plus a typed custom length. */
+.round-length {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.round-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--steel-muted);
+}
+
+.round-input input {
+  width: 4.8em;
+  padding: 7px 8px;
+  font-family: var(--font-data);
+  font-weight: 600;
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-align: center;
+  color: var(--steel-bright);
+  background: var(--range-black);
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-s);
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.round-input input:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 1px;
+  border-color: var(--brass-dim);
+}
+
+.round-input[data-active="true"] input {
+  color: var(--brass);
+  border-color: var(--brass);
+}
+
+/* Scoring rules: what a bullseye, a streak, a miss and an exploded orb are worth. */
+.rules {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rules li {
+  display: grid;
+  grid-template-columns: 3.6em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  font-size: var(--step--1);
+  line-height: 1.3;
+  color: var(--steel-muted);
+}
+
+.rules b {
+  font-family: var(--font-data);
+  font-weight: 600;
+  font-size: var(--step-0);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--signal-hit);
+}
+
+.rules b[data-tone="miss"] {
+  color: var(--signal-miss);
 }
 
 .settings {
@@ -1625,7 +1711,9 @@ kbd {
 
 .orb-icon--demon {
   position: relative;
-  background: radial-gradient(circle at 34% 30%, #ffd2c4 0%, #ff4a2d 26%, #a3120c 66%, #2a0403 100%);
+  background:
+    var(--orb-bullseye),
+    radial-gradient(circle at 34% 30%, #ffd2c4 0%, #ff4a2d 26%, #a3120c 66%, #2a0403 100%);
   animation: demon-pulse 1.6s ease-in-out infinite;
 }
 
@@ -1653,6 +1741,29 @@ kbd {
 @keyframes demon-pulse {
   0%, 100% { box-shadow: 0 0 9px rgba(255, 50, 30, 0.45); }
   50% { box-shadow: 0 0 22px rgba(255, 70, 30, 0.85); }
+}
+
+/* ------------------------------------------------------------------
+   Training Ground card (spans the grid under the four levels)
+   ------------------------------------------------------------------ */
+.mode-card--training {
+  grid-column: 1 / -1;
+  background: radial-gradient(120% 170% at 0% 0%, rgba(64, 214, 255, 0.1), transparent 55%), var(--gunmetal-raised);
+}
+
+.mode-card--training .mode-card__name {
+  color: #8fe6ff;
+}
+
+.mode-card--training[aria-checked="true"] {
+  border-color: #59d4f5;
+  background: linear-gradient(180deg, rgba(64, 214, 255, 0.12), transparent 80%), var(--gunmetal-raised);
+  box-shadow: inset 0 0 0 1px #59d4f5;
+}
+
+.mode-card--training[aria-checked="true"] .mode-card__key {
+  border-color: #2b7d93;
+  color: #8fe6ff;
 }
 
 /* Demon rounds re-tint the brass accents of the HUD and pause screen ember red. */
@@ -2176,12 +2287,21 @@ kbd {
     padding: 12px;
   }
 
+  .rules {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .result-head {
     grid-template-columns: minmax(0, 1fr);
     justify-items: start;
   }
 
   .ammo__pips {
+    display: none;
+  }
+
+  /* Phones keep the HUD stats readable; the menu has its own full screen button. */
+  .hud__fullscreen {
     display: none;
   }
 
@@ -2259,7 +2379,7 @@ kbd {
   <header class="hud" id="hud" hidden>
     <div class="hud__rail">
       <div class="hud__block hud__block--score">
-        <span class="hud__label">Score</span>
+        <span class="hud__label" id="hud-score-label">Score</span>
         <div class="hud__score-line">
           <span class="hud__value hud__value--xl" id="hud-score">0</span>
           <span class="hud__chip" id="hud-multiplier" title="Streak multiplier">×1.00</span>
@@ -2284,6 +2404,9 @@ kbd {
           <button class="icon-button" id="hud-sound-button" type="button" aria-pressed="false" aria-label="Mute sound (M)" title="Mute sound (M)">
             <svg id="hud-sound-on-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3.5v11L5 10H2z"/><path d="M11 5.2a4 4 0 0 1 0 5.6l-.9-.9a2.7 2.7 0 0 0 0-3.8z"/><path d="M12.8 3.4a6.5 6.5 0 0 1 0 9.2l-.9-.9a5.2 5.2 0 0 0 0-7.4z"/></svg>
             <svg id="hud-sound-off-icon" viewBox="0 0 16 16" aria-hidden="true" hidden><path d="M2 6h3l4-3.5v11L5 10H2z"/><path d="M10.6 5.6l.9-.9 1.6 1.6 1.6-1.6.9.9L14 7.2l1.6 1.6-.9.9-1.6-1.6-1.6 1.6-.9-.9 1.6-1.6z"/></svg>
+          </button>
+          <button class="icon-button hud__fullscreen" id="hud-fullscreen-button" type="button" aria-label="Full screen" title="Full screen" hidden>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 1.5h5v1.8H3.3v3.2H1.5zM9.5 1.5h5v5h-1.8V3.3H9.5zM1.5 9.5h1.8v3.2h3.2v1.8h-5zM12.7 9.5h1.8v5h-5v-1.8h3.2z"/></svg>
           </button>
           <button class="icon-button" id="hud-pause-button" type="button" aria-label="Pause (Esc)" title="Pause (Esc)">
             <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="3.4" height="11" rx="0.6"/><rect x="9.6" y="2.5" width="3.4" height="11" rx="0.6"/></svg>
@@ -2321,7 +2444,7 @@ kbd {
       <div class="console__brand">
         <p class="eyebrow">Live-fire sphere · WebGL 3D · procedural audio</p>
         <h1 class="wordmark" id="menu-title">HITSCAN<span class="wordmark__reticle" aria-hidden="true"></span></h1>
-        <p class="lede">You stand inside a gridded sphere. Glass orbs appear at different depths; your pistol follows the cursor. Hit each orb before its ring closes, then spend the coins you bank on weapon finishes in the Armory.</p>
+        <p class="lede">You stand inside a gridded sphere. Glass orbs appear at different depths; your pistol follows the cursor. Hit each orb before its ring closes. Harder levels pay more coins, which buy weapon finishes in the Armory.</p>
         <p class="notice" id="webgl-notice" data-tone="miss" hidden></p>
       </div>
       <div class="console__grid">
@@ -2332,38 +2455,72 @@ kbd {
               <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="EASY" id="mode-card-easy">
                 <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 152; --orb-size: 42px;"></span></span>
                 <span class="mode-card__name">Easy</span>
-                <span class="mode-card__spec">r 48–60 px · 4.0 s<br>static · big hitbox</span>
+                <span class="mode-card__spec">r 48–60 px · 4.0 s<br>static · ×1 coins</span>
                 <kbd class="mode-card__key">1</kbd>
               </button>
               <button class="mode-card" type="button" role="radio" aria-checked="true" tabindex="0" data-difficulty="MEDIUM" id="mode-card-medium">
-                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 40; --orb-size: 33px;"></span></span>
+                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 40; --orb-size: 34px;"></span></span>
                 <span class="mode-card__name">Medium</span>
-                <span class="mode-card__spec">r 34–44 px · 2.6 s<br>slow bounce</span>
+                <span class="mode-card__spec">r 34–44 px · 2.6 s<br>slow bounce · ×1.5 coins</span>
                 <kbd class="mode-card__key">2</kbd>
               </button>
-              <button class="mode-card mode-card--demon" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="DEMON" id="mode-card-demon">
-                <span class="mode-card__orb"><span class="orb-icon orb-icon--demon" style="--orb-hue: 2; --orb-size: 22px;"></span></span>
-                <span class="mode-card__name">Demon</span>
-                <span class="mode-card__spec">r 16–22 px · 1.25 s<br>erratic · 300 pts a hit</span>
+              <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="HARD" id="mode-card-hard">
+                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 22; --orb-size: 28px;"></span></span>
+                <span class="mode-card__name">Hard</span>
+                <span class="mode-card__spec">r 22–29 px · 1.65 s<br>fast drift · ×2 coins</span>
                 <kbd class="mode-card__key">3</kbd>
               </button>
-              <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="ADAPTIVE" id="mode-card-adaptive">
-                <span class="mode-card__orb"><span class="orb-icon orb-icon--adaptive" style="--orb-hue: 272; --orb-size: 36px;"></span></span>
-                <span class="mode-card__name">Adaptive</span>
-                <span class="mode-card__spec">re-tunes every 5 s<br>endless · 6 shields</span>
+              <button class="mode-card mode-card--demon" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="DEMON" id="mode-card-demon">
+                <span class="mode-card__orb"><span class="orb-icon orb-icon--demon" style="--orb-hue: 2; --orb-size: 24px;"></span></span>
+                <span class="mode-card__name">Demon</span>
+                <span class="mode-card__spec">r 18–24 px · 1.4 s<br>erratic · ×3 coins</span>
                 <kbd class="mode-card__key">4</kbd>
+              </button>
+              <button class="mode-card mode-card--training" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="TRAINING" id="mode-card-training">
+                <span class="mode-card__orb"><span class="orb-icon orb-icon--training" style="--orb-hue: 192; --orb-size: 30px;"></span></span>
+                <span class="mode-card__name">Training Ground</span>
+                <span class="mode-card__spec">play any level with the same rules<br>practice only · no coins, no leaderboard</span>
+                <kbd class="mode-card__key">5</kbd>
               </button>
             </div>
           </div>
 
+          <div class="field" role="group" aria-labelledby="label-training-level" id="training-level-field" hidden>
+            <p class="field__label" id="label-training-level">Training level</p>
+            <div class="segmented" id="training-level-options" role="radiogroup" aria-labelledby="label-training-level">
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-training-level="EASY" id="training-easy">Easy</button>
+              <button type="button" role="radio" aria-checked="true" tabindex="0" data-training-level="MEDIUM" id="training-medium">Medium</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-training-level="HARD" id="training-hard">Hard</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-training-level="DEMON" id="training-demon">Demon</button>
+            </div>
+            <p class="field__note">Same orbs and scoring as the real level. Nothing is earned: no coins and no leaderboard.</p>
+          </div>
+
           <div class="field" role="group" aria-labelledby="label-round-length" id="round-length-field">
             <p class="field__label" id="label-round-length">Round length</p>
-            <div class="segmented" id="round-length-options" role="radiogroup" aria-labelledby="label-round-length">
-              <button type="button" role="radio" aria-checked="false" data-round-seconds="30" id="round-30">30 s</button>
-              <button type="button" role="radio" aria-checked="true" data-round-seconds="60" id="round-60">60 s</button>
-              <button type="button" role="radio" aria-checked="false" data-round-seconds="90" id="round-90">90 s</button>
+            <div class="round-length">
+              <div class="segmented" id="round-length-options" role="radiogroup" aria-labelledby="label-round-length">
+                <button type="button" role="radio" aria-checked="false" data-round-seconds="30" id="round-30">30 s</button>
+                <button type="button" role="radio" aria-checked="true" data-round-seconds="60" id="round-60">60 s</button>
+                <button type="button" role="radio" aria-checked="false" data-round-seconds="90" id="round-90">90 s</button>
+              </div>
+              <label class="round-input" id="round-length-custom" for="round-length-input">
+                <span>Or type</span>
+                <input type="number" id="round-length-input" min="10" max="150" step="1" inputmode="numeric" value="60" aria-describedby="round-length-note">
+                <span>s</span>
+              </label>
             </div>
-            <p class="field__note" id="round-length-note" hidden>Endless chaos runs until all 6 shields break. Each orb that times out costs one shield.</p>
+            <p class="field__note" id="round-length-note">Type any length from 10 to 150 seconds.</p>
+          </div>
+
+          <div class="field" role="group" aria-labelledby="label-scoring">
+            <p class="field__label" id="label-scoring">Scoring</p>
+            <ul class="rules">
+              <li><b>+500</b><span>Bullseye: hit the small circle in the middle of an orb</span></li>
+              <li><b>+250</b><span>Streak bonus at 5 hits in a row, then +500 at 10, +750 at 15 and so on</span></li>
+              <li><b data-tone="miss">−50</b><span>A shot that hits nothing</span></li>
+              <li><b data-tone="miss">−100</b><span>An orb that explodes before you hit it</span></li>
+            </ul>
           </div>
 
           <div class="field" role="group" aria-labelledby="label-settings">
@@ -2384,14 +2541,15 @@ kbd {
 
           <div class="actions">
             <button class="cta" id="start-button" type="button">Start round <kbd>Enter</kbd></button>
+            <button class="button-secondary" id="fullscreen-button" type="button" hidden>Full screen</button>
           </div>
-          <p class="controls-hint controls-hint--keyboard">Click to fire · <kbd>R</kbd> or right-click reloads · <kbd>F</kbd> inspects the pistol · <kbd>L</kbd> laser on/off · <kbd>B</kbd> Armory · <kbd>Esc</kbd> pauses · <kbd>M</kbd> mutes · <kbd>1</kbd>–<kbd>4</kbd> pick a mode</p>
+          <p class="controls-hint controls-hint--keyboard">Click to fire · <kbd>R</kbd> or right-click reloads · <kbd>F</kbd> inspects the pistol · <kbd>L</kbd> laser on/off · <kbd>B</kbd> Armory · <kbd>Esc</kbd> pauses · <kbd>M</kbd> mutes · <kbd>1</kbd>–<kbd>5</kbd> pick a mode</p>
           <p class="controls-hint controls-hint--touch">Tap an orb to fire. Tap the magazine counter in the corner to reload early; it also reloads itself when empty. The laser sight switch is above, and the Armory button sits next to your coins.</p>
         </div>
 
         <div class="console__side">
           <aside class="loadout" aria-label="Wallet and equipped finish">
-            <div class="wallet" title="Every 10 points you score in a finished round banks 1 coin">
+            <div class="wallet" title="Every 10 points you score in a finished round bank 1 coin, times the level bonus">
               <svg class="coin-icon" viewBox="0 0 24 24" aria-hidden="true"><circle class="coin-icon__rim" cx="12" cy="12" r="10.2"/><circle class="coin-icon__face" cx="12" cy="12" r="6.8"/><path class="coin-icon__mark" d="M12 7.4v2.8M12 13.8v2.8M7.4 12h2.8M13.8 12h2.8"/></svg>
               <span class="wallet__amount" id="wallet-amount">0</span>
               <span class="wallet__unit">coins</span>
@@ -2401,7 +2559,7 @@ kbd {
               <span class="loadout__labels"><small>Equipped finish</small><b id="loadout-skin-name">Factory Issue</b></span>
             </div>
             <button class="button-secondary loadout__button" id="armory-button" type="button">Armory <kbd>B</kbd></button>
-            <p class="loadout__rate">10 points = 1 coin</p>
+            <p class="loadout__rate">10 points = 1 coin · Easy ×1 · Medium ×1.5 · Hard ×2 · Demon ×3</p>
           </aside>
           <div class="board" id="menu-board">
             <div class="board__head">
@@ -2409,8 +2567,8 @@ kbd {
               <div class="tabs" id="menu-board-tabs" role="tablist" aria-label="Leaderboard mode">
                 <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-list" data-board-mode="EASY" id="board-tab-easy">Easy</button>
                 <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="menu-board-list" data-board-mode="MEDIUM" id="board-tab-medium">Medium</button>
+                <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-list" data-board-mode="HARD" id="board-tab-hard">Hard</button>
                 <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-list" data-board-mode="DEMON" id="board-tab-demon">Demon</button>
-                <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-list" data-board-mode="ADAPTIVE" id="board-tab-adaptive">Adaptive</button>
               </div>
             </div>
             <ol class="board__list" id="menu-board-list" role="tabpanel" aria-label="Top scores"></ol>
@@ -2431,7 +2589,7 @@ kbd {
       <p class="eyebrow" id="pause-eyebrow">Round paused</p>
       <h2 class="screen__title" id="pause-title">Cease fire</h2>
       <p class="screen__subtitle" id="pause-subtitle">Targets are frozen. The clock resumes when you do.</p>
-      <p class="pause-note">Coins bank when a round finishes. Quitting or restarting now forfeits this round's coins.</p>
+      <p class="pause-note" id="pause-note">Coins bank when a round finishes. Quitting or restarting now forfeits this round's coins.</p>
       <div class="toggles pause-toggles">
         <label class="toggle" for="pause-laser"><input type="checkbox" id="pause-laser" checked><span>Laser sight</span></label>
       </div>
@@ -2462,7 +2620,7 @@ kbd {
       <div class="coin-award" id="over-coins" aria-live="polite">
         <svg class="coin-icon coin-icon--large" viewBox="0 0 24 24" aria-hidden="true"><circle class="coin-icon__rim" cx="12" cy="12" r="10.2"/><circle class="coin-icon__face" cx="12" cy="12" r="6.8"/><path class="coin-icon__mark" d="M12 7.4v2.8M12 13.8v2.8M7.4 12h2.8M13.8 12h2.8"/></svg>
         <div class="coin-award__body">
-          <p class="coin-award__line"><span class="coin-award__value" id="over-coins-earned">+0</span> <span class="coin-award__label">coins banked</span></p>
+          <p class="coin-award__line"><span class="coin-award__value" id="over-coins-earned">+0</span> <span class="coin-award__label" id="over-coins-label">coins banked</span></p>
           <p class="coin-award__meta" id="over-coins-meta">10 points = 1 coin · wallet 0</p>
         </div>
         <p class="coin-award__next" id="over-coins-next"></p>
@@ -2507,13 +2665,13 @@ kbd {
               <p class="eyebrow">Weapon finishes</p>
               <h2 class="screen__title" id="armory-title">Armory</h2>
             </div>
-            <div class="wallet wallet--large" title="Every 10 points you score in a finished round banks 1 coin">
+            <div class="wallet wallet--large" title="Every 10 points you score in a finished round bank 1 coin, times the level bonus">
               <svg class="coin-icon" viewBox="0 0 24 24" aria-hidden="true"><circle class="coin-icon__rim" cx="12" cy="12" r="10.2"/><circle class="coin-icon__face" cx="12" cy="12" r="6.8"/><path class="coin-icon__mark" d="M12 7.4v2.8M12 13.8v2.8M7.4 12h2.8M13.8 12h2.8"/></svg>
               <span class="wallet__amount" id="armory-wallet-amount">0</span>
               <span class="wallet__unit">coins</span>
             </div>
           </div>
-          <p class="armory__rate">Every finished round banks coins: <b>10 points = 1 coin</b>. Pick a finish to preview it on the pistol.</p>
+          <p class="armory__rate">Every finished round banks coins: <b>10 points = 1 coin</b>, times the level bonus (Medium ×1.5, Hard ×2, Demon ×3). Pick a finish to preview it on the pistol.</p>
           <div class="skin-list" id="skin-list" role="listbox" aria-label="Weapon finishes" aria-orientation="vertical"></div>
           <div class="skin-detail" id="skin-detail">
             <div class="skin-detail__top">
@@ -2609,17 +2767,26 @@ const ROUND_END_REASONS = deepFreeze({
    Every value the engine reads about a mode lives here and nowhere else.
    ------------------------------------------------------------------------- */
 
-const DIFFICULTY_KEYS = deepFreeze(['EASY', 'MEDIUM', 'DEMON', 'ADAPTIVE']);
+/** The four ranked levels, easiest first. Each keeps its own leaderboard. */
+const DIFFICULTY_KEYS = deepFreeze(['EASY', 'MEDIUM', 'HARD', 'DEMON']);
 
-/** Keys from older saves that map onto a current mode (HARD became DEMON). */
-const LEGACY_DIFFICULTY_KEYS = deepFreeze({ HARD: 'DEMON' });
+/** The Training Ground replays any level as practice: same orbs and scoring, nothing banked. */
+const TRAINING_MODE_KEY = 'TRAINING';
+
+/** Everything the menu can start, in card order (keys 1 to 5). */
+const MODE_KEYS = deepFreeze(['EASY', 'MEDIUM', 'HARD', 'DEMON', TRAINING_MODE_KEY]);
+
+/** Keys from older saves that map onto a current mode (Adaptive became the Training Ground). */
+const LEGACY_MODE_KEYS = deepFreeze({ ADAPTIVE: TRAINING_MODE_KEY });
 
 /**
- * Every mode is tuned to be forgiving except DEMON, which keeps tiny,
- * erratic, short-lived orbs and pays the most per hit. `hitboxScale` widens
- * the hit sphere past the drawn glass (1 = exact), `hueCenter`/`hueSpread`
- * restrict orb colors (null = the whole color wheel), and `theme` selects the
- * arena palette.
+ * Easy and Medium are forgiving; Hard and Demon keep small, drifting,
+ * short-lived orbs, and Hard sits just under Demon. Harder levels pay more
+ * per hit and multiply the coins a finished round banks (`coinMultiplier`);
+ * the miss and explode penalties are the same everywhere. `hitboxScale`
+ * widens the hit sphere past the drawn glass (1 = exact), `hueCenter`/
+ * `hueSpread` restrict orb colors (null = the whole color wheel), and
+ * `theme` selects the arena palette.
  */
 const DIFFICULTY_CONFIG = deepFreeze({
   EASY: {
@@ -2638,8 +2805,9 @@ const DIFFICULTY_CONFIG = deepFreeze({
     spawnIntervalMs: 1250,
     maxConcurrentTargets: 3,
     baseHitScore: 100,
-    expirePenalty: 75,
-    whiffPenalty: 5,
+    expirePenalty: 100,
+    whiffPenalty: 50,
+    coinMultiplier: 1,
     hitboxScale: 1.12,
     isEndless: false,
     startingShields: 0,
@@ -2649,6 +2817,7 @@ const DIFFICULTY_CONFIG = deepFreeze({
     hueCenter: null,
     hueSpread: null,
     theme: 'RANGE',
+    isTraining: false,
     adaptive: null
   },
   MEDIUM: {
@@ -2667,8 +2836,9 @@ const DIFFICULTY_CONFIG = deepFreeze({
     spawnIntervalMs: 950,
     maxConcurrentTargets: 4,
     baseHitScore: 150,
-    expirePenalty: 120,
-    whiffPenalty: 10,
+    expirePenalty: 100,
+    whiffPenalty: 50,
+    coinMultiplier: 1.5,
     hitboxScale: 1.08,
     isEndless: false,
     startingShields: 0,
@@ -2678,27 +2848,60 @@ const DIFFICULTY_CONFIG = deepFreeze({
     hueCenter: null,
     hueSpread: null,
     theme: 'RANGE',
+    isTraining: false,
+    adaptive: null
+  },
+  HARD: {
+    key: 'HARD',
+    label: 'Hard',
+    radiusMin: 22,
+    radiusMax: 29,
+    lifespanMs: 1650,
+    movementType: MOVEMENT_TYPES.SINE_DRIFT,
+    speedMin: 100,
+    speedMax: 155,
+    driftAccelerationMin: 180,
+    driftAccelerationMax: 300,
+    driftFrequencyMinHz: 0.8,
+    driftFrequencyMaxHz: 1.7,
+    spawnIntervalMs: 740,
+    maxConcurrentTargets: 4,
+    baseHitScore: 220,
+    expirePenalty: 100,
+    whiffPenalty: 50,
+    coinMultiplier: 2,
+    hitboxScale: 1.04,
+    isEndless: false,
+    startingShields: 0,
+    magazineCapacity: 16,
+    reloadDurationMs: 900,
+    accentHue: 22,
+    hueCenter: null,
+    hueSpread: null,
+    theme: 'RANGE',
+    isTraining: false,
     adaptive: null
   },
   DEMON: {
     key: 'DEMON',
     label: 'Demon',
-    radiusMin: 16,
-    radiusMax: 22,
-    lifespanMs: 1250,
+    radiusMin: 18,
+    radiusMax: 24,
+    lifespanMs: 1400,
     movementType: MOVEMENT_TYPES.SINE_DRIFT,
-    speedMin: 140,
-    speedMax: 210,
-    driftAccelerationMin: 300,
-    driftAccelerationMax: 480,
-    driftFrequencyMinHz: 1.1,
-    driftFrequencyMaxHz: 2.4,
-    spawnIntervalMs: 640,
+    speedMin: 125,
+    speedMax: 190,
+    driftAccelerationMin: 270,
+    driftAccelerationMax: 430,
+    driftFrequencyMinHz: 1.0,
+    driftFrequencyMaxHz: 2.2,
+    spawnIntervalMs: 680,
     maxConcurrentTargets: 5,
     baseHitScore: 300,
-    expirePenalty: 250,
-    whiffPenalty: 20,
-    hitboxScale: 1.0,
+    expirePenalty: 100,
+    whiffPenalty: 50,
+    coinMultiplier: 3,
+    hitboxScale: 1.03,
     isEndless: false,
     startingShields: 0,
     magazineCapacity: 15,
@@ -2707,89 +2910,75 @@ const DIFFICULTY_CONFIG = deepFreeze({
     hueCenter: 5,
     hueSpread: 45,
     theme: 'DEMON',
+    isTraining: false,
     adaptive: null
-  },
-  ADAPTIVE: {
-    key: 'ADAPTIVE',
-    label: 'Adaptive',
-    radiusMin: 34,
-    radiusMax: 44,
-    lifespanMs: 2400,
-    movementType: MOVEMENT_TYPES.LINEAR_BOUNCE,
-    speedMin: 55,
-    speedMax: 100,
-    driftAccelerationMin: 160,
-    driftAccelerationMax: 300,
-    driftFrequencyMinHz: 0.8,
-    driftFrequencyMaxHz: 1.8,
-    spawnIntervalMs: 900,
-    maxConcurrentTargets: 4,
-    baseHitScore: 200,
-    expirePenalty: 150,
-    whiffPenalty: 10,
-    hitboxScale: 1.06,
-    isEndless: true,
-    startingShields: 6,
-    magazineCapacity: 17,
-    reloadDurationMs: 880,
-    accentHue: 272,
-    hueCenter: null,
-    hueSpread: null,
-    theme: 'RANGE',
-    adaptive: {
-      evaluationIntervalMs: 5000,
-      highAccuracyThreshold: 0.85,
-      lowAccuracyThreshold: 0.60,
-      sizeReductionStep: 0.05,
-      velocityIncreaseStep: 0.10,
-      lifespanReductionStep: 0.07,
-      easeIntensityScale: 1.25,
-      minimumAttemptsPerWindow: 3,
-      sineDriftUnlockLevel: 4,
-      extraTargetEveryLevels: 3,
-      maxConcurrentTargetsCeiling: 7,
-      levelScoreBonusPerLevel: 0.12,
-      sizeMultiplierMin: 0.36,
-      sizeMultiplierMax: 1.5,
-      velocityMultiplierMin: 0.5,
-      velocityMultiplierMax: 4.0,
-      lifespanMultiplierMin: 0.4,
-      lifespanMultiplierMax: 1.7
-    }
   }
 });
 
-/** Maps a stored or requested mode key (including legacy ones) to a current key, or null. */
+/** Maps a stored or requested level key to one of the four ranked levels, or null. */
 function resolveDifficultyKey(candidate) {
   if (typeof candidate !== 'string') {
     return null;
   }
   const upper = candidate.toUpperCase();
-  if (DIFFICULTY_KEYS.indexOf(upper) !== -1) {
+  return DIFFICULTY_KEYS.indexOf(upper) !== -1 ? upper : null;
+}
+
+/** Maps a stored or requested menu mode (a level, the Training Ground, or a legacy key) to a current key, or null. */
+function resolveModeKey(candidate) {
+  if (typeof candidate !== 'string') {
+    return null;
+  }
+  const upper = candidate.toUpperCase();
+  if (MODE_KEYS.indexOf(upper) !== -1) {
     return upper;
   }
-  if (Object.prototype.hasOwnProperty.call(LEGACY_DIFFICULTY_KEYS, upper)) {
-    return LEGACY_DIFFICULTY_KEYS[upper];
+  if (Object.prototype.hasOwnProperty.call(LEGACY_MODE_KEYS, upper)) {
+    return LEGACY_MODE_KEYS[upper];
   }
   return null;
 }
 
-const ROUND_LENGTH_OPTIONS_SECONDS = deepFreeze([30, 60, 90]);
+/**
+ * The config a round runs on. A Training Ground round copies the chosen
+ * level (orbs, scoring, theme) under a training label, and banks nothing.
+ */
+function createRoundConfig(modeKey, trainingLevelKey) {
+  if (modeKey !== TRAINING_MODE_KEY) {
+    return DIFFICULTY_CONFIG[modeKey] || DIFFICULTY_CONFIG.MEDIUM;
+  }
+  const level = DIFFICULTY_CONFIG[trainingLevelKey] || DIFFICULTY_CONFIG.MEDIUM;
+  return deepFreeze(Object.assign({}, level, {
+    label: 'Training · ' + level.label,
+    coinMultiplier: 0,
+    isTraining: true
+  }));
+}
+
+/** Round lengths, preset (30, 60 or 90 s in the menu) or typed, are whole seconds in this range. */
+const ROUND_LENGTH_LIMITS_SECONDS = deepFreeze({ minimum: 10, maximum: 150 });
+
+function isValidRoundSeconds(seconds) {
+  return Number.isInteger(seconds) && seconds >= ROUND_LENGTH_LIMITS_SECONDS.minimum && seconds <= ROUND_LENGTH_LIMITS_SECONDS.maximum;
+}
 
 /** Global tuning knobs shared by several subsystems. */
 const GAME_RULES = deepFreeze({
-  safeZonePaddingRatio: 0.10,
+  safeZonePaddingRatio: 0.06,
   safeZoneHudClearancePx: 14,
+  safeZoneAmmoClearancePx: 12,
   gunExclusionMarginPx: 26,
   targetSeparationMarginPx: 12,
   spawnPlacementAttempts: 28,
   streakMilestoneInterval: 5,
   multiplierStepPerMilestone: 0.25,
   multiplierMaximum: 4,
+  // Every 5th hit in a row pays streak × 50: +250 at 5, +500 at 10, +750 at 15 and so on.
+  streakBonusPointsPerHit: 50,
   bullseyeRadiusRatio: 0.3,
+  bullseyeBonusPoints: 500,
   speedBonusWeight: 0.4,
   precisionBonusWeight: 0.5,
-  bullseyeBonusRatio: 0.25,
   countdownStepMs: 420,
   countdownSteps: 3,
   fixedTimeStepMs: 1000 / 120,
@@ -2817,15 +3006,19 @@ const GAME_RULES = deepFreeze({
    ------------------------------------------------------------------------- */
 
 const ARENA_RULES = deepFreeze({
-  arenaRadius: 60,
-  verticalFovDegrees: 46,
-  minimumHorizontalFovDegrees: 42,
+  // A wide, deep range: about 90° across on a widescreen, orbs from 8 to 20 m out.
+  arenaRadius: 100,
+  verticalFovDegrees: 58,
+  minimumHorizontalFovDegrees: 46,
+  // The pistol is framed as if the view were this narrow, so it keeps its size on screen.
+  viewmodelVerticalFovDegrees: 46,
+  viewmodelMinimumHorizontalFovDegrees: 42,
   nearPlane: 0.02,
-  farPlane: 160,
-  spawnDepthMin: 6,
-  spawnDepthMax: 12,
-  movementDepthMin: 5,
-  movementDepthMax: 14.5,
+  farPlane: 260,
+  spawnDepthMin: 8,
+  spawnDepthMax: 20,
+  movementDepthMin: 6.5,
+  movementDepthMax: 24,
   depthVelocityShare: 0.24,
   swayTranslationX: 0.05,
   swayTranslationY: 0.03,
@@ -2839,8 +3032,8 @@ const ARENA_RULES = deepFreeze({
   showcaseGunHeight: 0.15,
   showcaseFillWidth: 0.66,
   showcaseFillHeight: 0.6,
-  fogStartDepth: 7,
-  fogEndDepth: 28,
+  fogStartDepth: 10,
+  fogEndDepth: 46,
   fogMaxAmount: 0.35,
   gravityMetersPerSecondSquared: 9.8,
   maxRenderScale: 2,
@@ -5507,7 +5700,7 @@ class Target {
 
   /**
    * Keeps the orb inside the safe frustum slice at its own depth: walls are
-   * the 10% screen inset, plus near and far depth limits. Crossing a wall
+   * the safe-zone screen inset, plus near and far depth limits. Crossing a wall
    * inverts the velocity component along that wall's normal. The circular
    * zone around the gun (measured on screen) reflects the screen-plane motion.
    */
@@ -5719,15 +5912,19 @@ class TargetSpawner {
   }
 
   /**
-   * Safe zone in normalized screen units: at least a 10% inset from each edge
-   * (±0.8 in NDC), pushed below the HUD rail, with a gun zone at bottom-center.
+   * Safe zone in normalized screen units: at least a 6% inset from each edge
+   * (±0.88 in NDC), pushed below the HUD rail and above the magazine counter
+   * (null while it is hidden), with a gun zone at bottom right.
    */
-  configureBounds(renderer, hudBottomPx) {
+  configureBounds(renderer, hudBottomPx, ammoTopPx) {
     const bounds = this.bounds;
     const inset = 1 - GAME_RULES.safeZonePaddingRatio * 2;
     bounds.ndcLeft = -inset;
     bounds.ndcRight = inset;
-    bounds.ndcBottom = -inset;
+    const ammoLimit = ammoTopPx === null
+      ? -inset
+      : 1 - ((ammoTopPx - GAME_RULES.safeZoneAmmoClearancePx) / renderer.cssHeight) * 2;
+    bounds.ndcBottom = Math.min(-0.3, Math.max(-inset, ammoLimit));
     const hudLimit = 1 - ((hudBottomPx + GAME_RULES.safeZoneHudClearancePx) / renderer.cssHeight) * 2;
     bounds.ndcTop = Math.max(-0.2, Math.min(inset, hudLimit));
     bounds.tanHalfFovY = renderer.tanHalfVerticalFov;
@@ -6373,6 +6570,51 @@ class ImpactMark {
   }
 }
 
+/** A bullseye, drawn on the 2D overlay: the orb's small center circle flashes and pops outward. */
+class BullseyeMark {
+  constructor() {
+    this.isActive = false;
+    this.x = 0;
+    this.y = 0;
+    this.radius = 8;
+    this.lifeMs = 560;
+    this.ageMs = 0;
+  }
+
+  activate(x, y, radius) {
+    this.isActive = true;
+    this.x = x;
+    this.y = y;
+    this.radius = Math.max(5, radius);
+    this.ageMs = 0;
+  }
+
+  update(deltaSeconds) {
+    this.ageMs += deltaSeconds * 1000;
+    if (this.ageMs >= this.lifeMs) {
+      this.isActive = false;
+    }
+  }
+
+  render(context) {
+    const progress = MathUtils.clamp(this.ageMs / this.lifeMs, 0, 1);
+    const alpha = 1 - progress;
+    const ringRadius = this.radius * (1 + MathUtils.easeOutCubic(progress) * 0.9);
+    context.beginPath();
+    context.arc(this.x, this.y, ringRadius, 0, TAU);
+    context.lineWidth = 4;
+    context.strokeStyle = 'rgba(4, 6, 10, ' + (alpha * 0.55).toFixed(3) + ')';
+    context.stroke();
+    context.lineWidth = 2;
+    context.strokeStyle = 'rgba(255, 246, 226, ' + alpha.toFixed(3) + ')';
+    context.stroke();
+    context.fillStyle = 'rgba(255, 246, 226, ' + alpha.toFixed(3) + ')';
+    context.beginPath();
+    context.arc(this.x, this.y, 2.4 * (1 - progress * 0.5), 0, TAU);
+    context.fill();
+  }
+}
+
 class FloatingText {
   constructor() {
     this.isActive = false;
@@ -6446,6 +6688,7 @@ class EffectsSystem {
     this.smokePuffs = new FixedEffectPool(SmokePuff, 48);
     this.scratchSmokeVelocity = new Vector3D();
     this.impactMarks = new FixedEffectPool(ImpactMark, 24);
+    this.bullseyeMarks = new FixedEffectPool(BullseyeMark, 8);
     this.floatingTexts = new FixedEffectPool(FloatingText, 32);
     this.geometryScratch = {
       position: new Vector3D(),
@@ -6680,6 +6923,10 @@ class EffectsSystem {
     this.impactMarks.acquire().activate(screenX, screenY);
   }
 
+  spawnBullseyeMark(screenX, screenY, radiusPx) {
+    this.bullseyeMarks.acquire().activate(screenX, screenY, radiusPx);
+  }
+
   spawnFloatingText(text, screenX, screenY, options) {
     this.floatingTexts.acquire().activate(text, screenX, screenY, options || {});
   }
@@ -6690,6 +6937,7 @@ class EffectsSystem {
     this.tracers.update(deltaSeconds);
     this.smokePuffs.update(deltaSeconds);
     this.impactMarks.update(deltaSeconds);
+    this.bullseyeMarks.update(deltaSeconds);
     this.floatingTexts.update(deltaSeconds);
   }
 
@@ -6718,6 +6966,7 @@ class EffectsSystem {
 
   renderOverlay(context) {
     this.impactMarks.forEachActive((mark) => mark.render(context));
+    this.bullseyeMarks.forEachActive((mark) => mark.render(context));
     this.floatingTexts.forEachActive((text) => text.render(context));
   }
 
@@ -6727,6 +6976,7 @@ class EffectsSystem {
     this.tracers.clear();
     this.smokePuffs.clear();
     this.impactMarks.clear();
+    this.bullseyeMarks.clear();
     this.floatingTexts.clear();
   }
 
@@ -7428,7 +7678,14 @@ class GunController3D {
   setViewport(renderer) {
     const anchor = ARENA_RULES.gunAnchor;
     const isPortrait = renderer.aspect < 0.95;
-    const depth = isPortrait ? anchor.depth + 0.05 : anchor.depth;
+    // Frame the pistol for the narrower reference view (same minimum width rule as
+    // Renderer3D.resize), so the wide range view does not shrink it on screen.
+    const referenceTanHalfFov = Math.max(
+      Math.tan(ARENA_RULES.viewmodelVerticalFovDegrees * DEG_TO_RAD / 2),
+      Math.tan(ARENA_RULES.viewmodelMinimumHorizontalFovDegrees * DEG_TO_RAD / 2) / renderer.aspect
+    );
+    const framing = referenceTanHalfFov / renderer.tanHalfVerticalFov;
+    const depth = (isPortrait ? anchor.depth + 0.05 : anchor.depth) * framing;
     const ndcX = isPortrait ? 0.34 : anchor.ndcX;
     const ndcY = isPortrait ? -0.72 : anchor.ndcY;
     const halfHeight = depth * renderer.tanHalfVerticalFov;
@@ -8496,6 +8753,7 @@ const DEFAULT_SETTINGS = deepFreeze({
   laserEnabled: true,
   roundSeconds: 60,
   difficulty: 'MEDIUM',
+  trainingLevel: 'MEDIUM',
   boardTab: 'MEDIUM',
   playerName: ''
 });
@@ -8543,12 +8801,16 @@ class SettingsStore {
     if (typeof candidate.laserEnabled === 'boolean') {
       validated.laserEnabled = candidate.laserEnabled;
     }
-    if (ROUND_LENGTH_OPTIONS_SECONDS.indexOf(candidate.roundSeconds) !== -1) {
+    if (isValidRoundSeconds(candidate.roundSeconds)) {
       validated.roundSeconds = candidate.roundSeconds;
     }
-    const difficulty = resolveDifficultyKey(candidate.difficulty);
+    const difficulty = resolveModeKey(candidate.difficulty);
     if (difficulty !== null) {
       validated.difficulty = difficulty;
+    }
+    const trainingLevel = resolveDifficultyKey(candidate.trainingLevel);
+    if (trainingLevel !== null) {
+      validated.trainingLevel = trainingLevel;
     }
     const boardTab = resolveDifficultyKey(candidate.boardTab);
     if (boardTab !== null) {
@@ -8633,7 +8895,7 @@ class LeaderboardManager {
     if (candidate === null || typeof candidate !== 'object') {
       return null;
     }
-    // Older saves used HARD; those runs now sit on the Demon board.
+    // Only the four ranked levels keep boards (runs from the old Adaptive mode are dropped).
     const mode = resolveDifficultyKey(candidate.mode);
     if (mode === null) {
       return null;
@@ -8671,7 +8933,7 @@ class LeaderboardManager {
       averageReactionMs = Number.isFinite(reaction) && reaction > 0 && reaction < 60000 ? Math.round(reaction) : null;
     }
     let peakLevel = null;
-    if (mode === 'ADAPTIVE') {
+    if (DIFFICULTY_CONFIG[mode].adaptive !== null) {
       const level = LeaderboardManager.toNonNegativeInteger(candidate.peakLevel);
       peakLevel = level !== null && level >= 1 ? level : 1;
     }
@@ -8883,12 +9145,15 @@ class ArmoryStore {
     return Math.min(GAME_RULES.maximumCoinBalance, Math.floor(numeric));
   }
 
-  /** Coins a finished round banks: every 10 points buy one coin, and negative scores bank nothing. */
-  static coinsForScore(score) {
-    if (!(score > 0)) {
+  /**
+   * Coins a finished round banks: every 10 points buy one coin, times the
+   * level's coin multiplier. Negative scores bank nothing.
+   */
+  static coinsForScore(score, coinMultiplier = 1) {
+    if (!(score > 0) || !(coinMultiplier > 0)) {
       return 0;
     }
-    return Math.floor(score / GAME_RULES.pointsPerCoin);
+    return Math.floor((score * coinMultiplier) / GAME_RULES.pointsPerCoin);
   }
 
   get isPersistent() {
@@ -8964,9 +9229,9 @@ class ArmoryStore {
    * Converts a finished round's score into coins and adds them to the wallet.
    * @returns {{earned: number, balance: number, persisted: boolean}}
    */
-  bankRound(score) {
+  bankRound(score, coinMultiplier) {
     this.load();
-    const earned = ArmoryStore.coinsForScore(score);
+    const earned = ArmoryStore.coinsForScore(score, coinMultiplier);
     this.state.coins = Math.min(GAME_RULES.maximumCoinBalance, this.state.coins + earned);
     this.state.lifetimeCoins = Math.min(GAME_RULES.maximumCoinBalance, this.state.lifetimeCoins + earned);
     this.state.roundsBanked = Math.min(GAME_RULES.maximumCoinBalance, this.state.roundsBanked + 1);
@@ -9232,6 +9497,9 @@ class SessionStats {
 
   reset(config, roundDurationMs) {
     this.modeKey = config.key;
+    this.modeLabel = config.label;
+    this.isTraining = config.isTraining;
+    this.coinMultiplier = config.coinMultiplier;
     this.isEndless = config.isEndless;
     this.roundDurationMs = config.isEndless ? 0 : roundDurationMs;
     this.remainingMs = this.roundDurationMs;
@@ -9244,6 +9512,10 @@ class SessionStats {
     this.currentStreak = 0;
     this.bestStreak = 0;
     this.bullseyes = 0;
+    this.bullseyeBonusTotal = 0;
+    this.streakBonusTotal = 0;
+    this.whiffPenaltyTotal = 0;
+    this.expirePenaltyTotal = 0;
     this.reactionTimeTotalMs = 0;
     this.reactionSamples = 0;
     this.fastestReactionMs = Infinity;
@@ -9305,12 +9577,25 @@ class SessionStats {
     this.peakMultiplier = Math.max(this.peakMultiplier, this.multiplier);
   }
 
+  /** Flat bonus for hitting the small circle in the middle of an orb. */
+  addBullseyeBonus(points) {
+    this.score += points;
+    this.bullseyeBonusTotal += points;
+  }
+
+  /** Flat bonus paid at every streak milestone (5, 10, 15 and so on). */
+  addStreakBonus(points) {
+    this.score += points;
+    this.streakBonusTotal += points;
+  }
+
   /** @returns {number} the streak that was broken */
   recordWhiff(penalty) {
     const brokenStreak = this.currentStreak;
     this.whiffs += 1;
     this.currentStreak = 0;
     this.score -= penalty;
+    this.whiffPenaltyTotal += penalty;
     return brokenStreak;
   }
 
@@ -9320,6 +9605,7 @@ class SessionStats {
     this.targetsExpired += 1;
     this.currentStreak = 0;
     this.score -= penalty;
+    this.expirePenaltyTotal += penalty;
     if (this.startingShields > 0) {
       this.shieldsRemaining = Math.max(0, this.shieldsRemaining - 1);
     }
@@ -9355,6 +9641,9 @@ class SessionStats {
     const minutesPlayed = this.elapsedLiveMs / 60000;
     return {
       modeKey: this.modeKey,
+      modeLabel: this.modeLabel,
+      isTraining: this.isTraining,
+      coinMultiplier: this.coinMultiplier,
       isEndless: this.isEndless,
       endReason: endReason,
       score: Math.round(this.score),
@@ -9366,6 +9655,10 @@ class SessionStats {
       targetsExpired: this.targetsExpired,
       bestStreak: this.bestStreak,
       bullseyes: this.bullseyes,
+      bullseyeBonusTotal: this.bullseyeBonusTotal,
+      streakBonusTotal: this.streakBonusTotal,
+      whiffPenaltyTotal: this.whiffPenaltyTotal,
+      expirePenaltyTotal: this.expirePenaltyTotal,
       averageReactionMs: this.averageReactionMs,
       fastestReactionMs: Number.isFinite(this.fastestReactionMs) ? this.fastestReactionMs : null,
       hitsPerMinute: minutesPlayed > 0 ? this.shotsHit / minutesPlayed : 0,
@@ -9459,6 +9752,7 @@ class HUDController {
     this.documentRef = documentRef;
     this.elements = {
       root: requireElement(documentRef, 'hud'),
+      scoreLabel: requireElement(documentRef, 'hud-score-label'),
       score: requireElement(documentRef, 'hud-score'),
       multiplier: requireElement(documentRef, 'hud-multiplier'),
       mode: requireElement(documentRef, 'hud-mode'),
@@ -9530,6 +9824,7 @@ class HUDController {
       ? config.label + ' · endless'
       : config.label + ' · ' + Math.round(roundDurationMs / 1000) + ' s';
     this.elements.mode.textContent = modeText;
+    this.elements.scoreLabel.textContent = config.isTraining ? 'Practice score' : 'Score';
 
     this.elements.timebar.hidden = config.isEndless;
     this.elements.shields.hidden = !config.isEndless;
@@ -9711,13 +10006,20 @@ class UIController {
       armoryButton: requireElement(documentRef, 'armory-button'),
       overCoins: requireElement(documentRef, 'over-coins'),
       overCoinsEarned: requireElement(documentRef, 'over-coins-earned'),
+      overCoinsLabel: requireElement(documentRef, 'over-coins-label'),
       overCoinsMeta: requireElement(documentRef, 'over-coins-meta'),
       overCoinsNext: requireElement(documentRef, 'over-coins-next'),
       overArmory: requireElement(documentRef, 'over-armory'),
       modeGrid: requireElement(documentRef, 'mode-grid'),
+      trainingLevelField: requireElement(documentRef, 'training-level-field'),
+      trainingLevelOptions: requireElement(documentRef, 'training-level-options'),
       roundLengthField: requireElement(documentRef, 'round-length-field'),
       roundLengthOptions: requireElement(documentRef, 'round-length-options'),
+      roundLengthCustom: requireElement(documentRef, 'round-length-custom'),
+      roundLengthInput: requireElement(documentRef, 'round-length-input'),
       roundLengthNote: requireElement(documentRef, 'round-length-note'),
+      fullscreenButton: requireElement(documentRef, 'fullscreen-button'),
+      hudFullscreenButton: requireElement(documentRef, 'hud-fullscreen-button'),
       volumeInput: requireElement(documentRef, 'setting-volume'),
       volumeOutput: requireElement(documentRef, 'setting-volume-value'),
       shakeInput: requireElement(documentRef, 'setting-shake'),
@@ -9731,6 +10033,7 @@ class UIController {
       boardEmpty: requireElement(documentRef, 'menu-board-empty'),
       boardStorage: requireElement(documentRef, 'menu-board-storage'),
       boardClear: requireElement(documentRef, 'menu-board-clear'),
+      pauseNote: requireElement(documentRef, 'pause-note'),
       pauseStats: requireElement(documentRef, 'pause-stats'),
       pauseResume: requireElement(documentRef, 'pause-resume'),
       pauseRestart: requireElement(documentRef, 'pause-restart'),
@@ -9752,11 +10055,13 @@ class UIController {
       overMenu: requireElement(documentRef, 'over-menu')
     };
     this.modeCards = Array.prototype.slice.call(this.elements.modeGrid.querySelectorAll('[data-difficulty]'));
+    this.trainingLevelButtons = Array.prototype.slice.call(this.elements.trainingLevelOptions.querySelectorAll('[data-training-level]'));
     this.roundButtons = Array.prototype.slice.call(this.elements.roundLengthOptions.querySelectorAll('[data-round-seconds]'));
     this.boardTabButtons = Array.prototype.slice.call(this.elements.boardTabs.querySelectorAll('[data-board-mode]'));
     this.clearArmedMode = null;
     this.clearArmTimerId = 0;
     this.currentBoardTab = 'MEDIUM';
+    this.currentRoundSeconds = 60;
     this.coinCountTimerId = 0;
   }
 
@@ -9779,6 +10084,29 @@ class UIController {
         callbacks.onSelectRoundLength(Number(nextButton.getAttribute('data-round-seconds')));
       }));
     }
+
+    // A typed length applies as soon as it is in range; leaving the box (or Enter) settles the rest.
+    const roundInput = elements.roundLengthInput;
+    roundInput.addEventListener('input', () => this.commitTypedRoundLength(false));
+    roundInput.addEventListener('change', () => this.commitTypedRoundLength(true));
+    roundInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        this.commitTypedRoundLength(true);
+        roundInput.blur();
+      }
+    });
+
+    for (let buttonIndex = 0; buttonIndex < this.trainingLevelButtons.length; buttonIndex += 1) {
+      const levelButton = this.trainingLevelButtons[buttonIndex];
+      levelButton.addEventListener('click', () => callbacks.onSelectTrainingLevel(levelButton.getAttribute('data-training-level')));
+      levelButton.addEventListener('keydown', (event) => this.handleRadioGroupKeys(event, this.trainingLevelButtons, (nextButton) => {
+        callbacks.onSelectTrainingLevel(nextButton.getAttribute('data-training-level'));
+      }));
+    }
+
+    elements.fullscreenButton.addEventListener('click', () => callbacks.onToggleFullscreen());
+    elements.hudFullscreenButton.addEventListener('click', () => callbacks.onToggleFullscreen());
 
     elements.volumeInput.addEventListener('input', () => {
       const normalizedVolume = Number(elements.volumeInput.value) / 100;
@@ -9889,7 +10217,7 @@ class UIController {
 
   /**
    * Result-screen coin award, counted up over about half a second.
-   * @param {{earned: number, balance: number, persisted: boolean, nextSkin: object|null, ownsEverything: boolean}} award
+   * @param {{earned: number, balance: number, persisted: boolean, coinMultiplier: number, levelLabel: string, isTraining: boolean, nextSkin: object|null, ownsEverything: boolean}} award
    */
   showCoinAward(award) {
     const elements = this.elements;
@@ -9911,7 +10239,10 @@ class UIController {
       }, 33);
     }
     const storageNote = award.persisted ? '' : ' · this browser blocks storage, so coins last this session';
-    elements.overCoinsMeta.textContent = GAME_RULES.pointsPerCoin + ' points = 1 coin · wallet ' + Formatters.formatInteger(award.balance) + storageNote;
+    elements.overCoinsLabel.textContent = award.isTraining ? 'coins · training banks nothing' : 'coins banked';
+    elements.overCoinsMeta.textContent = award.isTraining
+      ? 'Training Ground is practice · wallet ' + Formatters.formatInteger(award.balance)
+      : GAME_RULES.pointsPerCoin + ' points = 1 coin · ' + award.levelLabel + ' pays ×' + award.coinMultiplier + ' · wallet ' + Formatters.formatInteger(award.balance) + storageNote;
     elements.overCoinsNext.textContent = '';
     if (award.ownsEverything) {
       elements.overCoinsNext.textContent = 'You own every finish in the Armory.';
@@ -9951,6 +10282,7 @@ class UIController {
      Menu controls
      --------------------------------------------------------------------- */
 
+  /** Marks the chosen mode card; the Training Ground also shows its level picker. */
   setSelectedDifficulty(difficultyKey) {
     for (let cardIndex = 0; cardIndex < this.modeCards.length; cardIndex += 1) {
       const card = this.modeCards[cardIndex];
@@ -9958,18 +10290,90 @@ class UIController {
       card.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       card.setAttribute('tabindex', isSelected ? '0' : '-1');
     }
-    const isEndless = DIFFICULTY_CONFIG[difficultyKey].isEndless;
-    this.elements.roundLengthOptions.hidden = isEndless;
-    this.elements.roundLengthNote.hidden = !isEndless;
+    const config = DIFFICULTY_CONFIG[difficultyKey];
+    this.elements.roundLengthField.hidden = Boolean(config && config.isEndless);
+    this.elements.trainingLevelField.hidden = difficultyKey !== TRAINING_MODE_KEY;
   }
 
+  setTrainingLevel(levelKey) {
+    for (let buttonIndex = 0; buttonIndex < this.trainingLevelButtons.length; buttonIndex += 1) {
+      const levelButton = this.trainingLevelButtons[buttonIndex];
+      const isSelected = levelButton.getAttribute('data-training-level') === levelKey;
+      levelButton.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      levelButton.setAttribute('tabindex', isSelected ? '0' : '-1');
+    }
+  }
+
+  /** Checks the matching preset (none for a typed length) and mirrors the length in the input box. */
   setRoundLength(seconds) {
+    this.currentRoundSeconds = seconds;
+    let isPreset = false;
     for (let buttonIndex = 0; buttonIndex < this.roundButtons.length; buttonIndex += 1) {
       const roundButton = this.roundButtons[buttonIndex];
       const isSelected = Number(roundButton.getAttribute('data-round-seconds')) === seconds;
+      isPreset = isPreset || isSelected;
       roundButton.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       roundButton.setAttribute('tabindex', isSelected ? '0' : '-1');
     }
+    if (!isPreset && this.roundButtons.length > 0) {
+      // No preset is checked, so keep the group reachable with Tab.
+      this.roundButtons[0].setAttribute('tabindex', '0');
+    }
+    if (this.documentRef.activeElement !== this.elements.roundLengthInput) {
+      this.elements.roundLengthInput.value = String(seconds);
+    }
+    this.elements.roundLengthCustom.setAttribute('data-active', isPreset ? 'false' : 'true');
+    this.setRoundLengthNote(null);
+  }
+
+  /** The note under the round length controls; null restores the default hint. */
+  setRoundLengthNote(text) {
+    const limits = ROUND_LENGTH_LIMITS_SECONDS;
+    this.elements.roundLengthNote.textContent = text === null
+      ? 'Type any length from ' + limits.minimum + ' to ' + limits.maximum + ' seconds.'
+      : text;
+  }
+
+  /**
+   * Reads the typed round length. A whole number of seconds in range applies
+   * right away; when the typing is done (`isFinal`), anything out of range
+   * snaps into 10 to 150 s and an empty box goes back to the current length.
+   */
+  commitTypedRoundLength(isFinal) {
+    const input = this.elements.roundLengthInput;
+    const raw = input.value.trim();
+    const typed = raw === '' ? NaN : Math.round(Number(raw));
+    if (isValidRoundSeconds(typed)) {
+      if (typed !== this.currentRoundSeconds) {
+        this.callbacks.onSelectRoundLength(typed);
+      }
+      if (isFinal) {
+        input.value = String(typed);
+      }
+      return;
+    }
+    if (!isFinal) {
+      return;
+    }
+    if (!Number.isFinite(typed)) {
+      input.value = String(this.currentRoundSeconds);
+      return;
+    }
+    const limits = ROUND_LENGTH_LIMITS_SECONDS;
+    const clamped = MathUtils.clamp(typed, limits.minimum, limits.maximum);
+    input.value = String(clamped);
+    this.callbacks.onSelectRoundLength(clamped);
+    this.setRoundLengthNote('Rounds last ' + limits.minimum + ' to ' + limits.maximum + ' seconds, so this one is set to ' + clamped + ' s.');
+  }
+
+  /** Shows the full screen buttons only where the page may go full screen, labelled for the current state. */
+  setFullscreenState(isAvailable, isActive) {
+    const label = isActive ? 'Exit full screen' : 'Full screen';
+    this.elements.fullscreenButton.hidden = !isAvailable;
+    this.elements.fullscreenButton.textContent = label;
+    this.elements.hudFullscreenButton.hidden = !isAvailable;
+    this.elements.hudFullscreenButton.setAttribute('aria-label', label);
+    this.elements.hudFullscreenButton.setAttribute('title', label);
   }
 
   setSettings(values) {
@@ -10105,6 +10509,12 @@ class UIController {
     this.fillStatGrid(this.elements.pauseStats, statRows);
   }
 
+  showPauseNote(isTraining) {
+    this.elements.pauseNote.textContent = isTraining
+      ? 'Training Ground is practice: nothing is banked, so quitting or restarting costs nothing.'
+      : 'Coins bank when a round finishes. Quitting or restarting now forfeits this round\'s coins.';
+  }
+
   /**
    * @param {object} summary from SessionStats.createSummary
    * @param {{qualifies: boolean, projectedRank: number, defaultName: string, entries: object[], manager: LeaderboardManager}} boardInfo
@@ -10117,24 +10527,30 @@ class UIController {
     elements.overGrade.setAttribute('data-grade', summary.grade);
     elements.overGrade.setAttribute('aria-label', 'Grade ' + summary.grade);
     elements.overEyebrow.textContent = summary.isEndless
-      ? config.label + ' · endless · peak level ' + summary.peakLevel
-      : config.label + ' · ' + Math.round(summary.roundDurationMs / 1000) + ' s round';
-    elements.overTitle.textContent = summary.endReason === ROUND_END_REASONS.SHIELDS_DEPLETED ? 'Shields down' : 'Round complete';
+      ? summary.modeLabel + ' · endless · peak level ' + summary.peakLevel
+      : summary.modeLabel + ' · ' + Math.round(summary.roundDurationMs / 1000) + ' s round';
+    let title = summary.isTraining ? 'Training complete' : 'Round complete';
+    if (summary.endReason === ROUND_END_REASONS.SHIELDS_DEPLETED) {
+      title = 'Shields down';
+    }
+    elements.overTitle.textContent = title;
     elements.overScore.textContent = summary.score < 0
       ? '−' + Formatters.formatInteger(Math.abs(summary.score))
       : Formatters.formatInteger(summary.score);
 
+    // "6 · +3,000": how often it happened and what it added to (or took off) the score.
+    const countWithPoints = (count, points, sign) => (points > 0 ? count + ' · ' + sign + Formatters.formatInteger(points) : String(count));
     const statRows = [
       { label: 'Accuracy', value: summary.hasShots ? Formatters.formatPercent(summary.accuracy, 1) : '—' },
       { label: 'Hits / shots', value: summary.shotsHit + ' / ' + summary.shotsFired, tone: 'hit' },
-      { label: 'Expired orbs', value: String(summary.targetsExpired), tone: summary.targetsExpired > 0 ? 'miss' : '' },
-      { label: 'Whiffed shots', value: String(summary.whiffs) },
+      { label: 'Bullseyes', value: countWithPoints(summary.bullseyes, summary.bullseyeBonusTotal, '+'), tone: summary.bullseyes > 0 ? 'hit' : '' },
+      { label: 'Streak bonus', value: summary.streakBonusTotal > 0 ? '+' + Formatters.formatInteger(summary.streakBonusTotal) : '0', tone: summary.streakBonusTotal > 0 ? 'hit' : '' },
+      { label: 'Exploded orbs', value: countWithPoints(summary.targetsExpired, summary.expirePenaltyTotal, '−'), tone: summary.targetsExpired > 0 ? 'miss' : '' },
+      { label: 'Missed shots', value: countWithPoints(summary.whiffs, summary.whiffPenaltyTotal, '−'), tone: summary.whiffs > 0 ? 'miss' : '' },
       { label: 'Best streak', value: String(summary.bestStreak) },
-      { label: 'Avg reaction', value: Formatters.formatMilliseconds(summary.averageReactionMs) },
-      { label: 'Bullseyes', value: String(summary.bullseyes) },
       summary.isEndless
         ? { label: 'Survived', value: Formatters.formatClock(summary.durationMs) }
-        : { label: 'Hits / min', value: summary.hitsPerMinute.toFixed(1) }
+        : { label: 'Avg reaction', value: Formatters.formatMilliseconds(summary.averageReactionMs) }
     ];
     this.fillStatGrid(elements.overStats, statRows);
 
@@ -10148,9 +10564,13 @@ class UIController {
     } else {
       elements.overRecordForm.hidden = true;
       elements.overSaveNotice.hidden = false;
-      elements.overSaveNotice.textContent = summary.score > 0
-        ? 'The ' + config.label + ' board keeps the top ' + GAME_RULES.leaderboardEntriesPerMode + '. This run did not make the cut.'
-        : 'Only positive scores go on the board.';
+      if (summary.isTraining) {
+        elements.overSaveNotice.textContent = 'Training Ground scores stay off the leaderboard. Here is the ' + config.label + ' board to beat.';
+      } else {
+        elements.overSaveNotice.textContent = summary.score > 0
+          ? 'The ' + config.label + ' board keeps the top ' + GAME_RULES.leaderboardEntriesPerMode + '. This run did not make the cut.'
+          : 'Only positive scores go on the board.';
+      }
     }
 
     elements.overBoardTitle.textContent = config.label + ' top ' + GAME_RULES.leaderboardEntriesPerMode;
@@ -10496,7 +10916,7 @@ class ArmoryView {
     const shortfall = skin.price - this.state.coins;
     if (shortfall > 0) {
       this.callbacks.onDenied(skin.id);
-      this.showNotice('You need ' + Formatters.formatInteger(shortfall) + ' more coins. Finished rounds bank 1 coin for every ' + GAME_RULES.pointsPerCoin + ' points.', 'miss');
+      this.showNotice('You need ' + Formatters.formatInteger(shortfall) + ' more coins. Finished rounds bank 1 coin for every ' + GAME_RULES.pointsPerCoin + ' points, and harder levels pay up to ×3.', 'miss');
       return;
     }
     if (this.confirmSkinId !== skin.id) {
@@ -11931,8 +12351,11 @@ const SHADER_SOURCES = (function buildShaderSources() {
     '    vec2 endPoint = vec2(sin(endAngle), cos(endAngle)) * ringRadius;',
     '    vec2 toEnd = vUv - endPoint;',
     '    float spark = exp(-dot(toEnd, toEnd) * 900.0) * step(0.002, remaining);',
-    '    float bullseye = (1.0 - smoothstep(0.004, 0.01, abs(radius - 0.207))) * 0.16;',
-    '    color = ringColor * (core + halo) * arc + trackColor * track + vec3(1.0, 0.96, 0.9) * spark * 1.6 + vec3(1.0) * bullseye;',
+    // The bullseye: a small circle (0.207 × 1.45 ≈ 0.3 of the orb radius) and a center dot.
+    '    float bullseyeRing = 1.0 - smoothstep(0.011, 0.022, abs(radius - 0.207));',
+    '    float bullseyeDot = 1.0 - smoothstep(0.022, 0.038, radius);',
+    '    vec3 bullseye = vec3(1.0, 0.97, 0.92) * (bullseyeRing * 0.5 + bullseyeDot * 0.6);',
+    '    color = ringColor * (core + halo) * arc + trackColor * track + vec3(1.0, 0.96, 0.9) * spark * 1.6 + bullseye;',
     '    color *= vColor.a;',
     '  } else if (kind < 2.5) {',
     '    float ringDistance = abs(radius - vParams.y);',
@@ -13452,6 +13875,7 @@ class AimTrainerGame {
     this.overlayCanvas = requireElement(documentRef, 'overlay');
     this.overlayContext = this.overlayCanvas.getContext('2d');
     this.hudElement = requireElement(documentRef, 'hud');
+    this.ammoElement = requireElement(documentRef, 'ammo');
 
     this.viewportWidth = 1;
     this.viewportHeight = 1;
@@ -13485,7 +13909,9 @@ class AimTrainerGame {
     this.ui = new UIController(documentRef, {
       onStart: () => this.startFromMenu(),
       onSelectDifficulty: (difficultyKey) => this.selectDifficulty(difficultyKey),
+      onSelectTrainingLevel: (levelKey) => this.selectTrainingLevel(levelKey),
       onSelectRoundLength: (seconds) => this.selectRoundLength(seconds),
+      onToggleFullscreen: () => this.toggleFullscreen(),
       onVolumeChange: (volume) => this.changeVolume(volume),
       onShakeToggle: (enabled) => this.toggleScreenShake(enabled),
       onReloadToggle: (enabled) => this.settings.set('reloadEnabled', enabled),
@@ -13520,8 +13946,10 @@ class AimTrainerGame {
     this.attractTargets = [];
     this.lastAttractSpawnMs = -Infinity;
     this.attractDemo = { target: null, aimStartedMs: 0, lastShotMs: 0 };
-    this.selectedDifficulty = resolveDifficultyKey(this.bootData.difficulty) || this.settings.get('difficulty');
-    this.activeConfig = DIFFICULTY_CONFIG[this.selectedDifficulty];
+    // A menu mode (a level or the Training Ground) and the level the Training Ground replays.
+    this.selectedDifficulty = resolveModeKey(this.bootData.difficulty) || this.settings.get('difficulty');
+    this.trainingLevel = resolveDifficultyKey(this.bootData.trainingLevel) || this.settings.get('trainingLevel');
+    this.activeConfig = createRoundConfig(this.selectedDifficulty, this.trainingLevel);
     this.laserEnabled = this.settings.get('laserEnabled');
     this.playPhase = PLAY_PHASES.COUNTDOWN;
     this.countdownElapsedMs = 0;
@@ -13607,10 +14035,11 @@ class AimTrainerGame {
     this.refreshWalletViews();
     this.ui.setSettings(this.settings.values);
     this.ui.setSelectedDifficulty(this.selectedDifficulty);
+    this.ui.setTrainingLevel(this.trainingLevel);
     this.ui.setActiveMode(this.selectedDifficulty);
     this.background.setThemeTarget(this.themeAmountFor(this.selectedDifficulty), true);
     const restoredRoundSeconds = this.bootData.roundSeconds;
-    if (typeof restoredRoundSeconds === 'number' && ROUND_LENGTH_OPTIONS_SECONDS.indexOf(restoredRoundSeconds) !== -1) {
+    if (isValidRoundSeconds(restoredRoundSeconds)) {
       this.settings.set('roundSeconds', restoredRoundSeconds);
     }
     this.ui.setRoundLength(this.settings.get('roundSeconds'));
@@ -13620,7 +14049,11 @@ class AimTrainerGame {
 
     requireElement(this.documentRef, 'hud-pause-button').addEventListener('click', () => this.pauseGame());
     requireElement(this.documentRef, 'hud-sound-button').addEventListener('click', () => this.toggleMute());
-    requireElement(this.documentRef, 'ammo').addEventListener('click', () => this.startReload());
+    this.ammoElement.addEventListener('click', () => this.startReload());
+
+    this.documentRef.addEventListener('fullscreenchange', () => this.refreshFullscreenButtons());
+    this.documentRef.addEventListener('webkitfullscreenchange', () => this.refreshFullscreenButtons());
+    this.refreshFullscreenButtons();
 
     const unlockAudio = () => this.audio.unlock();
     this.documentRef.addEventListener('pointerdown', unlockAudio, { capture: true, passive: true });
@@ -13666,9 +14099,14 @@ class AimTrainerGame {
     this.frameRequestId = window.requestAnimationFrame(this.boundRunFrame);
   }
 
-  /** Arena palette for a mode: 1 for the Demon level's ember-red sphere, 0 otherwise. */
+  /** The level a menu mode plays: the mode itself, or the chosen level for the Training Ground. */
+  levelKeyFor(modeKey) {
+    return modeKey === TRAINING_MODE_KEY ? this.trainingLevel : modeKey;
+  }
+
+  /** Arena palette for a mode: 1 for the Demon level's ember-red sphere (training on Demon too), 0 otherwise. */
   themeAmountFor(difficultyKey) {
-    const config = DIFFICULTY_CONFIG[difficultyKey];
+    const config = DIFFICULTY_CONFIG[this.levelKeyFor(difficultyKey)];
     return config && config.theme === 'DEMON' ? 1 : 0;
   }
 
@@ -13692,6 +14130,7 @@ class AimTrainerGame {
   createHotSnapshot() {
     return {
       difficulty: this.selectedDifficulty,
+      trainingLevel: this.trainingLevel,
       roundSeconds: this.settings.get('roundSeconds'),
       boardTab: this.ui.currentBoardTab
     };
@@ -13769,13 +14208,15 @@ class AimTrainerGame {
 
     fsm.onEnter(GAME_STATES.PAUSED, () => {
       this.ui.showState(GAME_STATES.PAUSED);
+      this.ui.showPauseNote(this.activeConfig.isTraining);
       this.ui.showPauseStats(this.buildPauseStats());
       this.ui.focusPrimaryAction(GAME_STATES.PAUSED);
     });
 
     fsm.onEnter(GAME_STATES.GAMEOVER, (payload) => {
       const summary = payload.summary;
-      const qualifies = this.leaderboard.qualifies(summary.modeKey, summary.score);
+      // Training Ground runs are practice and never go on a board.
+      const qualifies = !summary.isTraining && this.leaderboard.qualifies(summary.modeKey, summary.score);
       this.pendingSaveSummary = qualifies ? summary : null;
       this.hud.setVisible(false);
       this.ui.showGameOver(summary, {
@@ -13898,8 +14339,16 @@ class AimTrainerGame {
     return Math.max(0, hudBottom);
   }
 
+  /** Top of the magazine counter (bottom left) in canvas pixels, or null while it is hidden. */
+  measureAmmoTop() {
+    if (this.ammoElement.hidden) {
+      return null;
+    }
+    return this.ammoElement.getBoundingClientRect().top - this.canvas.getBoundingClientRect().top;
+  }
+
   refreshSafeZone() {
-    const bounds = this.spawner.configureBounds(this.renderer, this.measureHudBottom());
+    const bounds = this.spawner.configureBounds(this.renderer, this.measureHudBottom(), this.measureAmmoTop());
     for (let targetIndex = 0; targetIndex < this.targets.length; targetIndex += 1) {
       this.targets[targetIndex].checkBoundaries(bounds);
     }
@@ -14143,7 +14592,7 @@ class AimTrainerGame {
   }
 
   beginRound() {
-    const config = DIFFICULTY_CONFIG[this.selectedDifficulty];
+    const config = createRoundConfig(this.selectedDifficulty, this.trainingLevel);
     const roundDurationMs = this.settings.get('roundSeconds') * 1000;
     const reloadEnabled = this.settings.get('reloadEnabled');
     this.activeConfig = config;
@@ -14178,7 +14627,13 @@ class AimTrainerGame {
     this.audio.playSlideRack(0.3);
     if (config.theme === 'DEMON') {
       this.audio.playDemonStart();
-      this.toasts.show('Demon level', { tone: 'miss', subtext: 'tiny · erratic · ' + config.baseHitScore + ' points a hit', durationMs: 1700 });
+    }
+    if (config.isTraining) {
+      this.toasts.show('Training Ground', { tone: 'hit', subtext: DIFFICULTY_CONFIG[config.key].label + ' level · practice · nothing banked', durationMs: 1700 });
+    } else if (config.theme === 'DEMON') {
+      this.toasts.show('Demon level', { tone: 'miss', subtext: 'tiny · erratic · ×' + config.coinMultiplier + ' coins', durationMs: 1700 });
+    } else if (config.key === 'HARD') {
+      this.toasts.show('Hard level', { tone: 'brass', subtext: 'small · fast drift · ×' + config.coinMultiplier + ' coins', durationMs: 1700 });
     }
   }
 
@@ -14216,27 +14671,39 @@ class AimTrainerGame {
     this.magazine.cancelReload();
     this.gun.cancelReload();
     const summary = this.session.createSummary(this.difficulty, endReason);
-    summary.coinAward = this.bankRoundCoins(summary.score);
+    summary.coinAward = this.bankRoundCoins(summary);
     this.lastSummary = summary;
     this.audio.playGameOver();
     window.clearTimeout(this.coinSoundTimerId);
-    const coinsEarned = summary.coinAward.earned;
-    this.coinSoundTimerId = window.setTimeout(() => this.audio.playCoinsBanked(coinsEarned), 650);
+    if (!summary.isTraining) {
+      const coinsEarned = summary.coinAward.earned;
+      this.coinSoundTimerId = window.setTimeout(() => this.audio.playCoinsBanked(coinsEarned), 650);
+    }
     this.fsm.transition(GAME_STATES.GAMEOVER, { summary: summary });
   }
 
   /**
-   * Converts a finished round's score to coins (10 points = 1 coin) and
-   * reports the next finish to save up for.
+   * Converts a finished round's score to coins (10 points = 1 coin, times the
+   * level's coin multiplier; Training Ground rounds bank nothing) and reports
+   * the next finish to save up for.
    */
-  bankRoundCoins(score) {
-    const banked = this.armory.bankRound(score);
+  bankRoundCoins(summary) {
+    let banked = null;
+    if (summary.isTraining) {
+      this.armory.load();
+      banked = { earned: 0, balance: this.armory.coins, persisted: this.armory.isPersistent };
+    } else {
+      banked = this.armory.bankRound(summary.score, summary.coinMultiplier);
+    }
     const ownedIds = this.armory.getOwnedIds();
     const nextSkin = SkinCatalog.nextUnowned(ownedIds);
     return {
       earned: banked.earned,
       balance: banked.balance,
       persisted: banked.persisted,
+      coinMultiplier: summary.coinMultiplier,
+      levelLabel: DIFFICULTY_CONFIG[summary.modeKey].label,
+      isTraining: summary.isTraining,
       nextSkin: nextSkin,
       ownsEverything: nextSkin === null
     };
@@ -14353,6 +14820,12 @@ class AimTrainerGame {
     return visible;
   }
 
+  /**
+   * Scores a hit. The hit itself pays the level's base points, scaled by how
+   * fast and how centered it was and by the streak multiplier. On top of
+   * that, the small circle in the middle pays a flat bullseye bonus, and
+   * every 5th hit in a row pays a streak bonus that grows with the streak.
+   */
   handleTargetDestroyed(target, rayOrigin, rayDirection, screenX, screenY) {
     const config = this.activeConfig;
     const perpendicularDistance = target.perpendicularDistanceToRay(rayOrigin, rayDirection);
@@ -14361,11 +14834,19 @@ class AimTrainerGame {
     const reactionMs = target.ageMs;
     const speedFactor = (1 - GAME_RULES.speedBonusWeight) + GAME_RULES.speedBonusWeight * target.remainingFraction;
     const precisionFactor = 1 + GAME_RULES.precisionBonusWeight * precision;
-    const bullseyeFactor = isBullseye ? 1 + GAME_RULES.bullseyeBonusRatio : 1;
     const streakMultiplier = this.computeStreakMultiplier(this.session.currentStreak + 1);
-    const points = Math.max(1, Math.round(config.baseHitScore * speedFactor * precisionFactor * bullseyeFactor * streakMultiplier * this.difficulty.scoreMultiplier));
+    const points = Math.max(1, Math.round(config.baseHitScore * speedFactor * precisionFactor * streakMultiplier * this.difficulty.scoreMultiplier));
 
     this.session.recordHit(points, reactionMs, isBullseye);
+    if (isBullseye) {
+      this.session.addBullseyeBonus(GAME_RULES.bullseyeBonusPoints);
+    }
+    const streak = this.session.currentStreak;
+    const isStreakMilestone = streak > 0 && streak % GAME_RULES.streakMilestoneInterval === 0;
+    const streakBonus = isStreakMilestone ? streak * GAME_RULES.streakBonusPointsPerHit : 0;
+    if (streakBonus > 0) {
+      this.session.addStreakBonus(streakBonus);
+    }
 
     const screen = this.scratchScreen;
     const isOnScreen = this.projectTarget(target, screen);
@@ -14381,23 +14862,27 @@ class AimTrainerGame {
       velocityY: -84
     });
     if (isBullseye) {
-      this.effects.spawnFloatingText('BULLSEYE', textX, textY - 26, {
+      this.effects.spawnBullseyeMark(
+        isOnScreen ? screen.x : screenX,
+        isOnScreen ? screen.y : screenY,
+        isOnScreen ? screen.radiusPx * GAME_RULES.bullseyeRadiusRatio : 8
+      );
+      this.effects.spawnFloatingText('BULLSEYE +' + Formatters.formatInteger(GAME_RULES.bullseyeBonusPoints), textX, textY - 36, {
         color: PALETTE.brass,
-        fontSizePx: 13,
+        fontSizePx: 17,
         fontFamily: FONT_STACKS.data,
         fontWeight: 600,
         velocityY: -70,
-        lifeMs: 800
+        lifeMs: 1000
       });
     }
 
-    const streak = this.session.currentStreak;
-    if (streak > 0 && streak % GAME_RULES.streakMilestoneInterval === 0) {
+    if (isStreakMilestone) {
       this.audio.playComboStreak(streak);
-      this.toasts.show(streak + ' streak', {
+      this.toasts.show(streak + ' streak +' + Formatters.formatInteger(streakBonus), {
         tone: 'brass',
-        subtext: '×' + this.session.multiplier.toFixed(2) + ' multiplier',
-        durationMs: 1300
+        subtext: 'streak bonus · ×' + this.session.multiplier.toFixed(2) + ' multiplier',
+        durationMs: 1400
       });
     }
   }
@@ -14549,22 +15034,44 @@ class AimTrainerGame {
      Settings and menu actions
      ===================================================================== */
 
+  /** Picks a menu mode: one of the four levels, or the Training Ground (keys 1 to 5). */
   selectDifficulty(difficultyKey) {
-    if (DIFFICULTY_KEYS.indexOf(difficultyKey) === -1) {
+    if (MODE_KEYS.indexOf(difficultyKey) === -1) {
       return;
     }
     const wasDemon = this.themeAmountFor(this.selectedDifficulty) > 0;
     this.selectedDifficulty = difficultyKey;
     this.settings.set('difficulty', difficultyKey);
     this.ui.setSelectedDifficulty(difficultyKey);
-    this.changeBoardTab(difficultyKey);
-    if (this.fsm.is(GAME_STATES.MENU)) {
-      this.ui.setActiveMode(difficultyKey);
-      const isDemon = this.themeAmountFor(difficultyKey) > 0;
-      this.background.setThemeTarget(isDemon ? 1 : 0, false);
-      if (isDemon && !wasDemon) {
-        this.audio.playDifficultyShift(-1);
-      }
+    this.changeBoardTab(this.levelKeyFor(difficultyKey));
+    this.applyMenuTheme(wasDemon);
+  }
+
+  /** Picks the level the Training Ground replays. */
+  selectTrainingLevel(levelKey) {
+    if (DIFFICULTY_KEYS.indexOf(levelKey) === -1) {
+      return;
+    }
+    const wasDemon = this.themeAmountFor(this.selectedDifficulty) > 0;
+    this.trainingLevel = levelKey;
+    this.settings.set('trainingLevel', levelKey);
+    this.ui.setTrainingLevel(levelKey);
+    if (this.selectedDifficulty === TRAINING_MODE_KEY) {
+      this.changeBoardTab(levelKey);
+      this.applyMenuTheme(wasDemon);
+    }
+  }
+
+  /** Re-tints the menu sphere for the selected mode, with a cue when it turns to the Demon palette. */
+  applyMenuTheme(wasDemon) {
+    if (!this.fsm.is(GAME_STATES.MENU)) {
+      return;
+    }
+    this.ui.setActiveMode(this.selectedDifficulty);
+    const isDemon = this.themeAmountFor(this.selectedDifficulty) > 0;
+    this.background.setThemeTarget(isDemon ? 1 : 0, false);
+    if (isDemon && !wasDemon) {
+      this.audio.playDifficultyShift(-1);
     }
   }
 
@@ -14632,12 +15139,48 @@ class AimTrainerGame {
     this.armoryView.showNotice('Bought ' + skin.name + '. It is equipped.' + storageNote, null);
   }
 
+  /** A preset or a typed length: any whole number of seconds from 10 to 150. */
   selectRoundLength(seconds) {
-    if (ROUND_LENGTH_OPTIONS_SECONDS.indexOf(seconds) === -1) {
+    if (!isValidRoundSeconds(seconds)) {
       return;
     }
     this.settings.set('roundSeconds', seconds);
     this.ui.setRoundLength(seconds);
+  }
+
+  /** False when the browser, or the page embedding the game, does not allow full screen. */
+  get canFullscreen() {
+    const doc = this.documentRef;
+    return Boolean(doc.fullscreenEnabled || doc.webkitFullscreenEnabled);
+  }
+
+  get isFullscreen() {
+    const doc = this.documentRef;
+    return Boolean(doc.fullscreenElement || doc.webkitFullscreenElement);
+  }
+
+  refreshFullscreenButtons() {
+    this.ui.setFullscreenState(this.canFullscreen, this.isFullscreen);
+  }
+
+  /** Fills the whole display with the range (or leaves full screen). */
+  toggleFullscreen() {
+    if (!this.canFullscreen) {
+      return;
+    }
+    const doc = this.documentRef;
+    const root = doc.documentElement;
+    try {
+      const pending = this.isFullscreen
+        ? (doc.exitFullscreen || doc.webkitExitFullscreen).call(doc)
+        : (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+      // The change event can lag the switch, so relabel the buttons once it settles too.
+      if (pending && typeof pending.then === 'function') {
+        pending.then(() => this.refreshFullscreenButtons(), () => this.refreshFullscreenButtons());
+      }
+    } catch (error) {
+      /* the browser refused; the buttons stay as they are */
+    }
   }
 
   changeVolume(normalizedVolume) {
@@ -14793,10 +15336,10 @@ class AimTrainerGame {
         break;
       }
       case GAME_STATES.MENU: {
-        const digitMatch = /^(?:Digit|Numpad)([1-4])$/.exec(code);
+        const digitMatch = /^(?:Digit|Numpad)([1-5])$/.exec(code);
         if (digitMatch !== null) {
           event.preventDefault();
-          this.selectDifficulty(DIFFICULTY_KEYS[Number(digitMatch[1]) - 1]);
+          this.selectDifficulty(MODE_KEYS[Number(digitMatch[1]) - 1]);
         } else if (code === 'Enter' && !isControlFocused && !event.repeat) {
           event.preventDefault();
           this.startFromMenu();
