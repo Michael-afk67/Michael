@@ -2453,15 +2453,15 @@ kbd {
             <p class="field__label" id="label-difficulty">Difficulty</p>
             <div class="mode-grid" id="mode-grid" role="radiogroup" aria-labelledby="label-difficulty">
               <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="EASY" id="mode-card-easy">
-                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 152; --orb-size: 42px;"></span></span>
+                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 152; --orb-size: 38px;"></span></span>
                 <span class="mode-card__name">Easy</span>
-                <span class="mode-card__spec">r 48–60 px · 4.0 s<br>static · ×1 coins</span>
+                <span class="mode-card__spec">r 40–50 px · 4.0 s<br>static · ×1 coins</span>
                 <kbd class="mode-card__key">1</kbd>
               </button>
               <button class="mode-card" type="button" role="radio" aria-checked="true" tabindex="0" data-difficulty="MEDIUM" id="mode-card-medium">
-                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 40; --orb-size: 34px;"></span></span>
+                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 40; --orb-size: 32px;"></span></span>
                 <span class="mode-card__name">Medium</span>
-                <span class="mode-card__spec">r 34–44 px · 2.6 s<br>slow bounce · ×1.5 coins</span>
+                <span class="mode-card__spec">r 30–38 px · 2.6 s<br>slow bounce · ×1.5 coins</span>
                 <kbd class="mode-card__key">2</kbd>
               </button>
               <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="HARD" id="mode-card-hard">
@@ -2792,8 +2792,8 @@ const DIFFICULTY_CONFIG = deepFreeze({
   EASY: {
     key: 'EASY',
     label: 'Easy',
-    radiusMin: 48,
-    radiusMax: 60,
+    radiusMin: 40,
+    radiusMax: 50,
     lifespanMs: 4000,
     movementType: MOVEMENT_TYPES.STATIC,
     speedMin: 0,
@@ -2823,8 +2823,8 @@ const DIFFICULTY_CONFIG = deepFreeze({
   MEDIUM: {
     key: 'MEDIUM',
     label: 'Medium',
-    radiusMin: 34,
-    radiusMax: 44,
+    radiusMin: 30,
+    radiusMax: 38,
     lifespanMs: 2600,
     movementType: MOVEMENT_TYPES.LINEAR_BOUNCE,
     speedMin: 45,
@@ -3010,9 +3010,12 @@ const ARENA_RULES = deepFreeze({
   arenaRadius: 100,
   verticalFovDegrees: 58,
   minimumHorizontalFovDegrees: 46,
-  // The pistol is framed as if the view were this narrow, so it keeps its size on screen.
+  // The pistol is framed as if the view were this narrow, so the wide view does
+  // not shrink it, then held a little farther out (smaller on screen) so the
+  // orbs feel far away.
   viewmodelVerticalFovDegrees: 46,
   viewmodelMinimumHorizontalFovDegrees: 42,
+  viewmodelScale: 0.8,
   nearPlane: 0.02,
   farPlane: 260,
   spawnDepthMin: 8,
@@ -7679,12 +7682,12 @@ class GunController3D {
     const anchor = ARENA_RULES.gunAnchor;
     const isPortrait = renderer.aspect < 0.95;
     // Frame the pistol for the narrower reference view (same minimum width rule as
-    // Renderer3D.resize), so the wide range view does not shrink it on screen.
+    // Renderer3D.resize), then push it out so it draws at viewmodelScale of that size.
     const referenceTanHalfFov = Math.max(
       Math.tan(ARENA_RULES.viewmodelVerticalFovDegrees * DEG_TO_RAD / 2),
       Math.tan(ARENA_RULES.viewmodelMinimumHorizontalFovDegrees * DEG_TO_RAD / 2) / renderer.aspect
     );
-    const framing = referenceTanHalfFov / renderer.tanHalfVerticalFov;
+    const framing = referenceTanHalfFov / (renderer.tanHalfVerticalFov * ARENA_RULES.viewmodelScale);
     const depth = (isPortrait ? anchor.depth + 0.05 : anchor.depth) * framing;
     const ndcX = isPortrait ? 0.34 : anchor.ndcX;
     const ndcY = isPortrait ? -0.72 : anchor.ndcY;
