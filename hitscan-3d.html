@@ -1495,6 +1495,44 @@ kbd {
   padding: 14px 4px 0;
 }
 
+.board__server {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  font-size: var(--step--1);
+  color: var(--steel-muted);
+  background: var(--gunmetal-raised);
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-s);
+}
+
+.board__server p {
+  margin: 0;
+}
+
+.board__server b {
+  font-family: var(--font-data);
+  font-weight: 600;
+  color: var(--steel-bright);
+  -webkit-user-select: all;
+  user-select: all;
+}
+
+.board__command {
+  padding: 4px 8px;
+  font-family: var(--font-data);
+  font-size: var(--step--1);
+  color: var(--brass);
+  background: var(--range-black);
+  border: 1px solid var(--steel-line);
+  border-radius: 3px;
+  -webkit-user-select: all;
+  user-select: all;
+}
+
 .board__foot {
   display: flex;
   flex-wrap: wrap;
@@ -3115,6 +3153,11 @@ kbd {
                 <tbody id="menu-board-body"></tbody>
               </table>
               <p class="board__empty" id="menu-board-empty" hidden>No scores on this board yet.</p>
+              <div class="board__server" id="board-server-help" hidden>
+                <p>The global top 100 runs on a small server that comes inside this file. Save it next to this game, run it with Node.js 22.13 or newer, then play at <b>http://localhost:8787</b>.</p>
+                <code class="board__command">node hitscan-server.js</code>
+                <button class="button-secondary button-small" id="board-server-download" type="button">Download the server</button>
+              </div>
             </div>
             <div class="board__pager">
               <button class="button-secondary button-small" id="board-prev" type="button">Previous Ten</button>
@@ -10809,8 +10852,10 @@ class LeaderboardManager {
 }
 
 /* -------------------------------------------------------------------------
-   GlobalLeaderboardClient — talks to server/server.js: fetches pages of the
-   world's top 100 and posts signed scores.
+   GlobalLeaderboardClient — talks to the leaderboard server that ships at the
+   end of this file (the leaderboard's "Download the server" button saves it
+   as hitscan-server.js): fetches pages of the world's top 100 and posts
+   signed scores.
 
    Signing, as specified: the callsign, score, accuracy and the server's
    passphrase are joined into one string ("ACE|12345|93.47|<passphrase>")
@@ -12662,7 +12707,7 @@ class UIController {
 class LeaderboardPanel {
   /**
    * @param {Document} documentRef
-   * @param {{onScopeChange: function(string): void, onTabChange: function(string): void, onPage: function(number): void, onClear: function(string): void}} callbacks
+   * @param {{onScopeChange: function(string): void, onTabChange: function(string): void, onPage: function(number): void, onClear: function(string): void, onDownloadServer: function(): void}} callbacks
    */
   constructor(documentRef, callbacks) {
     this.documentRef = documentRef;
@@ -12678,7 +12723,9 @@ class LeaderboardPanel {
       next: requireElement(documentRef, 'board-next'),
       range: requireElement(documentRef, 'board-range'),
       storage: requireElement(documentRef, 'menu-board-storage'),
-      clear: requireElement(documentRef, 'menu-board-clear')
+      clear: requireElement(documentRef, 'menu-board-clear'),
+      serverHelp: requireElement(documentRef, 'board-server-help'),
+      serverDownload: requireElement(documentRef, 'board-server-download')
     };
     this.scopeButtons = Array.prototype.slice.call(this.elements.scope.querySelectorAll('[data-board-scope]'));
     this.tabButtons = Array.prototype.slice.call(this.elements.tabs.querySelectorAll('[data-board-mode]'));
@@ -12706,6 +12753,7 @@ class LeaderboardPanel {
     this.elements.previous.addEventListener('click', () => callbacks.onPage(-1));
     this.elements.next.addEventListener('click', () => callbacks.onPage(1));
     this.elements.clear.addEventListener('click', () => this.handleClearClick());
+    this.elements.serverDownload.addEventListener('click', () => callbacks.onDownloadServer());
   }
 
   setScope(scope) {
@@ -12731,6 +12779,11 @@ class LeaderboardPanel {
 
   setBusy(isBusy) {
     this.elements.panel.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+  }
+
+  /** How to start the leaderboard server that ships in this file (shown while the global board is offline). */
+  setServerHelp(isVisible) {
+    this.elements.serverHelp.hidden = !isVisible;
   }
 
   /**
@@ -16563,6 +16616,18 @@ class Renderer3D {
    that goes to the browser's share sheet, or downloads as a file.
    ========================================================================= */
 
+/** Saves a URL (a data string or a blob URL) as a file through a temporary download link. */
+function triggerDownload(documentRef, href, fileName) {
+  const link = documentRef.createElement('a');
+  link.href = href;
+  link.download = fileName;
+  link.rel = 'noopener';
+  link.style.display = 'none';
+  documentRef.body.appendChild(link);
+  link.click();
+  documentRef.body.removeChild(link);
+}
+
 /** Where the QR code points when the page has no web address of its own (opened from a file). */
 const SHARE_FALLBACK_URL = 'https://github.com/Michael-afk67/Michael';
 
@@ -16814,14 +16879,7 @@ class ShareCard {
   }
 
   static download(documentRef, dataUrl, fileName) {
-    const link = documentRef.createElement('a');
-    link.href = dataUrl;
-    link.download = fileName;
-    link.rel = 'noopener';
-    link.style.display = 'none';
-    documentRef.body.appendChild(link);
-    link.click();
-    documentRef.body.removeChild(link);
+    triggerDownload(documentRef, dataUrl, fileName);
     return 'downloaded';
   }
 }
@@ -16909,7 +16967,8 @@ class AimTrainerGame {
       onScopeChange: (scope) => this.changeBoardScope(scope),
       onTabChange: (levelKey) => this.changeBoardTab(levelKey),
       onPage: (direction) => this.pageBoard(direction),
-      onClear: (levelKey) => this.clearBoard(levelKey)
+      onClear: (levelKey) => this.clearBoard(levelKey),
+      onDownloadServer: () => this.downloadServer()
     });
     this.armoryView = new ArmoryView(documentRef, {
       onSelect: (skinId) => this.previewFinish(skinId),
@@ -18628,6 +18687,7 @@ class AimTrainerGame {
     const label = DIFFICULTY_CONFIG[view.levelKey].label;
     panel.setScope(view.scope);
     panel.setTab(view.levelKey);
+    panel.setServerHelp(view.scope === BOARD_SCOPES.GLOBAL && this.globalBoard.status === 'offline');
     view.requestId += 1;
 
     if (view.scope === BOARD_SCOPES.LOCAL) {
@@ -18720,6 +18780,14 @@ class AimTrainerGame {
         canClear: false
       });
     });
+  }
+
+  /** Saves the leaderboard server that ships inside this file as hitscan-server.js. */
+  downloadServer() {
+    const source = requireElement(this.documentRef, 'leaderboard-server-source').textContent.replace(/^\s+/, '');
+    const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+    triggerDownload(this.documentRef, url, 'hitscan-server.js');
+    window.setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
 
   /** Clears this device's runs for one level (the global board cannot be cleared from the game). */
@@ -19400,6 +19468,507 @@ class AimTrainerGame {
   }
 }());
 }());
+</script>
+<!-- The global leaderboard server (Node.js). The leaderboard's "Download the server" button saves this block as hitscan-server.js. -->
+<script type="text/plain" id="leaderboard-server-source">
+'use strict';
+
+/*
+ * HITSCAN global leaderboard server. It ships inside hitscan-3d.html; the
+ * game's Leaderboard panel ("Download the server") saves it as
+ * hitscan-server.js. No dependencies: Node.js 22.13 or newer (it uses the
+ * built-in node:sqlite).
+ *
+ * RUN IT next to the game file:
+ *
+ *   LEADERBOARD_PASSPHRASE='pick-your-own-secret' node hitscan-server.js
+ *
+ * then open http://localhost:8787 and play from there: the menu's Global
+ * top 100 is live, and saving a standard round (Easy to Demon) posts it.
+ * The server serves the game from hitscan-3d.html in the same folder (or
+ * the page named on the command line: node hitscan-server.js "my copy.html").
+ * Node prints a one-time "SQLite is an experimental feature" warning; that
+ * is expected.
+ *
+ * ROUTES
+ *   GET  /                  the game
+ *   GET  /api/config        the signing passphrase and the game's public address
+ *   GET  /api/leaderboard   ?difficulty=0..3&offset=0&limit=10, one page of the top 100
+ *   POST /api/scores        a signed score: saved when the signature matches, dropped when not
+ *   GET  /api/health        {"ok":true}
+ *
+ * SETTINGS (environment variables)
+ *   PORT                    default 8787
+ *   HOST                    default 0.0.0.0
+ *   LEADERBOARD_PASSPHRASE  the signing secret; set your own
+ *   DATABASE_FILE           default leaderboard.db next to this file
+ *   PUBLIC_URL              the game's public address, for the share card's QR code
+ *   GAME_FILE               the game page to serve (default: see above)
+ *   RATE_LIMIT_PER_MINUTE   scores one address may post per minute, default 12
+ *   TRUST_PROXY             set to 1 behind a reverse proxy (most hosts), so the client
+ *                           address is read from X-Forwarded-For; anyone can fake that
+ *                           header otherwise
+ *
+ * THE TABLE (SQLite, created on start; see SCHEMA_SQL): Leaderboard with a
+ * unique record id, the player's user id, a callsign of at most 12
+ * characters, the difficulty as a tiny integer (0 Easy, 1 Medium, 2 Hard,
+ * 3 Demon), the raw score, the accuracy percentage to two decimals, the max
+ * streak, the round length in seconds and the finish time. Ranking: higher
+ * score, then higher accuracy, then the earlier run.
+ *
+ * ANTI-CHEAT. The game joins callsign|score|accuracy|passphrase (accuracy
+ * always with two decimals, e.g. "ACE|48210|93.47|<passphrase>") and sends
+ * its SHA-256 with the stats. This server rebuilds that string with its own
+ * passphrase: a match is saved, a mismatch is dropped at once (403). It also
+ * refuses scores no real round can produce and rate-limits each address.
+ * Be aware: the browser must know the passphrase to sign, so anyone with
+ * developer tools can read it and sign a made-up score. This stops casual
+ * tampering, not a determined cheater.
+ *
+ * PUTTING IT ONLINE. Any host that runs a Node.js 22.13+ process and keeps
+ * files between restarts will do: upload this file and the game page, set
+ * LEADERBOARD_PASSPHRASE, DATABASE_FILE (on the persistent disk),
+ * PUBLIC_URL and, behind a proxy, TRUST_PROXY=1, then run
+ * node hitscan-server.js. If the game page is hosted somewhere else (for
+ * example GitHub Pages), set GLOBAL_LEADERBOARD_SERVER in the game to this
+ * server's address; the API already allows requests from any site (CORS).
+ */
+
+const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const { DatabaseSync } = require('node:sqlite');
+
+const DEFAULT_PASSPHRASE = 'hitscan-range-key-change-me';
+const SETTINGS = Object.freeze({
+  port: Number(process.env.PORT) || 8787,
+  host: process.env.HOST || '0.0.0.0',
+  passphrase: process.env.LEADERBOARD_PASSPHRASE || DEFAULT_PASSPHRASE,
+  databaseFile: process.env.DATABASE_FILE || path.join(__dirname, 'leaderboard.db'),
+  publicUrl: /^https?:\/\//.test(process.env.PUBLIC_URL || '') ? process.env.PUBLIC_URL : null,
+  gameFile: findGameFile(),
+  submissionsPerMinute: Number(process.env.RATE_LIMIT_PER_MINUTE) > 0 ? Number(process.env.RATE_LIMIT_PER_MINUTE) : 12,
+  // X-Forwarded-For is only believable when a proxy we run sets it; otherwise anyone could fake it.
+  trustProxy: process.env.TRUST_PROXY === '1'
+});
+
+const LIMITS = Object.freeze({
+  topSize: 100,
+  maxPageSize: 25,
+  maxBodyBytes: 4096,
+  minDurationSeconds: 10,
+  maxDurationSeconds: 150,
+  // Plausibility ceiling: nobody lands more than 8 hits a second for a whole round.
+  maxHitsPerSecond: 8,
+  futureToleranceMs: 5 * 60 * 1000
+});
+
+// Base points of one hit per level (0 Easy, 1 Medium, 2 Hard, 3 Demon), as in the game.
+const BASE_HIT_POINTS = [100, 150, 220, 300];
+
+const CALLSIGN_PATTERN = /^[A-Z0-9._-](?:[A-Z0-9 ._-]{0,10}[A-Z0-9._-])?$/;
+const USER_ID_PATTERN = /^USR-[a-z0-9]{8,32}$/;
+const RECORD_ID_PATTERN = /^[A-Za-z0-9-]{4,48}$/;
+const ACCURACY_PATTERN = /^(?:100\.00|\d{1,2}\.\d{2})$/;
+const SIGNATURE_PATTERN = /^[0-9a-f]{64}$/;
+
+// The column types read the same way in MySQL or PostgreSQL if the board ever moves there.
+const SCHEMA_SQL = [
+  'CREATE TABLE IF NOT EXISTS Leaderboard (',
+  '  id               VARCHAR(48)  PRIMARY KEY,',  // unique record id, e.g. RUN-mh2k1x9a-4f0qz
+  '  user_id          VARCHAR(40)  NOT NULL,',     // the player's account id, e.g. USR-k3j9x0q2m7b1c4d8
+  '  callsign         VARCHAR(12)  NOT NULL,',
+  '  difficulty       TINYINT      NOT NULL,',     // 0 Easy, 1 Medium, 2 Hard, 3 Demon
+  '  score            INTEGER      NOT NULL,',
+  '  accuracy         DECIMAL(5,2) NOT NULL,',     // hit percentage with two decimals, e.g. 93.47
+  '  max_streak       INTEGER      NOT NULL,',
+  '  duration_seconds SMALLINT     NOT NULL,',     // round length, 10 to 150
+  '  finished_at      TIMESTAMP    NOT NULL,',     // when the round ended, UTC ISO 8601
+  '  CHECK (length(callsign) BETWEEN 1 AND 12),',
+  '  CHECK (difficulty BETWEEN 0 AND 3),',
+  '  CHECK (score > 0),',
+  '  CHECK (accuracy BETWEEN 0 AND 100),',
+  '  CHECK (max_streak >= 0),',
+  '  CHECK (duration_seconds BETWEEN 10 AND 150)',
+  ');',
+  'CREATE INDEX IF NOT EXISTS leaderboard_ranking',
+  '  ON Leaderboard (difficulty, score DESC, accuracy DESC, finished_at, id);'
+].join('\n');
+
+/**
+ * The game page to serve: GAME_FILE, a path given on the command line,
+ * hitscan-3d.html next to this file, or any page in this folder that
+ * carries this server (the game, saved under another name). Null if none.
+ */
+function findGameFile() {
+  const named = [process.env.GAME_FILE, process.argv[2]].filter(Boolean);
+  for (const candidate of named.concat(path.join(__dirname, 'hitscan-3d.html'))) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+      return path.resolve(candidate);
+    }
+    if (named.indexOf(candidate) !== -1) {
+      console.warn('[hitscan] no game page at ' + candidate);
+    }
+  }
+  for (const name of fs.readdirSync(__dirname)) {
+    const candidate = path.join(__dirname, name);
+    if (/\.html?$/i.test(name) && fs.readFileSync(candidate, 'utf8').indexOf('id="leaderboard-server-source"') !== -1) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+/* ---------------------------------------------------------------------------
+   Database
+   --------------------------------------------------------------------------- */
+
+const database = new DatabaseSync(SETTINGS.databaseFile);
+database.exec(SCHEMA_SQL);
+
+const RANKING_ORDER = 'score DESC, accuracy DESC, finished_at ASC, id ASC';
+const statements = {
+  insert: database.prepare(
+    'INSERT INTO Leaderboard (id, user_id, callsign, difficulty, score, accuracy, max_streak, duration_seconds, finished_at) '
+    + 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ),
+  findById: database.prepare('SELECT * FROM Leaderboard WHERE id = ?'),
+  countLevel: database.prepare('SELECT COUNT(*) AS total FROM Leaderboard WHERE difficulty = ?'),
+  countBetter: database.prepare(
+    'SELECT COUNT(*) AS better FROM Leaderboard WHERE difficulty = ? AND ('
+    + 'score > ? OR (score = ? AND accuracy > ?) '
+    + 'OR (score = ? AND accuracy = ? AND finished_at < ?) '
+    + 'OR (score = ? AND accuracy = ? AND finished_at = ? AND id < ?))'
+  ),
+  page: database.prepare(
+    'SELECT id, callsign, score, accuracy, max_streak, duration_seconds, finished_at FROM Leaderboard '
+    + 'WHERE difficulty = ? ORDER BY ' + RANKING_ORDER + ' LIMIT ? OFFSET ?'
+  )
+};
+
+/** 1-based position of a stored row among its level's runs. */
+function rankOf(row) {
+  const better = statements.countBetter.get(
+    row.difficulty,
+    row.score, row.score, row.accuracy,
+    row.score, row.accuracy, row.finished_at,
+    row.score, row.accuracy, row.finished_at, row.id
+  ).better;
+  return Number(better) + 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Validation and the signature check
+   --------------------------------------------------------------------------- */
+
+/** The game's signature: SHA-256 of "callsign|score|accuracy|passphrase". */
+function expectedSignature(callsign, score, accuracyText) {
+  return crypto.createHash('sha256')
+    .update(callsign + '|' + score + '|' + accuracyText + '|' + SETTINGS.passphrase, 'utf8')
+    .digest('hex');
+}
+
+function signatureMatches(submission) {
+  if (typeof submission.signature !== 'string' || !SIGNATURE_PATTERN.test(submission.signature)) {
+    return false;
+  }
+  const expected = Buffer.from(expectedSignature(submission.callsign, submission.score, submission.accuracy), 'hex');
+  return crypto.timingSafeEqual(expected, Buffer.from(submission.signature, 'hex'));
+}
+
+/** The highest score a round of this level and length could reach (a sanity ceiling, not a target). */
+function maximumPlausibleScore(difficulty, durationSeconds) {
+  const hits = Math.ceil(durationSeconds * LIMITS.maxHitsPerSecond);
+  // A hit pays at most base × 1.5 (dead center) × 4 (streak multiplier) + the 500 bullseye bonus;
+  // streak bonuses add 250, 500, 750 … at every 5th hit in a row.
+  const milestones = Math.floor(hits / 5);
+  return hits * (BASE_HIT_POINTS[difficulty] * 6 + 500) + 125 * milestones * (milestones + 1);
+}
+
+/** Checks one submission's fields. Returns a reason string, or null when it looks like a real round. */
+function validationError(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return 'the body must be a JSON object';
+  }
+  if (typeof body.id !== 'string' || !RECORD_ID_PATTERN.test(body.id)) {
+    return 'bad record id';
+  }
+  if (typeof body.userId !== 'string' || !USER_ID_PATTERN.test(body.userId)) {
+    return 'bad user id';
+  }
+  if (typeof body.callsign !== 'string' || !CALLSIGN_PATTERN.test(body.callsign)) {
+    return 'callsigns are 1 to 12 characters: A-Z, 0-9, space, dot, dash or underscore';
+  }
+  if (!Number.isInteger(body.difficulty) || body.difficulty < 0 || body.difficulty > 3) {
+    return 'difficulty must be 0, 1, 2 or 3';
+  }
+  if (!Number.isInteger(body.durationSeconds) || body.durationSeconds < LIMITS.minDurationSeconds || body.durationSeconds > LIMITS.maxDurationSeconds) {
+    return 'round length must be 10 to 150 seconds';
+  }
+  if (!Number.isSafeInteger(body.score) || body.score <= 0) {
+    return 'only positive whole scores go on the board';
+  }
+  if (typeof body.accuracy !== 'string' || !ACCURACY_PATTERN.test(body.accuracy)) {
+    return 'accuracy must be a percentage with two decimals, like "93.47"';
+  }
+  if (!Number.isInteger(body.maxStreak) || body.maxStreak < 1) {
+    return 'a positive score needs at least one hit';
+  }
+  const accuracy = Number(body.accuracy);
+  if (accuracy <= 0) {
+    return 'a positive score needs at least one hit';
+  }
+  const maximumHits = Math.ceil(body.durationSeconds * LIMITS.maxHitsPerSecond);
+  if (body.maxStreak > maximumHits) {
+    return 'streak too long for the round';
+  }
+  if (body.score > maximumPlausibleScore(body.difficulty, body.durationSeconds)) {
+    return 'score out of range for the round';
+  }
+  const finishedAt = typeof body.finishedAt === 'string' ? Date.parse(body.finishedAt) : NaN;
+  if (!Number.isFinite(finishedAt) || finishedAt > Date.now() + LIMITS.futureToleranceMs) {
+    return 'bad finish time';
+  }
+  return null;
+}
+
+/* ---------------------------------------------------------------------------
+   HTTP plumbing
+   --------------------------------------------------------------------------- */
+
+const BASE_HEADERS = Object.freeze({
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'X-Content-Type-Options': 'nosniff'
+});
+
+function sendJson(response, status, payload) {
+  const body = JSON.stringify(payload);
+  response.writeHead(status, Object.assign({
+    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Length': Buffer.byteLength(body),
+    'Cache-Control': 'no-store'
+  }, BASE_HEADERS));
+  response.end(body);
+}
+
+function readJsonBody(request) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    request.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > LIMITS.maxBodyBytes) {
+        reject(Object.assign(new Error('body too large'), { status: 413 }));
+        request.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    request.on('end', () => {
+      try {
+        resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+      } catch (error) {
+        reject(Object.assign(new Error('the body is not valid JSON'), { status: 400 }));
+      }
+    });
+    request.on('error', reject);
+  });
+}
+
+/** At most RATE_LIMIT_PER_MINUTE submissions a minute from one address. */
+const recentSubmissions = new Map();
+function isRateLimited(address) {
+  const now = Date.now();
+  const times = (recentSubmissions.get(address) || []).filter((time) => now - time < 60000);
+  times.push(now);
+  recentSubmissions.set(address, times);
+  return times.length > SETTINGS.submissionsPerMinute;
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [address, times] of recentSubmissions) {
+    if (times.every((time) => now - time >= 60000)) {
+      recentSubmissions.delete(address);
+    }
+  }
+}, 60000).unref();
+
+function clientAddress(request) {
+  const forwarded = request.headers['x-forwarded-for'];
+  if (SETTINGS.trustProxy && typeof forwarded === 'string' && forwarded.length > 0) {
+    return forwarded.split(',')[0].trim();
+  }
+  return request.socket.remoteAddress || 'unknown';
+}
+
+/* ---------------------------------------------------------------------------
+   Routes
+   --------------------------------------------------------------------------- */
+
+function serveGame(response) {
+  if (SETTINGS.gameFile === null) {
+    sendJson(response, 404, { reason: 'put hitscan-3d.html next to hitscan-server.js, or run: node hitscan-server.js path/to/the-game.html' });
+    return;
+  }
+  fs.readFile(SETTINGS.gameFile, (error, contents) => {
+    if (error) {
+      sendJson(response, 500, { reason: 'the game file could not be read: ' + SETTINGS.gameFile });
+      return;
+    }
+    response.writeHead(200, Object.assign({
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Length': contents.length,
+      'Cache-Control': 'no-cache'
+    }, BASE_HEADERS));
+    response.end(contents);
+  });
+}
+
+function handleLeaderboard(url, response) {
+  const difficulty = Number(url.searchParams.get('difficulty'));
+  const offset = Number(url.searchParams.get('offset') || 0);
+  const limit = Number(url.searchParams.get('limit') || 10);
+  if (!Number.isInteger(difficulty) || difficulty < 0 || difficulty > 3) {
+    sendJson(response, 400, { reason: 'difficulty must be 0, 1, 2 or 3' });
+    return;
+  }
+  if (!Number.isInteger(offset) || offset < 0 || offset >= LIMITS.topSize || !Number.isInteger(limit) || limit < 1 || limit > LIMITS.maxPageSize) {
+    sendJson(response, 400, { reason: 'offset must be 0 to 99 and limit 1 to 25' });
+    return;
+  }
+  const pageLimit = Math.min(limit, LIMITS.topSize - offset);
+  const rows = statements.page.all(difficulty, pageLimit, offset);
+  const total = Math.min(LIMITS.topSize, Number(statements.countLevel.get(difficulty).total));
+  sendJson(response, 200, {
+    difficulty: difficulty,
+    offset: offset,
+    limit: pageLimit,
+    total: total,
+    entries: rows.map((row, index) => ({
+      rank: offset + index + 1,
+      id: row.id,
+      callsign: row.callsign,
+      score: Number(row.score),
+      accuracy: Math.round(Number(row.accuracy) * 100) / 100,
+      maxStreak: Number(row.max_streak),
+      durationSeconds: Number(row.duration_seconds),
+      finishedAt: row.finished_at
+    }))
+  });
+}
+
+async function handleSubmission(request, response) {
+  const address = clientAddress(request);
+  if (isRateLimited(address)) {
+    sendJson(response, 429, { accepted: false, reason: 'too many scores at once; wait a minute' });
+    return;
+  }
+  let body;
+  try {
+    body = await readJsonBody(request);
+  } catch (error) {
+    sendJson(response, error.status || 400, { accepted: false, reason: error.message });
+    return;
+  }
+  const problem = validationError(body);
+  if (problem !== null) {
+    sendJson(response, 400, { accepted: false, reason: problem });
+    return;
+  }
+  // The anti-cheat step: rebuild the signature with this server's passphrase; a mismatch drops the score.
+  if (!signatureMatches(body)) {
+    console.warn('[hitscan] dropped a score with a bad signature from ' + address + ' (' + body.callsign + ', ' + body.score + ')');
+    sendJson(response, 403, { accepted: false, reason: 'signature mismatch' });
+    return;
+  }
+
+  const row = {
+    id: body.id,
+    user_id: body.userId,
+    callsign: body.callsign,
+    difficulty: body.difficulty,
+    score: body.score,
+    accuracy: Number(body.accuracy),
+    max_streak: body.maxStreak,
+    duration_seconds: body.durationSeconds,
+    finished_at: new Date(Date.parse(body.finishedAt)).toISOString()
+  };
+  const existing = statements.findById.get(row.id);
+  if (existing) {
+    // A retry of a score already saved answers with its rank; a different run reusing the id is refused.
+    const isSameRun = existing.user_id === row.user_id && Number(existing.score) === row.score && existing.difficulty === row.difficulty;
+    if (!isSameRun) {
+      sendJson(response, 409, { accepted: false, reason: 'that record id is taken' });
+      return;
+    }
+    sendJson(response, 200, { accepted: true, id: existing.id, rank: rankOf(existing), total: Number(statements.countLevel.get(existing.difficulty).total) });
+    return;
+  }
+  statements.insert.run(row.id, row.user_id, row.callsign, row.difficulty, row.score, row.accuracy, row.max_streak, row.duration_seconds, row.finished_at);
+  const stored = statements.findById.get(row.id);
+  const rank = rankOf(stored);
+  const total = Number(statements.countLevel.get(row.difficulty).total);
+  console.log('[hitscan] saved ' + row.callsign + ' ' + row.score + ' on level ' + row.difficulty + ' (rank ' + rank + ' of ' + total + ')');
+  sendJson(response, 201, { accepted: true, id: row.id, rank: rank, total: total });
+}
+
+const server = http.createServer((request, response) => {
+  let url;
+  try {
+    url = new URL(request.url, 'http://localhost');
+  } catch (error) {
+    sendJson(response, 400, { reason: 'bad address' });
+    return;
+  }
+  const route = request.method + ' ' + url.pathname;
+  try {
+    if (request.method === 'OPTIONS') {
+      response.writeHead(204, Object.assign({ 'Access-Control-Max-Age': '600' }, BASE_HEADERS));
+      response.end();
+    } else if (route === 'GET /' || route === 'GET /hitscan-3d.html') {
+      serveGame(response);
+    } else if (route === 'GET /api/config') {
+      sendJson(response, 200, { passphrase: SETTINGS.passphrase, publicUrl: SETTINGS.publicUrl, topSize: LIMITS.topSize });
+    } else if (route === 'GET /api/leaderboard') {
+      handleLeaderboard(url, response);
+    } else if (route === 'POST /api/scores') {
+      handleSubmission(request, response).catch((error) => {
+        console.error('[hitscan] submission failed', error);
+        sendJson(response, 500, { accepted: false, reason: 'server error' });
+      });
+    } else if (route === 'GET /api/health') {
+      sendJson(response, 200, { ok: true });
+    } else {
+      sendJson(response, 404, { reason: 'not found' });
+    }
+  } catch (error) {
+    console.error('[hitscan] request failed', error);
+    sendJson(response, 500, { reason: 'server error' });
+  }
+});
+
+server.listen(SETTINGS.port, SETTINGS.host, () => {
+  console.log('[hitscan] open http://localhost:' + SETTINGS.port + ' to play (database ' + SETTINGS.databaseFile + ')');
+  if (SETTINGS.gameFile === null) {
+    console.warn('[hitscan] no game page found: put hitscan-3d.html next to this file, or run: node hitscan-server.js path/to/the-game.html');
+  }
+  if (SETTINGS.passphrase === DEFAULT_PASSPHRASE) {
+    console.warn('[hitscan] using the default passphrase; set LEADERBOARD_PASSPHRASE to your own secret');
+  }
+});
+
+function shutDown() {
+  server.close(() => {
+    database.close();
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(0), 2000).unref();
+}
+process.on('SIGINT', shutDown);
+process.on('SIGTERM', shutDown);
 </script>
 </body>
 </html>
