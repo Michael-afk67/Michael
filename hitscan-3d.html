@@ -153,6 +153,7 @@ kbd {
 }
 
 /* The reticle overlay only carries content during a round. */
+.app[data-state="SIGN_IN"] .overlay,
 .app[data-state="MENU"] .overlay,
 .app[data-state="ARMORY"] .overlay,
 .app[data-state="GAMEOVER"] .overlay {
@@ -834,6 +835,58 @@ kbd {
   right: 9px;
 }
 
+/* A level that still has to be earned: greyed out, with what opens it. */
+.mode-card[data-locked="true"] {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.mode-card[data-locked="true"] .mode-card__orb,
+.mode-card[data-locked="true"] .mode-card__name {
+  filter: grayscale(1) brightness(0.62);
+}
+
+.mode-card[data-locked="true"] .mode-card__spec {
+  display: none;
+}
+
+.lock-note {
+  font-weight: 600;
+  color: var(--brass);
+}
+
+.mode-card[data-denied="true"],
+.segmented button[data-denied="true"] {
+  animation: lock-deny 360ms ease;
+}
+
+@keyframes lock-deny {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.mode-card__lock {
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--brass);
+}
+
+.mode-card__lock::before {
+  content: "\1F512\00A0";
+}
+
+.segmented button[data-locked="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.segmented button[data-locked="true"]::before {
+  content: "\1F512\00A0";
+  font-size: 0.85em;
+}
+
 .mode-card[aria-checked="true"] .mode-card__key {
   border-color: var(--brass-dim);
   color: var(--brass);
@@ -1254,7 +1307,7 @@ kbd {
   outline-offset: 1px;
 }
 
-/* Global top 100 or My scores: a pill switch whose brass thumb slides under the active side. */
+/* Top 500 or My scores: a pill switch whose brass thumb slides under the active side. */
 .scope-toggle {
   position: relative;
   display: inline-grid;
@@ -1312,13 +1365,27 @@ kbd {
   outline-offset: 2px;
 }
 
-/* Room for ten rows, so paging never makes the panel jump (an empty board stays compact). */
-.board__panel {
-  min-height: 384px;
+/* Up to 500 rows: the table scrolls inside the panel under a header that stays put. */
+.board__scroll {
+  max-height: 448px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 3px;
 }
 
-.board__panel[data-empty="true"] {
-  min-height: 0;
+.board__scroll:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+.board__panel[data-empty="true"] .board__scroll {
+  overflow: hidden;
+}
+
+.board-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .board__panel[aria-busy="true"] .board-table tbody {
@@ -1417,20 +1484,6 @@ kbd {
 
 .board-table tr[data-highlight="true"] td:first-child {
   box-shadow: inset 3px 0 0 var(--brass);
-}
-
-.board__pager {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.board__range {
-  font-family: var(--font-data);
-  font-size: var(--step--1);
-  color: var(--steel-muted);
-  text-align: center;
 }
 
 .board__list {
@@ -1836,6 +1889,77 @@ kbd {
   color: var(--signal-miss);
 }
 
+.notice--unlock {
+  padding: 10px 12px;
+  font-weight: 700;
+  color: #ffe2a1;
+  background: linear-gradient(90deg, rgba(226, 174, 72, 0.18), transparent 80%);
+  border: 1px solid rgba(226, 174, 72, 0.45);
+  border-radius: var(--radius-s);
+}
+
+/* ------------------------------------------------------------------
+   Sign-in screen
+   ------------------------------------------------------------------ */
+.account__tabs {
+  margin-top: 18px;
+  gap: 6px;
+}
+
+.account__tabs .tab {
+  padding: 7px 12px;
+  font-size: var(--step--1);
+}
+
+.account__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.account__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steel-muted);
+}
+
+.account__field input {
+  padding: 11px 12px;
+  font-family: var(--font-data);
+  font-weight: 600;
+  font-size: var(--step-1);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--steel-bright);
+  background: var(--range-black);
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-s);
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.account__field input:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 1px;
+  border-color: var(--brass-dim);
+}
+
+.account__form .notice {
+  margin: 0;
+}
+
+.account__rules {
+  margin: 16px 0 0;
+  font-size: var(--step--1);
+  color: var(--steel-muted);
+}
+
 /* ------------------------------------------------------------------
    Coins, wallet and loadout (menu)
    ------------------------------------------------------------------ */
@@ -1965,6 +2089,20 @@ kbd {
   font-weight: 700;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.loadout__player {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--steel-line);
+}
+
+.loadout__player b {
+  font-size: var(--step-1);
 }
 
 .loadout__buttons {
@@ -2861,6 +2999,10 @@ kbd {
     padding-right: 6px;
   }
 
+  .board__scroll {
+    max-height: 60vh;
+  }
+
   .board-table th.board-table__rank {
     width: 3.3rem;
   }
@@ -2881,11 +3023,6 @@ kbd {
     font-size: var(--step--2);
   }
 
-  .board__pager .button-small {
-    padding-left: 9px;
-    padding-right: 9px;
-    letter-spacing: 0.04em;
-  }
 
 
 
@@ -3013,6 +3150,38 @@ kbd {
 
   <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 
+  <!-- SIGN IN --------------------------------------------------------- -->
+  <section class="screen screen--account" id="screen-account" aria-labelledby="account-title" hidden>
+    <div class="console console--narrow account">
+      <p class="eyebrow">Hitscan · player account</p>
+      <h2 class="screen__title" id="account-title">Create your account</h2>
+      <p class="screen__subtitle" id="account-where">Your account is saved in this browser on this device.</p>
+      <div class="tabs account__tabs" id="account-tabs" role="tablist" aria-label="Account">
+        <button class="tab" type="button" role="tab" aria-selected="true" tabindex="0" aria-controls="account-form" data-account-mode="CREATE" id="account-tab-create">Create account</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="account-form" data-account-mode="SIGN_IN" id="account-tab-sign-in">Sign in</button>
+      </div>
+      <form class="account__form" id="account-form" role="tabpanel" aria-labelledby="account-tab-create" novalidate>
+        <label class="account__field" for="account-username">
+          <span>Username</span>
+          <input id="account-username" name="username" type="text" autocomplete="username" maxlength="12" spellcheck="false" autocapitalize="off" required>
+        </label>
+        <label class="account__field" for="account-password">
+          <span>Password</span>
+          <input id="account-password" name="password" type="password" autocomplete="new-password" maxlength="64" required>
+        </label>
+        <label class="account__field" for="account-confirm" id="account-confirm-field">
+          <span>Type the password again</span>
+          <input id="account-confirm" name="confirm" type="password" autocomplete="new-password" maxlength="64">
+        </label>
+        <p class="notice" id="account-error" data-tone="miss" role="alert" hidden></p>
+        <div class="actions">
+          <button class="cta" id="account-submit" type="submit">Create account</button>
+        </div>
+      </form>
+      <p class="account__rules" id="account-rules">Usernames: 3 to 12 letters, numbers, dots, dashes or underscores. Passwords: at least 6 characters.</p>
+    </div>
+  </section>
+
   <!-- MENU ------------------------------------------------------------ -->
   <section class="screen screen--menu" id="screen-menu" aria-labelledby="menu-title">
     <div class="console">
@@ -3036,19 +3205,22 @@ kbd {
               <button class="mode-card" type="button" role="radio" aria-checked="true" tabindex="0" data-difficulty="MEDIUM" id="mode-card-medium">
                 <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 40; --orb-size: 32px;"></span></span>
                 <span class="mode-card__name">Medium</span>
-                <span class="mode-card__spec">r 30–38 px · 2.6 s<br>slow bounce · ×1.5 coins</span>
+                <span class="mode-card__spec">r 30–38 px · 2.6 s<br>slow bounce · ×2 coins</span>
+                <span class="mode-card__lock" hidden></span>
                 <kbd class="mode-card__key">2</kbd>
               </button>
               <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="HARD" id="mode-card-hard">
                 <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 22; --orb-size: 28px;"></span></span>
                 <span class="mode-card__name">Hard</span>
-                <span class="mode-card__spec">r 22–29 px · 1.65 s<br>fast drift · ×2 coins</span>
+                <span class="mode-card__spec">r 22–29 px · 1.65 s<br>fast drift · ×8 coins</span>
+                <span class="mode-card__lock" hidden></span>
                 <kbd class="mode-card__key">3</kbd>
               </button>
               <button class="mode-card mode-card--demon" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="DEMON" id="mode-card-demon">
                 <span class="mode-card__orb"><span class="orb-icon orb-icon--demon" style="--orb-hue: 2; --orb-size: 24px;"></span></span>
                 <span class="mode-card__name">Demon</span>
-                <span class="mode-card__spec">r 18–24 px · 1.4 s<br>erratic · ×3 coins</span>
+                <span class="mode-card__spec">r 18–24 px · 1.4 s<br>erratic · ×100 coins</span>
+                <span class="mode-card__lock" hidden></span>
                 <kbd class="mode-card__key">4</kbd>
               </button>
               <button class="mode-card mode-card--training" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="TRAINING" id="mode-card-training">
@@ -3070,6 +3242,7 @@ kbd {
                 <kbd class="mode-card__key">7</kbd>
               </button>
             </div>
+            <p class="field__note lock-note" id="mode-lock-note" role="status" hidden></p>
           </div>
 
           <div class="field" role="group" aria-labelledby="label-level" id="level-field" hidden>
@@ -3080,6 +3253,7 @@ kbd {
               <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="HARD" id="level-hard">Hard</button>
               <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="DEMON" id="level-demon">Demon</button>
             </div>
+            <p class="field__note lock-note" id="level-lock-note" role="status" hidden></p>
             <p class="field__note" id="level-note">Same orbs and scoring as the real level. Nothing is earned: no coins and no leaderboard.</p>
           </div>
 
@@ -3157,7 +3331,11 @@ kbd {
         </div>
 
         <div class="console__side">
-          <aside class="loadout" aria-label="Wallet and equipped finish">
+          <aside class="loadout" aria-label="Player, wallet and equipped finish">
+            <div class="loadout__player">
+              <span class="loadout__labels"><small id="player-where">Player</small><b id="player-name">—</b></span>
+              <button class="link-button" id="sign-out-button" type="button">Log out</button>
+            </div>
             <div class="wallet" title="Every 10 points you score in a finished round bank 1 coin, times the level bonus">
               <svg class="coin-icon" viewBox="0 0 24 24" aria-hidden="true"><circle class="coin-icon__rim" cx="12" cy="12" r="10.2"/><circle class="coin-icon__face" cx="12" cy="12" r="6.8"/><path class="coin-icon__mark" d="M12 7.4v2.8M12 13.8v2.8M7.4 12h2.8M13.8 12h2.8"/></svg>
               <span class="wallet__amount" id="wallet-amount">0</span>
@@ -3171,13 +3349,13 @@ kbd {
               <button class="button-secondary loadout__button" id="armory-button" type="button">Armory <kbd>B</kbd></button>
               <button class="button-secondary loadout__button" id="crosshair-button" type="button">Crosshair <kbd>C</kbd></button>
             </div>
-            <p class="loadout__rate">Standard rounds bank ⌊score ÷ 10⌋ coins × Easy 1 · Medium 1.5 · Hard 2 · Demon 3</p>
+            <p class="loadout__rate">Standard rounds bank ⌊score ÷ 10⌋ coins × Easy 1 · Medium 2 · Hard 8 · Demon 100</p>
           </aside>
           <div class="board" id="menu-board">
             <div class="board__head">
               <h2 class="board__title">Leaderboard</h2>
               <div class="scope-toggle" id="board-scope" role="radiogroup" aria-label="Which scores to show" data-scope="GLOBAL">
-                <button type="button" role="radio" aria-checked="true" tabindex="0" data-board-scope="GLOBAL" id="board-scope-global">Global top 100</button>
+                <button type="button" role="radio" aria-checked="true" tabindex="0" data-board-scope="GLOBAL" id="board-scope-global">Top 500</button>
                 <button type="button" role="radio" aria-checked="false" tabindex="-1" data-board-scope="LOCAL" id="board-scope-local">My scores</button>
               </div>
             </div>
@@ -3188,36 +3366,33 @@ kbd {
               <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="DEMON" id="board-tab-demon">Demon</button>
             </div>
             <div class="board__panel" id="menu-board-panel" role="tabpanel" aria-labelledby="board-tab-medium" aria-busy="false">
-              <table class="board-table" id="menu-board-table">
-                <caption class="visually-hidden" id="menu-board-caption">Global top 100, Medium</caption>
-                <thead>
-                  <tr>
-                    <th scope="col" class="board-table__rank">Rank</th>
-                    <th scope="col">Callsign</th>
-                    <th scope="col" class="board-table__num">Score</th>
-                    <th scope="col" class="board-table__num">Acc · Streak</th>
-                  </tr>
-                </thead>
-                <tbody id="menu-board-body"></tbody>
-              </table>
+              <div class="board__scroll" id="menu-board-scroll" tabindex="0" aria-label="Leaderboard rows. Scroll for more.">
+                <table class="board-table" id="menu-board-table">
+                  <caption class="visually-hidden" id="menu-board-caption">Top 500, Medium</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" class="board-table__rank">Rank</th>
+                      <th scope="col">Player</th>
+                      <th scope="col" class="board-table__num">Score</th>
+                      <th scope="col" class="board-table__num">Acc · Streak</th>
+                    </tr>
+                  </thead>
+                  <tbody id="menu-board-body"></tbody>
+                </table>
+              </div>
               <p class="board__empty" id="menu-board-empty" hidden>No scores on this board yet.</p>
               <details class="board__server" id="board-server-help" hidden>
                 <summary class="board__server-link"><span>How do I turn on the global board?</span></summary>
                 <div class="board__server-body">
-                  <p>The global top 100 runs on a small server that comes inside this file. Save it next to this game, run it with Node.js 22.13 or newer, then play at <b>http://localhost:8787</b>.</p>
+                  <p>The global top 500 runs on a small server that comes inside this file. Save it next to this game, run it with Node.js 22.13 or newer, then play at <b>http://localhost:8787</b>. Accounts made there work on every device that plays from it.</p>
                   <code class="board__command">node hitscan-server.js</code>
                   <button class="button-secondary button-small" id="board-server-download" type="button">Download the server</button>
                 </div>
               </details>
             </div>
-            <div class="board__pager">
-              <button class="button-secondary button-small" id="board-prev" type="button">Previous Ten</button>
-              <span class="board__range" id="board-range" aria-live="polite">1–10</span>
-              <button class="button-secondary button-small" id="board-next" type="button">Next Ten</button>
-            </div>
             <div class="board__foot">
-              <p class="board__storage" id="menu-board-storage">Saved in this browser</p>
-              <button class="link-button" id="menu-board-clear" type="button" hidden>Clear this board</button>
+              <p class="board__storage" id="menu-board-storage" aria-live="polite">Saved in this browser</p>
+              <button class="link-button" id="menu-board-clear" type="button" hidden>Clear my scores</button>
             </div>
           </div>
         </div>
@@ -3270,14 +3445,8 @@ kbd {
 
       <dl class="stat-grid" id="over-stats"></dl>
 
-      <form class="record-form" id="over-record-form" autocomplete="off" hidden>
-        <p class="record-form__copy" id="over-record-copy">New top-10 score. Sign the range log.</p>
-        <label for="over-name-input">Callsign
-          <input id="over-name-input" name="callsign" type="text" maxlength="12" spellcheck="false" autocapitalize="characters" placeholder="PLAYER">
-        </label>
-        <button class="button-secondary" id="over-save-button" type="submit">Save score</button>
-      </form>
-      <p class="notice" id="over-save-notice" hidden></p>
+      <p class="notice" id="over-save-notice" aria-live="polite" hidden></p>
+      <p class="notice notice--unlock" id="over-unlock" aria-live="polite" hidden></p>
 
       <div class="result-board" id="over-result-board">
         <div class="board" id="over-board">
@@ -3322,7 +3491,7 @@ kbd {
           </div>
 
           <div class="armory__section" id="armory-section-finishes" role="tabpanel" aria-labelledby="armory-tab-finishes">
-            <p class="armory__rate">Standard rounds bank coins: <b>⌊score ÷ 10⌋ × the level bonus</b> (Easy ×1, Medium ×1.5, Hard ×2, Demon ×3). Pick a finish to preview it on the pistol; your shots burst in its colors.</p>
+            <p class="armory__rate">Standard rounds bank coins: <b>⌊score ÷ 10⌋ × the level bonus</b> (Easy ×1, Medium ×2, Hard ×8, Demon ×100). Pick a finish to preview it on the pistol; your shots burst in its colors.</p>
             <div class="skin-list" id="skin-list" role="listbox" aria-label="Weapon finishes" aria-orientation="vertical"></div>
             <div class="skin-detail" id="skin-detail">
               <div class="skin-detail__top">
@@ -3437,6 +3606,8 @@ function deepFreeze(target) {
    ------------------------------------------------------------------------- */
 
 const GAME_STATES = deepFreeze({
+  // Before the menu: create an account or sign in.
+  SIGN_IN: 'SIGN_IN',
   MENU: 'MENU',
   ARMORY: 'ARMORY',
   PLAYING: 'PLAYING',
@@ -3582,7 +3753,7 @@ const DIFFICULTY_CONFIG = deepFreeze({
     baseHitScore: 150,
     expirePenalty: 100,
     whiffPenalty: 50,
-    coinMultiplier: 1.5,
+    coinMultiplier: 2,
     hitboxScale: 1.08,
     isEndless: false,
     startingShields: 0,
@@ -3613,7 +3784,7 @@ const DIFFICULTY_CONFIG = deepFreeze({
     baseHitScore: 220,
     expirePenalty: 100,
     whiffPenalty: 50,
-    coinMultiplier: 2,
+    coinMultiplier: 8,
     hitboxScale: 1.04,
     isEndless: false,
     startingShields: 0,
@@ -3644,7 +3815,7 @@ const DIFFICULTY_CONFIG = deepFreeze({
     baseHitScore: 300,
     expirePenalty: 100,
     whiffPenalty: 50,
-    coinMultiplier: 3,
+    coinMultiplier: 100,
     hitboxScale: 1.03,
     isEndless: false,
     startingShields: 0,
@@ -3762,6 +3933,66 @@ function isValidRoundSeconds(seconds) {
   return Number.isInteger(seconds) && seconds >= ROUND_LENGTH_LIMITS_SECONDS.minimum && seconds <= ROUND_LENGTH_LIMITS_SECONDS.maximum;
 }
 
+/**
+ * Level unlocks. A new player starts with Easy only. Finishing a standard
+ * round with a fair score opens the next level: Easy → Medium → Hard →
+ * Demon. Each target is set for a 60 s round and scales with the round
+ * length; rounds shorter than 30 s do not count. The targets come from
+ * simulated players of four skill levels: in a 60 s round a first try
+ * scores about 2,000 to 10,000, a beginner about 23,000, a player who has
+ * practised a little 34,000 to 44,000 and a casual regular over 50,000. So
+ * a few rounds of practice open each level, a first try does not. The
+ * leaderboard server applies the same numbers (UNLOCK_RULES in the server
+ * code at the end of this file), so change both together.
+ */
+const UNLOCK_RULES = deepFreeze({
+  minimumRoundSeconds: 30,
+  steps: [
+    { level: 'EASY', unlocks: 'MEDIUM', scorePerMinute: 30000 },
+    { level: 'MEDIUM', unlocks: 'HARD', scorePerMinute: 35000 },
+    { level: 'HARD', unlocks: 'DEMON', scorePerMinute: 30000 }
+  ]
+});
+
+const LevelUnlocks = {
+  /** The step a level's rounds count toward (null for Demon, the last level). */
+  stepFrom(levelKey) {
+    return UNLOCK_RULES.steps.find((step) => step.level === levelKey) || null;
+  },
+
+  /** The step that opens a level (null for Easy, which is always open). */
+  stepOpening(levelKey) {
+    return UNLOCK_RULES.steps.find((step) => step.unlocks === levelKey) || null;
+  },
+
+  /** The score a round of this length needs on the step's level. */
+  targetScore(step, roundSeconds) {
+    return Math.ceil(step.scorePerMinute * roundSeconds / 60);
+  },
+
+  /** The level a finished standard round opens, or null. */
+  levelEarnedBy(levelKey, score, roundSeconds) {
+    const step = LevelUnlocks.stepFrom(levelKey);
+    if (step === null || roundSeconds < UNLOCK_RULES.minimumRoundSeconds) {
+      return null;
+    }
+    return score >= LevelUnlocks.targetScore(step, roundSeconds) ? step.unlocks : null;
+  },
+
+  /** What opens a locked level, for the round length now chosen in the menu ("score 30,000 on Easy in a 60 s round"). */
+  describe(levelKey, roundSeconds) {
+    const step = LevelUnlocks.stepOpening(levelKey);
+    if (step === null) {
+      return '';
+    }
+    const fromLabel = DIFFICULTY_CONFIG[step.level].label;
+    if (roundSeconds < UNLOCK_RULES.minimumRoundSeconds) {
+      return 'play ' + fromLabel + ' in a round of ' + UNLOCK_RULES.minimumRoundSeconds + ' s or more';
+    }
+    return 'score ' + Formatters.formatInteger(LevelUnlocks.targetScore(step, roundSeconds)) + ' on ' + fromLabel + ' in a ' + roundSeconds + ' s round';
+  }
+};
+
 /** Global tuning knobs shared by several subsystems. */
 const GAME_RULES = deepFreeze({
   safeZonePaddingRatio: 0.06,
@@ -3795,10 +4026,11 @@ const GAME_RULES = deepFreeze({
   hitShardsMaximum: 30,
   hitShardLifeMs: 450,
   gravityPxPerSecondSquared: 1500,
-  // Local boards keep each level's best 100 runs; the global board shows the world's top 100.
-  leaderboardEntriesPerMode: 100,
-  leaderboardPageSize: 10,
-  globalLeaderboardSize: 100,
+  // Leaderboards rank players by their best run and list the top 500 in one scrolling table.
+  // This device keeps each player's best 25 runs per level: about 1 MB for a class of 30
+  // sharing one browser, well under the browser's storage limit.
+  leaderboardSize: 500,
+  localRunsPerPlayer: 25,
   // Mouse speed widens a dynamic crosshair: px of extra gap per px/s, up to a maximum.
   crosshairMovementGapPerSpeed: 0.012,
   crosshairMovementGapMaximum: 24,
@@ -6569,6 +6801,100 @@ class SoundFXEngine {
       subOscillator.stop(stopTime);
 
       this.retireVoiceWhenEnded(subOscillator, ownedNodes);
+    });
+  }
+
+  /* ---------------------------------------------------------------------
+     playVictory — a bright fanfare for a round that ends on a positive score:
+     a quick C-major run up to the octave, a held major chord with a little
+     vibrato, and two sparkles on top
+     --------------------------------------------------------------------- */
+
+  playVictory() {
+    return this.runVoice('victory', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(0, ownedNodes);
+      // The voice is retired when its longest note ends.
+      let longestSource = null;
+      let longestEnd = 0;
+      const tone = (type, frequency, at, peak, decaySeconds, vibratoHz) => {
+        const oscillator = context.createOscillator();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, startTime + at);
+        const envelope = context.createGain();
+        envelope.gain.setValueAtTime(0.0001, startTime);
+        envelope.gain.setValueAtTime(0.0001, startTime + at);
+        envelope.gain.exponentialRampToValueAtTime(peak, startTime + at + 0.012);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + at + decaySeconds);
+        oscillator.connect(envelope);
+        envelope.connect(voiceOutput);
+        ownedNodes.push(oscillator, envelope);
+        if (vibratoHz > 0) {
+          const vibrato = context.createOscillator();
+          vibrato.frequency.setValueAtTime(vibratoHz, startTime + at);
+          const vibratoDepth = context.createGain();
+          vibratoDepth.gain.setValueAtTime(frequency * 0.006, startTime + at);
+          vibrato.connect(vibratoDepth);
+          vibratoDepth.connect(oscillator.frequency);
+          ownedNodes.push(vibrato, vibratoDepth);
+          vibrato.start(startTime + at);
+          vibrato.stop(startTime + at + decaySeconds + 0.02);
+        }
+        oscillator.start(startTime + at);
+        oscillator.stop(startTime + at + decaySeconds + 0.02);
+        if (at + decaySeconds > longestEnd) {
+          longestEnd = at + decaySeconds;
+          longestSource = oscillator;
+        }
+      };
+
+      // The run: C5 E5 G5, then C6.
+      const run = [523.25, 659.25, 783.99, 1046.5];
+      for (let index = 0; index < run.length; index += 1) {
+        const at = index * 0.085;
+        tone('triangle', run[index], at, 0.26, 0.22, 0);
+        tone('square', run[index], at, 0.045, 0.16, 0);
+      }
+      // The held chord: C5 E5 G5 C6.
+      const chordAt = 0.36;
+      const chord = [523.25, 659.25, 783.99, 1046.5];
+      for (let index = 0; index < chord.length; index += 1) {
+        tone('triangle', chord[index], chordAt, 0.13, 1.05, 5.5);
+      }
+      tone('sine', 261.63, chordAt, 0.12, 0.9, 0);
+      // Sparkles.
+      tone('sine', 2093, chordAt + 0.1, 0.06, 0.35, 0);
+      tone('sine', 2637, chordAt + 0.22, 0.05, 0.4, 0);
+
+      this.retireVoiceWhenEnded(longestSource, ownedNodes);
+    });
+  }
+
+  /** A round that ends on exactly zero: a soft two-note "done", neither a win nor a loss. */
+  playRoundOverNeutral() {
+    return this.runVoice('roundOverNeutral', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(0, ownedNodes);
+      let lastSource = null;
+      const notes = [{ frequency: 392, at: 0 }, { frequency: 523.25, at: 0.13 }];
+      for (let index = 0; index < notes.length; index += 1) {
+        const note = notes[index];
+        const oscillator = context.createOscillator();
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(note.frequency, startTime + note.at);
+        const envelope = context.createGain();
+        envelope.gain.setValueAtTime(0.0001, startTime);
+        envelope.gain.setValueAtTime(0.0001, startTime + note.at);
+        envelope.gain.exponentialRampToValueAtTime(0.18, startTime + note.at + 0.015);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + note.at + 0.45);
+        oscillator.connect(envelope);
+        envelope.connect(voiceOutput);
+        ownedNodes.push(oscillator, envelope);
+        oscillator.start(startTime + note.at);
+        oscillator.stop(startTime + note.at + 0.47);
+        lastSource = oscillator;
+      }
+      this.retireVoiceWhenEnded(lastSource, ownedNodes);
     });
   }
 
@@ -10429,15 +10755,22 @@ class ScreenShakeSystem {
 const STORAGE_KEYS = deepFreeze({
   leaderboard: 'hitscan3d.leaderboard.v1',
   settings: 'hitscan3d.settings.v1',
-  // The old wallet format; read once to migrate into the inventory file.
+  // Accounts made on this device, and the signed-in session on the leaderboard server.
+  accounts: 'hitscan3d.accounts.v1',
+  session: 'hitscan3d.session.v1',
+  // Each account's inventory file and progress (unlocked levels, arcade bests): prefix + account id.
+  inventoryPrefix: 'hitscan3d.inventory.v2:',
+  profilePrefix: 'hitscan3d.profile.v1:',
+  // Data from before accounts. The first account to sign in on this device takes it over.
   armory: 'hitscan3d.armory.v1',
-  inventory: 'hitscan3d.inventory.v2'
+  inventory: 'hitscan3d.inventory.v2',
+  legacyClaimed: 'hitscan3d.legacy-claimed'
 });
 
 /** Callsigns are at most twelve characters (the global board's limit). */
 const NAME_MAX_LENGTH = 12;
 
-/** Which leaderboard the menu shows: the world's top 100, or this device's own runs. */
+/** Which leaderboard the menu shows: the top 500 players, or the signed-in player's own runs. */
 const BOARD_SCOPES = deepFreeze({ GLOBAL: 'GLOBAL', LOCAL: 'LOCAL' });
 
 /**
@@ -10520,9 +10853,7 @@ const DEFAULT_SETTINGS = deepFreeze({
   gridshotNodes: 9,
   boardTab: 'MEDIUM',
   boardScope: 'GLOBAL',
-  playerName: '',
-  // Arcade bests on this device: Time Attack score per level (TIME_ATTACK_EASY …),
-  // Gridshot hits per second per grid (GRIDSHOT_9, GRIDSHOT_16).
+  // Arcade bests from before accounts (each account keeps its own now); the first account takes them over.
   personalBests: {}
 });
 
@@ -10594,20 +10925,7 @@ class SettingsStore {
     if (candidate.boardScope === BOARD_SCOPES.GLOBAL || candidate.boardScope === BOARD_SCOPES.LOCAL) {
       validated.boardScope = candidate.boardScope;
     }
-    if (typeof candidate.playerName === 'string') {
-      validated.playerName = LeaderboardManager.sanitizeName(candidate.playerName);
-    }
-    validated.personalBests = {};
-    if (candidate.personalBests !== null && typeof candidate.personalBests === 'object') {
-      const keys = DIFFICULTY_KEYS.map((levelKey) => 'TIME_ATTACK_' + levelKey)
-        .concat(GRIDSHOT_RULES.nodeOptions.map((nodes) => 'GRIDSHOT_' + nodes));
-      for (let index = 0; index < keys.length; index += 1) {
-        const best = Number(candidate.personalBests[keys[index]]);
-        if (Number.isFinite(best) && best > 0) {
-          validated.personalBests[keys[index]] = Math.min(1e9, Math.round(best * 100) / 100);
-        }
-      }
-    }
+    validated.personalBests = validatePersonalBests(candidate.personalBests);
     return validated;
   }
 
@@ -10629,14 +10947,16 @@ class SettingsStore {
 }
 
 /* -------------------------------------------------------------------------
-   LeaderboardManager
+   LeaderboardManager — the runs saved on this device. Every run belongs to
+   an account (its id and username; runs saved before accounts keep their
+   old name). Boards rank players by their best run, and each player keeps
+   their best 25 runs per level here.
    ------------------------------------------------------------------------- */
 
 class LeaderboardManager {
-  constructor(storage, maximumEntriesPerMode = GAME_RULES.leaderboardEntriesPerMode) {
+  constructor(storage) {
     this.storage = storage;
     this.storageKey = STORAGE_KEYS.leaderboard;
-    this.maximumEntriesPerMode = maximumEntriesPerMode;
     this.entriesByMode = this.createEmptyBoard();
     this.lastLoadReport = { rawFound: false, parsed: false, accepted: 0, rejected: 0 };
     this.load();
@@ -10654,13 +10974,13 @@ class LeaderboardManager {
     return emptyBoard;
   }
 
-  /** Strips control characters and markup, collapses whitespace, uppercases, caps length. */
-  static sanitizeName(rawName) {
+  /** Strips control characters and markup and collapses whitespace; keeps the case; caps the length. */
+  static cleanName(rawName) {
     if (typeof rawName !== 'string') {
       return '';
     }
     const withoutControlCharacters = rawName.replace(/[\u0000-\u001f\u007f<>]/g, '');
-    const collapsed = withoutControlCharacters.replace(/\s+/g, ' ').trim().toUpperCase();
+    const collapsed = withoutControlCharacters.replace(/\s+/g, ' ').trim();
     const codePoints = Array.from(collapsed);
     if (codePoints.length > NAME_MAX_LENGTH) {
       return codePoints.slice(0, NAME_MAX_LENGTH).join('').trim();
@@ -10676,6 +10996,11 @@ class LeaderboardManager {
     return Math.floor(numeric);
   }
 
+  /** Who a run belongs to: its account id, or "name:<name>" for a run saved before accounts. */
+  static playerKey(entry) {
+    return entry.userId !== null ? entry.userId : 'name:' + entry.name;
+  }
+
   /**
    * Validates one untrusted record from storage. Returns a clean entry or null.
    * Every field is type-checked and range-checked; nothing is trusted as-is.
@@ -10689,12 +11014,12 @@ class LeaderboardManager {
     if (mode === null) {
       return null;
     }
-    const name = LeaderboardManager.sanitizeName(candidate.name);
+    const name = LeaderboardManager.cleanName(candidate.name);
     if (name.length === 0) {
       return null;
     }
     const score = Number(candidate.score);
-    if (!Number.isFinite(score) || score <= 0 || score > 1e9) {
+    if (!Number.isFinite(score) || score <= 0 || score > 1e12) {
       return null;
     }
     const accuracy = Number(candidate.accuracy);
@@ -10721,17 +11046,16 @@ class LeaderboardManager {
       const reaction = Number(candidate.averageReactionMs);
       averageReactionMs = Number.isFinite(reaction) && reaction > 0 && reaction < 60000 ? Math.round(reaction) : null;
     }
-    let peakLevel = null;
-    if (DIFFICULTY_CONFIG[mode].adaptive !== null) {
-      const level = LeaderboardManager.toNonNegativeInteger(candidate.peakLevel);
-      peakLevel = level !== null && level >= 1 ? level : 1;
-    }
     const entryId = typeof candidate.id === 'string' && /^[A-Za-z0-9-]{4,48}$/.test(candidate.id)
       ? candidate.id
       : IdentifierFactory.createEntryId();
+    const roundSeconds = LeaderboardManager.toNonNegativeInteger(candidate.roundSeconds);
 
     return {
       id: entryId,
+      userId: typeof candidate.userId === 'string' && /^USR-[a-z0-9]{8,32}$/.test(candidate.userId) ? candidate.userId : null,
+      // Runs of accounts on the leaderboard server are kept here too, but only "device" runs make this device's board.
+      source: candidate.source === 'online' ? 'online' : 'device',
       name: name,
       mode: mode,
       score: Math.round(score),
@@ -10741,8 +11065,8 @@ class LeaderboardManager {
       bestStreak: bestStreak,
       expired: expired,
       durationMs: durationMs,
+      roundSeconds: isValidRoundSeconds(roundSeconds) ? roundSeconds : null,
       averageReactionMs: averageReactionMs,
-      peakLevel: peakLevel,
       dateIso: new Date(parsedTime).toISOString()
     };
   }
@@ -10756,6 +11080,17 @@ class LeaderboardManager {
       return second.accuracy - first.accuracy;
     }
     return Date.parse(first.dateIso) - Date.parse(second.dateIso);
+  }
+
+  /** Keeps each player's best runs (GAME_RULES.localRunsPerPlayer per level) from a sorted list. */
+  static prunePerPlayer(sortedEntries) {
+    const counts = new Map();
+    return sortedEntries.filter((entry) => {
+      const key = LeaderboardManager.playerKey(entry);
+      const count = (counts.get(key) || 0) + 1;
+      counts.set(key, count);
+      return count <= GAME_RULES.localRunsPerPlayer;
+    });
   }
 
   /** Reads, parses and validates the stored board. Corrupt data is discarded entry by entry. */
@@ -10793,15 +11128,14 @@ class LeaderboardManager {
     for (let modeIndex = 0; modeIndex < DIFFICULTY_KEYS.length; modeIndex += 1) {
       const modeKey = DIFFICULTY_KEYS[modeIndex];
       const seenIds = new Set();
-      const uniqueEntries = [];
-      const sortedEntries = freshBoard[modeKey].sort(LeaderboardManager.compareEntries);
-      for (let entryIndex = 0; entryIndex < sortedEntries.length; entryIndex += 1) {
-        if (!seenIds.has(sortedEntries[entryIndex].id)) {
-          seenIds.add(sortedEntries[entryIndex].id);
-          uniqueEntries.push(sortedEntries[entryIndex]);
+      const uniqueEntries = freshBoard[modeKey].sort(LeaderboardManager.compareEntries).filter((entry) => {
+        if (seenIds.has(entry.id)) {
+          return false;
         }
-      }
-      freshBoard[modeKey] = uniqueEntries.slice(0, this.maximumEntriesPerMode);
+        seenIds.add(entry.id);
+        return true;
+      });
+      freshBoard[modeKey] = LeaderboardManager.prunePerPlayer(uniqueEntries);
     }
 
     this.entriesByMode = freshBoard;
@@ -10817,85 +11151,109 @@ class LeaderboardManager {
         flattenedEntries.push(modeEntries[entryIndex]);
       }
     }
-    const payload = JSON.stringify({ version: 1, savedAt: new Date().toISOString(), entries: flattenedEntries });
+    const payload = JSON.stringify({ version: 2, savedAt: new Date().toISOString(), entries: flattenedEntries });
     return this.storage.write(this.storageKey, payload);
   }
 
-  qualifies(mode, score) {
-    if (!(score > 0)) {
-      return false;
-    }
-    const modeEntries = this.entriesByMode[mode];
-    if (!modeEntries) {
-      return false;
-    }
-    if (modeEntries.length < this.maximumEntriesPerMode) {
-      return true;
-    }
-    return score > modeEntries[modeEntries.length - 1].score;
-  }
-
-  projectedRank(mode, score) {
-    const modeEntries = this.entriesByMode[mode] || [];
-    let rank = 1;
-    for (let entryIndex = 0; entryIndex < modeEntries.length; entryIndex += 1) {
-      if (modeEntries[entryIndex].score >= score) {
-        rank += 1;
-      }
-    }
-    return rank;
-  }
-
   /**
-   * Merges in anything another tab saved, inserts the new run, re-sorts,
-   * truncates to the top N and persists.
-   * @returns {{accepted: boolean, rank: number, persisted: boolean, entry: object|null}}
+   * Saves a finished run, after re-reading storage so runs saved in another tab are kept.
+   * @returns {{accepted: boolean, persisted: boolean, entry: object|null, isPersonalBest: boolean, rank: number, players: number}}
+   *   rank is the player's place among this device's players on that level
    */
   submit(rawEntry) {
     this.load();
     const entry = this.validateEntry(rawEntry);
     if (entry === null) {
-      return { accepted: false, rank: -1, persisted: false, entry: null };
+      return { accepted: false, persisted: false, entry: null, isPersonalBest: false, rank: 0, players: 0 };
     }
+    const previousBest = entry.userId !== null ? this.playerRuns(entry.mode, entry.userId, 1)[0] || null : null;
     const modeEntries = this.entriesByMode[entry.mode];
     modeEntries.push(entry);
     modeEntries.sort(LeaderboardManager.compareEntries);
-    const rank = modeEntries.indexOf(entry) + 1;
-    if (modeEntries.length > this.maximumEntriesPerMode) {
-      modeEntries.length = this.maximumEntriesPerMode;
-    }
-    if (rank > this.maximumEntriesPerMode) {
-      return { accepted: false, rank: -1, persisted: false, entry: null };
-    }
+    this.entriesByMode[entry.mode] = LeaderboardManager.prunePerPlayer(modeEntries);
     const persisted = this.save();
-    return { accepted: true, rank: rank, persisted: persisted, entry: entry };
+    const standing = this.standingOf(entry.mode, entry.source, LeaderboardManager.playerKey(entry));
+    return {
+      accepted: true,
+      persisted: persisted,
+      entry: entry,
+      isPersonalBest: previousBest === null || LeaderboardManager.compareEntries(entry, previousBest) < 0,
+      rank: standing.rank,
+      players: standing.players
+    };
   }
 
-  getEntries(mode) {
-    return (this.entriesByMode[mode] || []).slice();
+  /** Each player's best run on a level, best first, from runs saved on this device (source "device") or mirrored from the server ("online"). */
+  topPlayers(mode, source, limit = GAME_RULES.leaderboardSize) {
+    const seenPlayers = new Set();
+    const bestRuns = [];
+    const modeEntries = this.entriesByMode[mode] || [];
+    for (let index = 0; index < modeEntries.length && bestRuns.length < limit; index += 1) {
+      const entry = modeEntries[index];
+      const key = LeaderboardManager.playerKey(entry);
+      if (entry.source !== source || seenPlayers.has(key)) {
+        continue;
+      }
+      seenPlayers.add(key);
+      bestRuns.push(entry);
+    }
+    return bestRuns;
   }
 
-  clearMode(mode) {
+  /** One player's runs on a level, best first. */
+  playerRuns(mode, userId, limit = GAME_RULES.leaderboardSize) {
+    return (this.entriesByMode[mode] || []).filter((entry) => entry.userId === userId).slice(0, limit);
+  }
+
+  /** A player's place among the players on a level (rank 0 when they have no run there). */
+  standingOf(mode, source, playerKey) {
+    const players = this.topPlayers(mode, source, Infinity);
+    const index = players.findIndex((entry) => LeaderboardManager.playerKey(entry) === playerKey);
+    return { rank: index + 1, players: players.length };
+  }
+
+  /** Removes one player's runs on a level. */
+  clearPlayer(mode, userId) {
     if (!this.entriesByMode[mode]) {
       return false;
     }
     this.load();
-    this.entriesByMode[mode] = [];
+    this.entriesByMode[mode] = this.entriesByMode[mode].filter((entry) => entry.userId !== userId);
     return this.save();
+  }
+
+  /** Hands the runs saved before accounts to the first account on this device. Returns how many moved. */
+  assignLegacyRuns(userId, name) {
+    this.load();
+    let moved = 0;
+    for (let modeIndex = 0; modeIndex < DIFFICULTY_KEYS.length; modeIndex += 1) {
+      const modeKey = DIFFICULTY_KEYS[modeIndex];
+      const modeEntries = this.entriesByMode[modeKey];
+      for (let index = 0; index < modeEntries.length; index += 1) {
+        if (modeEntries[index].userId === null) {
+          modeEntries[index].userId = userId;
+          modeEntries[index].name = name;
+          modeEntries[index].source = 'device';
+          moved += 1;
+        }
+      }
+      this.entriesByMode[modeKey] = LeaderboardManager.prunePerPlayer(modeEntries.sort(LeaderboardManager.compareEntries));
+    }
+    if (moved > 0) {
+      this.save();
+    }
+    return moved;
   }
 
   /** Display strings for one row. */
   formatEntry(entry, rank) {
     const accuracyText = Formatters.formatPercent(entry.accuracy, 1);
     const dateText = Formatters.formatShortDate(entry.dateIso);
-    const metaText = entry.peakLevel !== null
-      ? 'LV ' + entry.peakLevel + ' · ' + accuracyText
-      : accuracyText + (dateText ? ' · ' + dateText : '');
     return {
       rank: '#' + String(rank).padStart(2, '0'),
       name: entry.name,
       score: Formatters.formatInteger(entry.score),
-      meta: metaText,
+      meta: accuracyText + (dateText ? ' · ' + dateText : ''),
       accuracy: accuracyText,
       date: dateText
     };
@@ -10903,10 +11261,440 @@ class LeaderboardManager {
 }
 
 /* -------------------------------------------------------------------------
+   Accounts. Every player signs in with a username and a password before
+   the menu opens. DeviceAccounts keeps the accounts made in this browser
+   (used when the game is played from the file, or anywhere without the
+   leaderboard server): each password is salted and stretched with 20,000
+   rounds of SHA-256 and never stored as typed. With the leaderboard server
+   the accounts live on the server instead (see AccountService), so they
+   work on every device that plays there.
+   ------------------------------------------------------------------------- */
+
+const ACCOUNT_RULES = deepFreeze({
+  usernamePattern: /^[A-Za-z0-9._-]{3,12}$/,
+  minimumPasswordLength: 6,
+  maximumPasswordLength: 64,
+  passwordHashRounds: 20000
+});
+
+const AccountRules = {
+  /** Why a username cannot be used, or null when it is fine. */
+  usernameProblem(username) {
+    return ACCOUNT_RULES.usernamePattern.test(username)
+      ? null
+      : 'Usernames are 3 to 12 letters, numbers, dots, dashes or underscores (no spaces).';
+  },
+
+  /** Why a password cannot be used, or null when it is fine. */
+  passwordProblem(password) {
+    if (password.length < ACCOUNT_RULES.minimumPasswordLength) {
+      return 'Passwords need at least ' + ACCOUNT_RULES.minimumPasswordLength + ' characters.';
+    }
+    if (password.length > ACCOUNT_RULES.maximumPasswordLength) {
+      return 'Passwords can be at most ' + ACCOUNT_RULES.maximumPasswordLength + ' characters.';
+    }
+    return null;
+  }
+};
+
+class DeviceAccounts {
+  constructor(storage) {
+    this.storage = storage;
+    this.storageKey = STORAGE_KEYS.accounts;
+    this.state = { accounts: [], signedInId: null, lastUsername: '' };
+    this.load();
+  }
+
+  /** The salt and password, stretched: SHA-256 applied the given number of times. */
+  static hashPassword(password, salt, rounds) {
+    let digest = Sha256.hex(salt + ':' + password);
+    for (let round = 1; round < rounds; round += 1) {
+      digest = Sha256.hex(digest + ':' + salt);
+    }
+    return digest;
+  }
+
+  static randomSalt() {
+    const bytes = new Uint8Array(16);
+    try {
+      window.crypto.getRandomValues(bytes);
+    } catch (error) {
+      for (let index = 0; index < bytes.length; index += 1) {
+        bytes[index] = Math.floor(Math.random() * 256);
+      }
+    }
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  load() {
+    const rawPayload = this.storage.read(this.storageKey);
+    let parsed = null;
+    try {
+      parsed = typeof rawPayload === 'string' && rawPayload.length > 0 ? JSON.parse(rawPayload) : null;
+    } catch (error) {
+      parsed = null;
+    }
+    const accounts = [];
+    const candidates = parsed !== null && typeof parsed === 'object' && Array.isArray(parsed.accounts) ? parsed.accounts : [];
+    for (let index = 0; index < candidates.length; index += 1) {
+      const candidate = candidates[index];
+      const isValid = candidate !== null && typeof candidate === 'object'
+        && typeof candidate.id === 'string' && /^USR-[a-z0-9]{8,32}$/.test(candidate.id)
+        && typeof candidate.username === 'string' && ACCOUNT_RULES.usernamePattern.test(candidate.username)
+        && typeof candidate.salt === 'string' && /^[0-9a-f]{16,64}$/.test(candidate.salt)
+        && typeof candidate.hash === 'string' && /^[0-9a-f]{64}$/.test(candidate.hash)
+        && Number.isInteger(candidate.rounds) && candidate.rounds >= 1 && candidate.rounds <= 1000000;
+      if (isValid && !accounts.some((account) => account.username.toLowerCase() === candidate.username.toLowerCase())) {
+        accounts.push({
+          id: candidate.id,
+          username: candidate.username,
+          salt: candidate.salt,
+          hash: candidate.hash,
+          rounds: candidate.rounds,
+          createdAt: typeof candidate.createdAt === 'string' ? candidate.createdAt : ''
+        });
+      }
+    }
+    const signedInId = parsed !== null && accounts.some((account) => account.id === parsed.signedInId) ? parsed.signedInId : null;
+    const lastUsername = parsed !== null && typeof parsed.lastUsername === 'string' && ACCOUNT_RULES.usernamePattern.test(parsed.lastUsername)
+      ? parsed.lastUsername
+      : '';
+    this.state = { accounts: accounts, signedInId: signedInId, lastUsername: lastUsername };
+  }
+
+  save() {
+    return this.storage.write(this.storageKey, JSON.stringify({
+      version: 1,
+      accounts: this.state.accounts,
+      signedInId: this.state.signedInId,
+      lastUsername: this.state.lastUsername
+    }));
+  }
+
+  find(username) {
+    const key = String(username).toLowerCase();
+    return this.state.accounts.find((account) => account.username.toLowerCase() === key) || null;
+  }
+
+  /** The account that stays signed in on this device until it logs out, or null. */
+  get signedIn() {
+    return this.state.accounts.find((account) => account.id === this.state.signedInId) || null;
+  }
+
+  rememberUsername(username) {
+    this.load();
+    this.state.lastUsername = username;
+    this.save();
+  }
+
+  /** @returns {{ok: boolean, reason?: string, account?: object, persisted?: boolean}} */
+  register(username, password) {
+    this.load();
+    const problem = AccountRules.usernameProblem(username) || AccountRules.passwordProblem(password);
+    if (problem !== null) {
+      return { ok: false, reason: problem };
+    }
+    if (this.find(username) !== null) {
+      return { ok: false, reason: 'That username is already taken on this device. Pick another one, or sign in.' };
+    }
+    const salt = DeviceAccounts.randomSalt();
+    const account = {
+      id: IdentifierFactory.createUserId(),
+      username: username,
+      salt: salt,
+      hash: DeviceAccounts.hashPassword(password, salt, ACCOUNT_RULES.passwordHashRounds),
+      rounds: ACCOUNT_RULES.passwordHashRounds,
+      createdAt: new Date().toISOString()
+    };
+    this.state.accounts.push(account);
+    this.state.signedInId = account.id;
+    this.state.lastUsername = account.username;
+    return { ok: true, account: account, persisted: this.save() };
+  }
+
+  /** @returns {{ok: boolean, reason?: string, account?: object}} */
+  signIn(username, password) {
+    this.load();
+    const account = this.find(username);
+    if (account === null || DeviceAccounts.hashPassword(password, account.salt, account.rounds) !== account.hash) {
+      return { ok: false, reason: 'Wrong username or password.' };
+    }
+    this.state.signedInId = account.id;
+    this.state.lastUsername = account.username;
+    this.save();
+    return { ok: true, account: account };
+  }
+
+  signOut() {
+    this.load();
+    this.state.signedInId = null;
+    this.save();
+  }
+}
+
+/** Arcade personal bests, validated from untrusted storage: Time Attack per level, Gridshot per grid. */
+function validatePersonalBests(candidate) {
+  const validated = {};
+  if (candidate === null || typeof candidate !== 'object') {
+    return validated;
+  }
+  const keys = DIFFICULTY_KEYS.map((levelKey) => 'TIME_ATTACK_' + levelKey)
+    .concat(GRIDSHOT_RULES.nodeOptions.map((nodes) => 'GRIDSHOT_' + nodes));
+  for (let index = 0; index < keys.length; index += 1) {
+    const best = Number(candidate[keys[index]]);
+    if (Number.isFinite(best) && best > 0) {
+      validated[keys[index]] = Math.min(1e9, Math.round(best * 100) / 100);
+    }
+  }
+  return validated;
+}
+
+/* -------------------------------------------------------------------------
+   PlayerProfile — one account's progress on this device: the levels it has
+   unlocked and its arcade personal bests. Signed out, it keeps nothing.
+   ------------------------------------------------------------------------- */
+
+class PlayerProfile {
+  /** @param {string|null} accountId */
+  constructor(storage, accountId) {
+    this.storage = storage;
+    this.storageKey = accountId ? STORAGE_KEYS.profilePrefix + accountId : null;
+    this.state = PlayerProfile.createDefaultState();
+    this.load();
+  }
+
+  static createDefaultState() {
+    return { unlocked: ['EASY'], personalBests: {} };
+  }
+
+  validate(candidate) {
+    const validated = PlayerProfile.createDefaultState();
+    if (candidate === null || typeof candidate !== 'object') {
+      return validated;
+    }
+    if (Array.isArray(candidate.unlocked)) {
+      validated.unlocked = DIFFICULTY_KEYS.filter((levelKey) => levelKey === 'EASY' || candidate.unlocked.indexOf(levelKey) !== -1);
+    }
+    validated.personalBests = validatePersonalBests(candidate.personalBests);
+    return validated;
+  }
+
+  load() {
+    if (this.storageKey === null) {
+      return;
+    }
+    const rawPayload = this.storage.read(this.storageKey);
+    try {
+      this.state = this.validate(typeof rawPayload === 'string' && rawPayload.length > 0 ? JSON.parse(rawPayload) : null);
+    } catch (error) {
+      this.state = PlayerProfile.createDefaultState();
+    }
+  }
+
+  save() {
+    if (this.storageKey === null) {
+      return false;
+    }
+    return this.storage.write(this.storageKey, JSON.stringify({ version: 1, unlocked: this.state.unlocked, personalBests: this.state.personalBests }));
+  }
+
+  isUnlocked(levelKey) {
+    return levelKey === 'EASY' || this.state.unlocked.indexOf(levelKey) !== -1;
+  }
+
+  /** @returns {boolean} true when the level was locked until now */
+  unlock(levelKey) {
+    this.load();
+    if (this.isUnlocked(levelKey) || DIFFICULTY_KEYS.indexOf(levelKey) === -1) {
+      return false;
+    }
+    this.state.unlocked = DIFFICULTY_KEYS.filter((key) => key === levelKey || this.isUnlocked(key));
+    this.save();
+    return true;
+  }
+
+  /** The leaderboard server's list replaces this device's for accounts kept there. */
+  setUnlocked(levels) {
+    this.state.unlocked = DIFFICULTY_KEYS.filter((key) => key === 'EASY' || levels.indexOf(key) !== -1);
+    this.save();
+  }
+
+  get personalBests() {
+    return this.state.personalBests;
+  }
+
+  /** Keeps the better of the stored and the new value. Returns { previous, best, isNewBest }. */
+  recordBest(key, value) {
+    this.load();
+    const previous = typeof this.state.personalBests[key] === 'number' ? this.state.personalBests[key] : 0;
+    const isNewBest = value > 0 && value > previous;
+    if (isNewBest) {
+      this.state.personalBests = validatePersonalBests(Object.assign({}, this.state.personalBests, { [key]: value }));
+      this.save();
+    }
+    return { previous: previous, best: Math.max(previous, value), isNewBest: isNewBest };
+  }
+
+  /** Takes over bests saved before accounts, keeping the higher value of each. */
+  mergeBests(bests) {
+    this.load();
+    const merged = Object.assign({}, this.state.personalBests);
+    const incoming = validatePersonalBests(bests);
+    Object.keys(incoming).forEach((key) => {
+      merged[key] = Math.max(merged[key] || 0, incoming[key]);
+    });
+    this.state.personalBests = merged;
+    this.save();
+  }
+}
+
+/* -------------------------------------------------------------------------
+   AccountService — signs players in, on the leaderboard server when the
+   page was opened from it (those accounts work on every device that plays
+   there), on this device otherwise. An account stays signed in until it
+   logs out.
+   ------------------------------------------------------------------------- */
+
+class AccountService {
+  constructor(storage, globalBoard) {
+    this.storage = storage;
+    this.globalBoard = globalBoard;
+    this.device = new DeviceAccounts(storage);
+    /** The signed-in player, { id, username, isOnline }, or null. */
+    this.current = null;
+    /** The levels the server has unlocked for an online account. */
+    this.serverUnlocked = null;
+    this.token = null;
+  }
+
+  get isOnline() {
+    return this.globalBoard.isOnline;
+  }
+
+  /** The username to suggest on the sign-in screen. */
+  get lastUsername() {
+    return this.device.state.lastUsername;
+  }
+
+  /** True when the sign-in screen should open on "Sign in" rather than "Create account". */
+  get expectsSignIn() {
+    return this.isOnline ? this.lastUsername !== '' : this.device.state.accounts.length > 0;
+  }
+
+  readSession() {
+    let session = null;
+    try {
+      session = JSON.parse(this.storage.read(STORAGE_KEYS.session) || 'null');
+    } catch (error) {
+      session = null;
+    }
+    const isValid = session !== null && typeof session === 'object'
+      && typeof session.token === 'string' && /^[0-9a-f]{64}$/.test(session.token)
+      && session.origin === window.location.origin;
+    return isValid ? session : null;
+  }
+
+  clearSession() {
+    this.storage.remove(STORAGE_KEYS.session);
+  }
+
+  /** Signs back in whoever was signed in last time. Resolves the account, or null. */
+  restore() {
+    if (this.isOnline) {
+      const session = this.readSession();
+      if (session === null) {
+        return Promise.resolve(null);
+      }
+      return this.globalBoard.me(session.token).then((answer) => this.acceptOnline(answer, session.token), (error) => {
+        if (error && error.status === 401) {
+          this.clearSession();
+        }
+        return null;
+      });
+    }
+    const account = this.device.signedIn;
+    this.current = account !== null ? { id: account.id, username: account.username, isOnline: false } : null;
+    return Promise.resolve(this.current);
+  }
+
+  acceptOnline(answer, token) {
+    if (answer === null || typeof answer !== 'object' || answer.user === null || typeof answer.user !== 'object'
+      || typeof answer.user.id !== 'string' || typeof answer.user.username !== 'string') {
+      throw new Error('The leaderboard server sent an unexpected answer.');
+    }
+    this.token = token;
+    this.current = { id: answer.user.id, username: answer.user.username, isOnline: true };
+    this.serverUnlocked = Array.isArray(answer.unlocked) ? answer.unlocked : ['EASY'];
+    this.storage.write(STORAGE_KEYS.session, JSON.stringify({ token: token, id: answer.user.id, username: answer.user.username, origin: window.location.origin }));
+    this.device.rememberUsername(answer.user.username);
+    return this.current;
+  }
+
+  static serverReason(error) {
+    if (error && typeof error.status === 'number' && error.message) {
+      return error.message.charAt(0).toUpperCase() + error.message.slice(1) + '.';
+    }
+    return 'The leaderboard server did not answer. Check the connection and try again.';
+  }
+
+  /** Creates an account and signs it in. Resolves { ok, reason }. */
+  register(username, password) {
+    const problem = AccountRules.usernameProblem(username) || AccountRules.passwordProblem(password);
+    if (problem !== null) {
+      return Promise.resolve({ ok: false, reason: problem });
+    }
+    if (this.isOnline) {
+      return this.globalBoard.register(username, password).then((answer) => {
+        this.acceptOnline(answer, answer.token);
+        return { ok: true };
+      }, (error) => ({ ok: false, reason: AccountService.serverReason(error) }));
+    }
+    const result = this.device.register(username, password);
+    if (result.ok) {
+      this.current = { id: result.account.id, username: result.account.username, isOnline: false };
+    }
+    return Promise.resolve(result);
+  }
+
+  /** Resolves { ok, reason }. */
+  signIn(username, password) {
+    if (username === '' || password === '') {
+      return Promise.resolve({ ok: false, reason: 'Type your username and password.' });
+    }
+    if (this.isOnline) {
+      return this.globalBoard.login(username, password).then((answer) => {
+        this.acceptOnline(answer, answer.token);
+        return { ok: true };
+      }, (error) => ({ ok: false, reason: AccountService.serverReason(error) }));
+    }
+    const result = this.device.signIn(username, password);
+    if (result.ok) {
+      this.current = { id: result.account.id, username: result.account.username, isOnline: false };
+    }
+    return Promise.resolve(result);
+  }
+
+  signOut() {
+    if (this.current !== null && this.current.isOnline) {
+      const token = this.token;
+      this.clearSession();
+      if (token !== null) {
+        this.globalBoard.logout(token).catch(() => {});
+      }
+    } else {
+      this.device.signOut();
+    }
+    this.current = null;
+    this.serverUnlocked = null;
+    this.token = null;
+  }
+}
+
+/* -------------------------------------------------------------------------
    GlobalLeaderboardClient — talks to the leaderboard server that ships at the
    end of this file (the leaderboard's "Download the server" button saves it
-   as hitscan-server.js): fetches pages of the world's top 100 and posts
-   signed scores.
+   as hitscan-server.js): accounts and sessions, the top 500 players, a
+   player's own runs, and signed scores.
 
    Signing, as specified: the callsign, score, accuracy and the server's
    passphrase are joined into one string ("ACE|12345|93.47|<passphrase>")
@@ -10949,7 +11737,14 @@ class GlobalLeaderboardClient {
     }
   }
 
-  /** Looks for the server; GET /api/config hands over the signing passphrase and the game's public address. */
+  /**
+   * Looks for the server; GET /api/config hands over the signing passphrase
+   * and the game's public address. A page with no server behind it (opened
+   * from a file, or on a web host that answers with something else) goes
+   * offline at once. A slow or dropped answer is tried once more first, so
+   * a busy network or a slow device does not quietly sign players in on
+   * this device instead of on the server.
+   */
   connect() {
     const protocol = window.location.protocol;
     const isHosted = protocol === 'http:' || protocol === 'https:';
@@ -10959,52 +11754,93 @@ class GlobalLeaderboardClient {
     }
     this.baseUrl = GLOBAL_LEADERBOARD_SERVER.replace(/\/+$/, '');
     this.setStatus('connecting');
-    return this.requestJson('GET', '/api/config').then((config) => {
+    const attempt = (retriesLeft) => this.requestJson('GET', '/api/config', undefined, null, 8000).then((config) => {
       if (config === null || typeof config !== 'object' || typeof config.passphrase !== 'string' || config.passphrase === '') {
-        throw new Error('The server sent no passphrase');
+        const error = new Error('No leaderboard server here');
+        error.status = 404;
+        throw error;
       }
       this.passphrase = config.passphrase;
       this.publicUrl = typeof config.publicUrl === 'string' && /^https?:\/\//.test(config.publicUrl) ? config.publicUrl : null;
       this.setStatus('online');
       return true;
-    }).catch(() => {
+    }).catch((error) => {
+      // A clear "not here" (4xx) is final; a timeout, a dropped connection or a server error is retried.
+      const isFinal = error && typeof error.status === 'number' && error.status < 500;
+      if (!isFinal && retriesLeft > 0) {
+        return new Promise((resolve) => window.setTimeout(resolve, 1000)).then(() => attempt(retriesLeft - 1));
+      }
       this.setStatus('offline');
       return false;
     });
+    return attempt(1);
   }
 
-  /** JSON request with a 6 s timeout; rejects with the server's reason on any non-2xx answer. */
-  requestJson(method, path, body) {
+  /**
+   * JSON request with a timeout (6 s unless given); rejects with the server's reason on any
+   * non-2xx answer. A session token, when given, signs the request in as that account.
+   */
+  requestJson(method, path, body, token, timeoutMs = 6000) {
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
-    const timerId = controller !== null ? window.setTimeout(() => controller.abort(), 6000) : 0;
-    const options = { method: method, cache: 'no-store', signal: controller !== null ? controller.signal : undefined };
+    const timerId = controller !== null ? window.setTimeout(() => controller.abort(), timeoutMs) : 0;
+    const options = { method: method, cache: 'no-store', signal: controller !== null ? controller.signal : undefined, headers: {} };
     if (body !== undefined) {
-      options.headers = { 'Content-Type': 'application/json' };
+      options.headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(body);
     }
-    return fetch(this.baseUrl + path, options).then((response) => response.json().catch(() => ({})).then((data) => {
-      window.clearTimeout(timerId);
+    if (token) {
+      options.headers.Authorization = 'Bearer ' + token;
+    }
+    // The body is read as text, so a timeout while it arrives fails the request like any other
+    // timeout; only a body that is not JSON (a web host's own page, say) reads as {}.
+    return fetch(this.baseUrl + path, options).then((response) => response.text().then((text) => {
+      let data = {};
+      try {
+        data = text === '' ? {} : JSON.parse(text);
+      } catch (error) {
+        data = {};
+      }
       if (!response.ok) {
         const error = new Error(data && data.reason ? data.reason : 'HTTP ' + response.status);
         error.status = response.status;
         throw error;
       }
       return data;
-    }), (error) => {
+    })).then((data) => {
+      window.clearTimeout(timerId);
+      return data;
+    }, (error) => {
       window.clearTimeout(timerId);
       throw error;
     });
   }
 
-  /** One page of the global top 100 for a level (0 Easy, 1 Medium, 2 Hard, 3 Demon). */
-  fetchPage(difficultyIndex, offset, limit) {
-    return this.requestJson('GET', '/api/leaderboard?difficulty=' + difficultyIndex + '&offset=' + offset + '&limit=' + limit);
+  /** Accounts on the server: each answer is { token, user: { id, username }, unlocked: [levels] }. */
+  register(username, password) {
+    return this.requestJson('POST', '/api/register', { username: username, password: password });
   }
 
-  /** Global callsigns: A–Z, 0–9, space, dot, dash and underscore, at most 12 characters. */
-  static cleanCallsign(rawName) {
-    const cleaned = String(rawName || '').toUpperCase().replace(/[^A-Z0-9 ._-]/g, '').replace(/\s+/g, ' ').trim();
-    return cleaned.slice(0, NAME_MAX_LENGTH).trim() || 'PLAYER';
+  login(username, password) {
+    return this.requestJson('POST', '/api/login', { username: username, password: password });
+  }
+
+  /** The account a saved session token belongs to: { user, unlocked }. */
+  me(token) {
+    return this.requestJson('GET', '/api/me', undefined, token);
+  }
+
+  logout(token) {
+    return this.requestJson('POST', '/api/logout', {}, token);
+  }
+
+  /** A level's top players (each by their best run), best first (0 Easy, 1 Medium, 2 Hard, 3 Demon). */
+  fetchTop(difficultyIndex, limit) {
+    return this.requestJson('GET', '/api/leaderboard?difficulty=' + difficultyIndex + '&limit=' + limit);
+  }
+
+  /** One player's runs on a level, best first. */
+  fetchPlayerRuns(difficultyIndex, username, limit) {
+    return this.requestJson('GET', '/api/leaderboard?difficulty=' + difficultyIndex + '&player=' + encodeURIComponent(username) + '&limit=' + limit);
   }
 
   /** The signature: SHA-256 of callsign|score|accuracy|passphrase. */
@@ -11013,41 +11849,46 @@ class GlobalLeaderboardClient {
   }
 
   /**
-   * Signs and posts a finished ranked round; resolves with { accepted, rank }.
+   * Signs and posts a finished ranked round for the signed-in account; resolves with
+   * { accepted, id, rank, total, unlocked }. The callsign is the account's username.
    * Accuracy travels as text with two decimals so both sides hash the same characters.
    */
-  submit(run) {
-    const callsign = GlobalLeaderboardClient.cleanCallsign(run.callsign);
+  submit(run, token) {
     const score = Math.round(run.score);
     const accuracyText = (Math.round(MathUtils.clamp(run.accuracy, 0, 1) * 10000) / 100).toFixed(2);
     return this.requestJson('POST', '/api/scores', {
       id: run.id,
-      userId: run.userId,
-      callsign: callsign,
+      callsign: run.callsign,
       difficulty: run.difficulty,
       score: score,
       accuracy: accuracyText,
       maxStreak: run.maxStreak,
       durationSeconds: run.durationSeconds,
       finishedAt: run.finishedAt,
-      signature: GlobalLeaderboardClient.sign(callsign, score, accuracyText, this.passphrase)
-    });
+      signature: GlobalLeaderboardClient.sign(run.callsign, score, accuracyText, this.passphrase)
+    }, token);
   }
 }
 
 /* -------------------------------------------------------------------------
-   InventoryStore — the player's inventory file: their account id, the coin
-   wallet, the names of everything they have bought, and the equipped weapon
+   InventoryStore — an account's inventory file: its account id, the coin
+   wallet, the names of everything it has bought, and the equipped weapon
    finish, crosshair and sound pack. Same read → parse → validate → save
    discipline as the leaderboard: every write re-reads storage first so a
-   purchase in another tab is never lost.
+   purchase in another tab is never lost. Signed out, it keeps nothing.
    ------------------------------------------------------------------------- */
 
 class InventoryStore {
-  constructor(storage) {
+  /**
+   * @param {SafeStorage} storage
+   * @param {string|null} accountId null for no account (nothing is read or saved)
+   * @param {{adoptLegacy?: boolean}} [options] adoptLegacy: a new file starts from the inventory saved before accounts
+   */
+  constructor(storage, accountId, options = {}) {
     this.storage = storage;
-    this.storageKey = STORAGE_KEYS.inventory;
-    this.state = InventoryStore.createDefaultState(IdentifierFactory.createUserId());
+    this.storageKey = accountId ? STORAGE_KEYS.inventoryPrefix + accountId : null;
+    this.adoptLegacy = Boolean(options.adoptLegacy);
+    this.state = InventoryStore.createDefaultState(accountId || '');
     this.load();
   }
 
@@ -11078,7 +11919,7 @@ class InventoryStore {
 
   /**
    * Coins a finished ranked round banks: the score divided by 10 and rounded
-   * down, times the level's multiplier (Easy 1, Medium 1.5, Hard 2, Demon 3),
+   * down, times the level's multiplier (Easy 1, Medium 2, Hard 8, Demon 100),
    * then rounded down to whole coins. Negative scores bank nothing.
    */
   static coinsForScore(score, coinMultiplier = 1) {
@@ -11104,12 +11945,10 @@ class InventoryStore {
   }
 
   validate(candidate) {
+    // The file always belongs to the account it is stored under.
     const validated = InventoryStore.createDefaultState(this.state.userId);
     if (candidate === null || typeof candidate !== 'object') {
       return validated;
-    }
-    if (typeof candidate.userId === 'string' && /^USR-[a-z0-9]{8,32}$/.test(candidate.userId)) {
-      validated.userId = candidate.userId;
     }
     validated.wallet = InventoryStore.toCoinCount(candidate.wallet);
     validated.lifetimeCoins = Math.max(validated.wallet, InventoryStore.toCoinCount(candidate.lifetimeCoins));
@@ -11137,6 +11976,9 @@ class InventoryStore {
   }
 
   load() {
+    if (this.storageKey === null) {
+      return this.state;
+    }
     const rawPayload = this.storage.read(this.storageKey);
     if (typeof rawPayload === 'string' && rawPayload.length > 0) {
       try {
@@ -11146,15 +11988,21 @@ class InventoryStore {
       }
       return this.state;
     }
-    // First run of this version: carry the old wallet over, then save so the account id sticks.
-    const legacyPayload = this.storage.read(STORAGE_KEYS.armory);
-    let legacy = null;
-    try {
-      legacy = typeof legacyPayload === 'string' && legacyPayload.length > 0 ? JSON.parse(legacyPayload) : null;
-    } catch (error) {
-      legacy = null;
-    }
-    if (legacy !== null && typeof legacy === 'object') {
+    // A new account file. The first account on this device takes over the inventory
+    // saved before accounts (or the even older wallet), then those files are removed.
+    const readJson = (key) => {
+      const payload = this.storage.read(key);
+      try {
+        return typeof payload === 'string' && payload.length > 0 ? JSON.parse(payload) : null;
+      } catch (error) {
+        return null;
+      }
+    };
+    const previousInventory = this.adoptLegacy ? readJson(STORAGE_KEYS.inventory) : null;
+    const legacy = this.adoptLegacy && previousInventory === null ? readJson(STORAGE_KEYS.armory) : null;
+    if (previousInventory !== null && typeof previousInventory === 'object') {
+      this.state = this.validate(previousInventory);
+    } else if (legacy !== null && typeof legacy === 'object') {
       const ownedNames = Array.isArray(legacy.owned)
         ? legacy.owned.map((skinId) => (SkinCatalog.byId(skinId) || { name: '' }).name)
         : [];
@@ -11170,10 +12018,17 @@ class InventoryStore {
       this.state = InventoryStore.createDefaultState(this.state.userId);
     }
     this.save();
+    if (this.adoptLegacy) {
+      this.storage.remove(STORAGE_KEYS.inventory);
+      this.storage.remove(STORAGE_KEYS.armory);
+    }
     return this.state;
   }
 
   save() {
+    if (this.storageKey === null) {
+      return false;
+    }
     const state = this.state;
     const payload = JSON.stringify({
       version: 2,
@@ -12064,6 +12919,7 @@ class UIController {
     this.callbacks = callbacks;
     this.elements = {
       app: requireElement(documentRef, 'app'),
+      accountScreen: requireElement(documentRef, 'screen-account'),
       menuScreen: requireElement(documentRef, 'screen-menu'),
       pauseScreen: requireElement(documentRef, 'screen-pause'),
       overScreen: requireElement(documentRef, 'screen-over'),
@@ -12073,6 +12929,9 @@ class UIController {
       loadoutSkinName: requireElement(documentRef, 'loadout-skin-name'),
       armoryButton: requireElement(documentRef, 'armory-button'),
       crosshairButton: requireElement(documentRef, 'crosshair-button'),
+      playerName: requireElement(documentRef, 'player-name'),
+      playerWhere: requireElement(documentRef, 'player-where'),
+      signOutButton: requireElement(documentRef, 'sign-out-button'),
       overCoins: requireElement(documentRef, 'over-coins'),
       overCoinsEarned: requireElement(documentRef, 'over-coins-earned'),
       overCoinsLabel: requireElement(documentRef, 'over-coins-label'),
@@ -12084,6 +12943,8 @@ class UIController {
       levelLabel: requireElement(documentRef, 'label-level'),
       levelOptions: requireElement(documentRef, 'level-options'),
       levelNote: requireElement(documentRef, 'level-note'),
+      modeLockNote: requireElement(documentRef, 'mode-lock-note'),
+      levelLockNote: requireElement(documentRef, 'level-lock-note'),
       gridField: requireElement(documentRef, 'grid-field'),
       gridOptions: requireElement(documentRef, 'grid-options'),
       roundLengthField: requireElement(documentRef, 'round-length-field'),
@@ -12112,11 +12973,8 @@ class UIController {
       overTitle: requireElement(documentRef, 'over-title'),
       overScore: requireElement(documentRef, 'over-score'),
       overStats: requireElement(documentRef, 'over-stats'),
-      overRecordForm: requireElement(documentRef, 'over-record-form'),
-      overRecordCopy: requireElement(documentRef, 'over-record-copy'),
-      overNameInput: requireElement(documentRef, 'over-name-input'),
-      overSaveButton: requireElement(documentRef, 'over-save-button'),
       overSaveNotice: requireElement(documentRef, 'over-save-notice'),
+      overUnlock: requireElement(documentRef, 'over-unlock'),
       overResultBoard: requireElement(documentRef, 'over-result-board'),
       overBoardTitle: requireElement(documentRef, 'over-board-title'),
       overBoardList: requireElement(documentRef, 'over-board-list'),
@@ -12134,7 +12992,6 @@ class UIController {
     this.rulesLists = queryAll(documentRef, '[data-rules]');
     this.currentRoundSeconds = 60;
     this.coinCountTimerId = 0;
-    this.saveNoticeBase = '';
   }
 
   bind() {
@@ -12190,10 +13047,7 @@ class UIController {
     elements.overArmory.addEventListener('click', () => callbacks.onOpenArmory('FINISHES'));
     elements.armoryButton.addEventListener('click', () => callbacks.onOpenArmory('FINISHES'));
     elements.crosshairButton.addEventListener('click', () => callbacks.onOpenArmory('CROSSHAIR'));
-    elements.overRecordForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      callbacks.onSaveScore(elements.overNameInput.value);
-    });
+    elements.signOutButton.addEventListener('click', () => callbacks.onSignOut());
   }
 
   /** Arrow-key roving focus inside a radio group or tab list. */
@@ -12235,6 +13089,7 @@ class UIController {
 
   showState(stateName) {
     this.elements.app.setAttribute('data-state', stateName);
+    this.elements.accountScreen.hidden = stateName !== GAME_STATES.SIGN_IN;
     this.elements.menuScreen.hidden = stateName !== GAME_STATES.MENU;
     this.elements.pauseScreen.hidden = stateName !== GAME_STATES.PAUSED;
     this.elements.overScreen.hidden = stateName !== GAME_STATES.GAMEOVER;
@@ -12244,6 +13099,64 @@ class UIController {
   /** The level being played (Demon re-tints the HUD accents through CSS). */
   setActiveMode(modeKey) {
     this.elements.app.setAttribute('data-mode', modeKey);
+  }
+
+  /** The signed-in player in the menu, and where the account lives. */
+  setPlayer(account) {
+    this.elements.playerName.textContent = account !== null ? account.username : '—';
+    this.elements.playerWhere.textContent = account !== null && account.isOnline ? 'Player · online account' : 'Player · on this device';
+  }
+
+  /**
+   * Greys out the levels still to be earned, on the level cards and the level pickers.
+   * @param {Object<string, string>} locks for each level: '' when open, else what opens it
+   */
+  setLevelLocks(locks) {
+    for (let index = 0; index < this.modeCards.length; index += 1) {
+      const card = this.modeCards[index];
+      const lockText = locks[card.getAttribute('data-difficulty')] || '';
+      card.setAttribute('data-locked', lockText !== '' ? 'true' : 'false');
+      card.setAttribute('aria-disabled', lockText !== '' ? 'true' : 'false');
+      const lockLine = card.querySelector('.mode-card__lock');
+      if (lockLine !== null) {
+        lockLine.hidden = lockText === '';
+        lockLine.textContent = lockText !== '' ? 'Locked: ' + lockText : '';
+      }
+    }
+    for (let index = 0; index < this.levelButtons.length; index += 1) {
+      const button = this.levelButtons[index];
+      const lockText = locks[button.getAttribute('data-level')] || '';
+      button.setAttribute('data-locked', lockText !== '' ? 'true' : 'false');
+      button.setAttribute('aria-disabled', lockText !== '' ? 'true' : 'false');
+      button.title = lockText !== '' ? 'Locked: ' + lockText : '';
+    }
+  }
+
+  /**
+   * A locked level was picked: shake its card or button and say what opens it, for a few seconds.
+   * @param {string} levelKey
+   * @param {string} text
+   * @param {boolean} fromLevelPicker true for the Training / Time Attack level buttons
+   */
+  showLockNote(levelKey, text, fromLevelPicker) {
+    const note = fromLevelPicker ? this.elements.levelLockNote : this.elements.modeLockNote;
+    const other = fromLevelPicker ? this.elements.modeLockNote : this.elements.levelLockNote;
+    other.hidden = true;
+    note.hidden = false;
+    note.textContent = text;
+    window.clearTimeout(this.lockNoteTimerId);
+    this.lockNoteTimerId = window.setTimeout(() => {
+      note.hidden = true;
+    }, 4500);
+    const items = fromLevelPicker
+      ? this.levelButtons.filter((button) => button.getAttribute('data-level') === levelKey)
+      : this.modeCards.filter((card) => card.getAttribute('data-difficulty') === levelKey);
+    items.forEach((item) => {
+      item.removeAttribute('data-denied');
+      // Reading the size restarts the CSS shake when the same item is clicked twice.
+      void item.offsetWidth;
+      item.setAttribute('data-denied', 'true');
+    });
   }
 
   /** Menu wallet and equipped-finish chip. */
@@ -12581,7 +13494,7 @@ class UIController {
 
   /**
    * @param {object} summary from SessionStats.createSummary
-   * @param {{qualifies: boolean, projectedRank: number, defaultName: string, entries: object[], manager: LeaderboardManager, globalOnline: boolean}} boardInfo
+   * @param {{entries: object[], manager: LeaderboardManager, highlightId: string|null}} boardInfo the player's own runs on the level
    */
   showGameOver(summary, boardInfo) {
     const elements = this.elements;
@@ -12652,84 +13565,48 @@ class UIController {
     }
     this.fillStatGrid(elements.overStats, statRows);
 
-    elements.overSaveNotice.hidden = true;
-    elements.overSaveNotice.removeAttribute('data-tone');
     elements.overShareNotice.hidden = true;
     elements.overShareNotice.removeAttribute('data-tone');
-    elements.overResultBoard.hidden = isArcade || levelConfig === null;
-    if (boardInfo.qualifies) {
-      elements.overRecordForm.hidden = false;
-      elements.overRecordCopy.textContent = 'That run places #' + boardInfo.projectedRank + ' on your ' + levelConfig.label + ' board.'
-        + (boardInfo.globalOnline ? ' Saving also posts it to the global top 100.' : ' Sign the range log.');
-      elements.overNameInput.value = boardInfo.defaultName;
-      elements.overSaveButton.disabled = false;
-    } else {
-      elements.overRecordForm.hidden = true;
-      elements.overSaveNotice.hidden = false;
-      if (roundType === ROUND_TYPES.TRAINING) {
-        elements.overSaveNotice.textContent = 'Training Ground scores stay off the leaderboard. Here is the ' + levelConfig.label + ' board to beat.';
-      } else if (isArcade) {
-        elements.overSaveNotice.textContent = 'Arcade modes keep a personal best on this device. Coins and the leaderboards come from the standard levels.';
-      } else {
-        elements.overSaveNotice.textContent = summary.score > 0
-          ? 'Your ' + levelConfig.label + ' board keeps the top ' + GAME_RULES.leaderboardEntriesPerMode + '. This run did not make the cut.'
-          : 'Only positive scores go on the board.';
-      }
+    elements.overUnlock.hidden = true;
+    this.showSaveNotice('', null);
+    if (roundType === ROUND_TYPES.TRAINING) {
+      this.showSaveNotice('Training Ground runs stay off the leaderboard. Here are your ' + levelConfig.label + ' runs to beat.', null);
+    } else if (isArcade) {
+      this.showSaveNotice('Arcade modes keep a personal best for your account. Coins and the leaderboards come from the standard levels.', null);
+    } else if (summary.score <= 0) {
+      this.showSaveNotice('Only positive scores go on the leaderboard.', null);
     }
 
+    elements.overResultBoard.hidden = isArcade || levelConfig === null;
     if (!elements.overResultBoard.hidden) {
-      elements.overBoardTitle.textContent = 'My ' + levelConfig.label + ' best';
-      this.renderBoard(elements.overBoardList, elements.overBoardEmpty, boardInfo.entries, boardInfo.manager, { limit: 5 });
+      elements.overBoardTitle.textContent = 'Your best ' + levelConfig.label + ' runs';
+      this.renderBoard(elements.overBoardList, elements.overBoardEmpty, boardInfo.entries, boardInfo.manager, { limit: 5, highlightId: boardInfo.highlightId });
     }
   }
 
-  focusNameInput() {
+  focusResultAction() {
     const isFinePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: fine)').matches;
-    if (isFinePointer && !this.elements.overRecordForm.hidden) {
-      this.elements.overNameInput.focus({ preventScroll: true });
-      this.elements.overNameInput.select();
-    } else if (isFinePointer) {
+    if (isFinePointer) {
       this.elements.overPlayAgain.focus({ preventScroll: true });
     }
   }
 
-  /** The callsign typed on the result screen, if the form is up. */
-  get typedCallsign() {
-    return this.elements.overRecordForm.hidden ? '' : this.elements.overNameInput.value;
-  }
-
-  /** After saving: hide the form, confirm, and show the board with the new row highlighted. */
-  showSaveResult(result, entries, manager) {
-    const elements = this.elements;
-    elements.overRecordForm.hidden = true;
-    elements.overSaveNotice.hidden = false;
-    if (result.accepted) {
-      elements.overSaveNotice.removeAttribute('data-tone');
-      elements.overSaveNotice.textContent = result.persisted
-        ? 'Saved at #' + result.rank + ' on this device.'
-        : 'Saved at #' + result.rank + ' for this session. This browser is blocking storage, so it will not survive a reload.';
-      this.saveNoticeBase = elements.overSaveNotice.textContent;
-      this.renderBoard(elements.overBoardList, elements.overBoardEmpty, entries, manager, { limit: 5, highlightId: result.entry.id });
-    } else {
-      elements.overSaveNotice.setAttribute('data-tone', 'miss');
-      elements.overSaveNotice.textContent = 'That score could not be saved. Enter a callsign with at least one letter or number.';
-      elements.overRecordForm.hidden = false;
-    }
-    if (result.accepted) {
-      elements.overPlayAgain.focus({ preventScroll: true });
-    }
-  }
-
-  /** Shows the global board's answer after the local save line (each answer replaces the last). */
-  appendSaveNotice(text, tone) {
+  /** The line under the stats about where the run was saved; '' hides it. */
+  showSaveNotice(text, tone) {
     const notice = this.elements.overSaveNotice;
-    notice.hidden = false;
-    notice.textContent = (this.saveNoticeBase ? this.saveNoticeBase + ' ' : '') + text;
+    notice.hidden = text === '';
+    notice.textContent = text;
     if (tone) {
       notice.setAttribute('data-tone', tone);
     } else {
       notice.removeAttribute('data-tone');
     }
+  }
+
+  /** "Medium unlocked!" (or how close the run came). */
+  showUnlock(text) {
+    this.elements.overUnlock.hidden = text === '';
+    this.elements.overUnlock.textContent = text;
   }
 
   showShareNotice(text, tone) {
@@ -12750,15 +13627,15 @@ class UIController {
 
 /* -------------------------------------------------------------------------
    LeaderboardPanel — the menu's leaderboard: a sliding switch between the
-   global top 100 and this device's own runs, one tab per level, and a
-   ten-row table paged with Previous Ten / Next Ten. It only draws; the game
-   decides what rows to show.
+   top 500 players and the player's own runs, one tab per level, and one
+   table of up to 500 rows that scrolls. It only draws; the game decides
+   what rows to show.
    ------------------------------------------------------------------------- */
 
 class LeaderboardPanel {
   /**
    * @param {Document} documentRef
-   * @param {{onScopeChange: function(string): void, onTabChange: function(string): void, onPage: function(number): void, onClear: function(string): void, onDownloadServer: function(): void}} callbacks
+   * @param {{onScopeChange: function(string): void, onTabChange: function(string): void, onClear: function(string): void, onDownloadServer: function(): void}} callbacks
    */
   constructor(documentRef, callbacks) {
     this.documentRef = documentRef;
@@ -12770,9 +13647,7 @@ class LeaderboardPanel {
       caption: requireElement(documentRef, 'menu-board-caption'),
       body: requireElement(documentRef, 'menu-board-body'),
       empty: requireElement(documentRef, 'menu-board-empty'),
-      previous: requireElement(documentRef, 'board-prev'),
-      next: requireElement(documentRef, 'board-next'),
-      range: requireElement(documentRef, 'board-range'),
+      scroll: requireElement(documentRef, 'menu-board-scroll'),
       storage: requireElement(documentRef, 'menu-board-storage'),
       clear: requireElement(documentRef, 'menu-board-clear'),
       serverHelp: requireElement(documentRef, 'board-server-help'),
@@ -12801,8 +13676,6 @@ class LeaderboardPanel {
         callbacks.onTabChange(nextTab.getAttribute('data-board-mode'));
       }));
     }
-    this.elements.previous.addEventListener('click', () => callbacks.onPage(-1));
-    this.elements.next.addEventListener('click', () => callbacks.onPage(1));
     this.elements.clear.addEventListener('click', () => this.handleClearClick());
     this.elements.serverDownload.addEventListener('click', () => callbacks.onDownloadServer());
   }
@@ -12840,15 +13713,17 @@ class LeaderboardPanel {
   /**
    * @param {{
    *   rows: {rank: number, callsign: string, score: number, accuracyPercent: number, streak: number, isHighlight: boolean}[],
-   *   total: number, offset: number, pageSize: number, pageLimit: number,
-   *   caption: string, emptyText: string, statusText: string, canClear: boolean
-   * }} view
+   *   caption: string, emptyText: string, statusText: string, canClear: boolean, keepScroll?: boolean
+   * }} view keepScroll: redrawing the same list, so the reader's scroll position stays
    */
   render(view) {
     const elements = this.elements;
     const documentRef = this.documentRef;
     elements.caption.textContent = view.caption;
     elements.body.textContent = '';
+    if (!view.keepScroll) {
+      elements.scroll.scrollTop = 0;
+    }
     for (let index = 0; index < view.rows.length; index += 1) {
       const rowData = view.rows[index];
       const row = documentRef.createElement('tr');
@@ -12876,15 +13751,25 @@ class LeaderboardPanel {
     elements.empty.textContent = view.emptyText;
     elements.empty.hidden = view.rows.length > 0;
     elements.panel.setAttribute('data-empty', view.rows.length > 0 ? 'false' : 'true');
-
-    const shown = Math.min(view.total, view.pageLimit);
-    const first = view.rows.length > 0 ? view.offset + 1 : 0;
-    const last = view.offset + view.rows.length;
-    elements.range.textContent = view.rows.length > 0 ? first + '–' + last + ' of ' + shown : '';
-    elements.previous.disabled = view.offset <= 0;
-    elements.next.disabled = view.offset + view.pageSize >= shown;
     elements.storage.textContent = view.statusText;
     elements.clear.hidden = !view.canClear;
+  }
+
+  /** Scrolls the table so the highlighted row (the player's) is in view. */
+  /**
+   * Scrolls the highlighted row to the middle of the table. False while the
+   * board is hidden (behind the result screen) or has no highlighted row.
+   */
+  revealHighlight() {
+    const row = this.elements.body.querySelector('tr[data-highlight="true"]');
+    const scroll = this.elements.scroll;
+    if (row === null || scroll.clientHeight === 0) {
+      return false;
+    }
+    const rowBounds = row.getBoundingClientRect();
+    const scrollBounds = scroll.getBoundingClientRect();
+    scroll.scrollTop += (rowBounds.top - scrollBounds.top) - (scroll.clientHeight - rowBounds.height) / 2;
+    return true;
   }
 
   handleClearClick() {
@@ -12905,7 +13790,120 @@ class LeaderboardPanel {
     window.clearTimeout(this.clearArmTimerId);
     this.clearArmedMode = null;
     this.elements.clear.setAttribute('data-armed', 'false');
-    this.elements.clear.textContent = 'Clear this board';
+    this.elements.clear.textContent = 'Clear my scores';
+  }
+}
+
+/* -------------------------------------------------------------------------
+   AccountView — the sign-in screen: "Create account" (username, password and
+   the password again) or "Sign in". It only draws and collects; the game
+   checks the details.
+   ------------------------------------------------------------------------- */
+
+class AccountView {
+  /**
+   * @param {Document} documentRef
+   * @param {{onSubmit: function(string, string, string, string): void}} callbacks mode, username, password, password again
+   */
+  constructor(documentRef, callbacks) {
+    this.documentRef = documentRef;
+    this.callbacks = callbacks;
+    this.elements = {
+      title: requireElement(documentRef, 'account-title'),
+      where: requireElement(documentRef, 'account-where'),
+      tabs: requireElement(documentRef, 'account-tabs'),
+      form: requireElement(documentRef, 'account-form'),
+      username: requireElement(documentRef, 'account-username'),
+      password: requireElement(documentRef, 'account-password'),
+      confirm: requireElement(documentRef, 'account-confirm'),
+      confirmField: requireElement(documentRef, 'account-confirm-field'),
+      error: requireElement(documentRef, 'account-error'),
+      submit: requireElement(documentRef, 'account-submit')
+    };
+    this.tabButtons = Array.prototype.slice.call(this.elements.tabs.querySelectorAll('[data-account-mode]'));
+    this.mode = 'CREATE';
+    this.isBusy = false;
+  }
+
+  bind(radioKeys) {
+    for (let index = 0; index < this.tabButtons.length; index += 1) {
+      const tab = this.tabButtons[index];
+      tab.addEventListener('click', () => this.setMode(tab.getAttribute('data-account-mode')));
+      tab.addEventListener('keydown', (event) => radioKeys(event, this.tabButtons, (nextTab) => this.setMode(nextTab.getAttribute('data-account-mode'))));
+    }
+    this.elements.form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (this.isBusy) {
+        return;
+      }
+      const elements = this.elements;
+      this.callbacks.onSubmit(this.mode, elements.username.value.trim(), elements.password.value, elements.confirm.value);
+    });
+  }
+
+  /** @param {string} mode CREATE or SIGN_IN */
+  setMode(mode) {
+    const elements = this.elements;
+    this.mode = mode === 'SIGN_IN' ? 'SIGN_IN' : 'CREATE';
+    const isCreate = this.mode === 'CREATE';
+    for (let index = 0; index < this.tabButtons.length; index += 1) {
+      const tab = this.tabButtons[index];
+      const isSelected = tab.getAttribute('data-account-mode') === this.mode;
+      tab.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+      tab.setAttribute('tabindex', isSelected ? '0' : '-1');
+      if (isSelected) {
+        elements.form.setAttribute('aria-labelledby', tab.id);
+      }
+    }
+    elements.title.textContent = isCreate ? 'Create your account' : 'Sign in';
+    elements.confirmField.hidden = !isCreate;
+    elements.password.setAttribute('autocomplete', isCreate ? 'new-password' : 'current-password');
+    elements.submit.textContent = isCreate ? 'Create account' : 'Sign in';
+    this.showError('');
+  }
+
+  /**
+   * Opens the screen.
+   * @param {{mode: string, isOnline: boolean, connecting: boolean, username: string}} options
+   */
+  open(options) {
+    const elements = this.elements;
+    this.setMode(options.mode);
+    if (options.connecting) {
+      elements.where.textContent = 'Looking for the leaderboard server…';
+    } else if (options.isOnline) {
+      elements.where.textContent = 'Online account: it is saved on the leaderboard server, so you can sign in on any device that plays the game from there.';
+    } else {
+      elements.where.textContent = 'Your account is saved in this browser on this device. Everyone who plays here can make their own.';
+    }
+    elements.username.value = options.username || '';
+    elements.password.value = '';
+    elements.confirm.value = '';
+    this.setBusy(Boolean(options.connecting), 'Connecting…');
+  }
+
+  setBusy(isBusy, label) {
+    this.isBusy = isBusy;
+    this.elements.submit.disabled = isBusy;
+    if (isBusy) {
+      this.elements.submit.textContent = label || 'One moment…';
+    } else {
+      this.elements.submit.textContent = this.mode === 'CREATE' ? 'Create account' : 'Sign in';
+    }
+  }
+
+  showError(text) {
+    this.elements.error.hidden = text === '';
+    this.elements.error.textContent = text;
+  }
+
+  focus() {
+    const isFinePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: fine)').matches;
+    if (!isFinePointer) {
+      return;
+    }
+    const target = this.elements.username.value === '' ? this.elements.username : this.elements.password;
+    target.focus({ preventScroll: true });
   }
 }
 
@@ -13724,7 +14722,7 @@ class ArmoryView {
     const shortfall = skin.price - this.state.coins;
     if (shortfall > 0) {
       this.callbacks.onDenied(skin.id);
-      this.showNotice('You need ' + Formatters.formatInteger(shortfall) + ' more coins. Standard rounds bank ⌊score ÷ ' + GAME_RULES.pointsPerCoin + '⌋ coins times the level bonus, up to ×3 on Demon.', 'miss');
+      this.showNotice('You need ' + Formatters.formatInteger(shortfall) + ' more coins. Standard rounds bank ⌊score ÷ ' + GAME_RULES.pointsPerCoin + '⌋ coins times the level bonus, up to ×100 on Demon.', 'miss');
       return;
     }
     if (this.confirmSkinId !== skin.id) {
@@ -13779,7 +14777,7 @@ class ArmoryView {
 
 /* =========================================================================
    Module 11 · GameStateMachine — explicit, table-driven finite state machine
-   MENU ⇄ ARMORY; MENU → PLAYING ⇄ PAUSED → GAMEOVER → (PLAYING | MENU | ARMORY)
+   SIGN_IN ⇄ MENU ⇄ ARMORY; MENU → PLAYING ⇄ PAUSED → GAMEOVER → (PLAYING | MENU | ARMORY)
    ========================================================================= */
 
 class GameStateMachine {
@@ -13790,7 +14788,8 @@ class GameStateMachine {
     this.currentState = initialState;
     this.previousState = null;
     this.transitionTable = deepFreeze({
-      MENU: [GAME_STATES.PLAYING, GAME_STATES.ARMORY],
+      SIGN_IN: [GAME_STATES.MENU],
+      MENU: [GAME_STATES.PLAYING, GAME_STATES.ARMORY, GAME_STATES.SIGN_IN],
       ARMORY: [GAME_STATES.MENU],
       PLAYING: [GAME_STATES.PAUSED, GAME_STATES.GAMEOVER, GAME_STATES.MENU],
       PAUSED: [GAME_STATES.PLAYING, GAME_STATES.MENU],
@@ -16973,8 +17972,11 @@ class AimTrainerGame {
     this.storage = new SafeStorage();
     this.settings = new SettingsStore(this.storage);
     this.leaderboard = new LeaderboardManager(this.storage);
-    this.inventory = new InventoryStore(this.storage);
     this.globalBoard = new GlobalLeaderboardClient();
+    this.accounts = new AccountService(this.storage, this.globalBoard);
+    // The signed-in account's inventory and progress; empty placeholders until someone signs in.
+    this.inventory = new InventoryStore(this.storage, null);
+    this.profile = new PlayerProfile(this.storage, null);
     this.shareCard = new ShareCard(documentRef);
     this.previewSkinId = null;
 
@@ -16990,7 +17992,7 @@ class AimTrainerGame {
     this.difficulty = new DifficultyEngine();
     this.session = new SessionStats();
     this.magazine = new WeaponMagazine();
-    this.fsm = new GameStateMachine(GAME_STATES.MENU);
+    this.fsm = new GameStateMachine(GAME_STATES.SIGN_IN);
 
     this.hud = new HUDController(documentRef);
     this.toasts = new ToastManager(requireElement(documentRef, 'toasts'));
@@ -17010,16 +18012,18 @@ class AimTrainerGame {
       onQuitToMenu: () => this.quitToMenu(),
       onPlayAgain: () => this.restartRound(),
       onBackToMenu: () => this.quitToMenu(),
-      onSaveScore: (rawName) => this.saveScore(rawName),
       onShareScore: () => this.shareScore(),
-      onOpenArmory: (tab) => this.openArmory(tab)
+      onOpenArmory: (tab) => this.openArmory(tab),
+      onSignOut: () => this.signOut()
     });
     this.boardPanel = new LeaderboardPanel(documentRef, {
       onScopeChange: (scope) => this.changeBoardScope(scope),
       onTabChange: (levelKey) => this.changeBoardTab(levelKey),
-      onPage: (direction) => this.pageBoard(direction),
       onClear: (levelKey) => this.clearBoard(levelKey),
       onDownloadServer: () => this.downloadServer()
+    });
+    this.accountView = new AccountView(documentRef, {
+      onSubmit: (mode, username, password, confirmation) => this.submitAccount(mode, username, password, confirmation)
     });
     this.armoryView = new ArmoryView(documentRef, {
       onSelect: (skinId) => this.previewFinish(skinId),
@@ -17054,13 +18058,14 @@ class AimTrainerGame {
     this.activeConfig = createRoundConfig(this.selectedDifficulty, this.levelKeyFor(this.selectedDifficulty), this.gridNodes);
     // Gridshot: node positions (world space, camera at the origin) and the orb radius, from layoutGrid().
     this.grid = { columns: 3, nodes: [], radiusWorld: 0, cellWorld: 0, center: new Vector3D(0, 0, -GRIDSHOT_RULES.depth) };
-    // The menu leaderboard: which scope and level it shows, and which ten rows.
+    // The menu leaderboard: which scope (the top 500 players, or my runs) and which level it shows.
     this.boardView = {
       scope: this.settings.get('boardScope'),
       levelKey: resolveDifficultyKey(this.bootData.boardTab) || this.settings.get('boardTab'),
-      offset: 0,
-      total: 0,
-      requestId: 0
+      requestId: 0,
+      shownKey: '',
+      // Set when a run is saved: the next time the menu board is on screen, it scrolls to the player's row.
+      revealPending: false
     };
     this.lastLocalEntryId = null;
     this.lastGlobalEntryId = null;
@@ -17073,7 +18078,6 @@ class AimTrainerGame {
     this.ambientClockMs = 0;
     this.damageVignetteElapsedMs = Infinity;
     this.damageVignetteDurationMs = 420;
-    this.pendingSaveSummary = null;
     this.lastSummary = null;
     this.lastEmberSpawnMs = -Infinity;
     this.coinSoundTimerId = 0;
@@ -17150,6 +18154,7 @@ class AimTrainerGame {
     const radioKeys = (event, items, onActivate) => this.ui.handleRadioGroupKeys(event, items, onActivate);
     this.ui.bind();
     this.boardPanel.bind(radioKeys);
+    this.accountView.bind(radioKeys);
     this.armoryView.build();
     this.armoryView.bind(radioKeys);
     this.armoryView.crosshairEditor.setLook(this.inventory.crosshair);
@@ -17165,9 +18170,8 @@ class AimTrainerGame {
       this.settings.set('roundSeconds', restoredRoundSeconds);
     }
     this.ui.setRoundLength(this.settings.get('roundSeconds'));
-    this.refreshBoard();
+    this.refreshLevelLocks();
     this.globalBoard.onStatusChange(() => this.refreshBoard());
-    this.globalBoard.connect();
     this.hud.setMuted(this.settings.get('isMuted'));
 
     requireElement(this.documentRef, 'hud-pause-button').addEventListener('click', () => this.pauseGame());
@@ -17217,8 +18221,12 @@ class AimTrainerGame {
     this.handleResize(true);
     this.input.pointerPosition.set(this.viewportWidth / 2, this.viewportHeight * 0.42);
     this.gun.beginDraw();
-    this.ui.showState(GAME_STATES.MENU);
-    this.ui.focusPrimaryAction(GAME_STATES.MENU);
+    // Everyone signs in first. Whether accounts live on the leaderboard server or on this device
+    // depends on whether the server answers, so the screen waits for that check.
+    this.ui.showState(GAME_STATES.SIGN_IN);
+    this.ui.setPlayer(null);
+    this.accountView.open({ mode: 'SIGN_IN', isOnline: false, connecting: true, username: this.accounts.lastUsername });
+    this.globalBoard.connect().then(() => this.restoreAccount());
     this.frameRequestId = window.requestAnimationFrame(this.boundRunFrame);
   }
 
@@ -17304,6 +18312,14 @@ class AimTrainerGame {
       }
     });
 
+    fsm.onEnter(GAME_STATES.SIGN_IN, () => {
+      this.ui.showState(GAME_STATES.SIGN_IN);
+      this.hud.setVisible(false);
+      this.toasts.clear();
+      this.refreshWalletViews();
+      this.openAccountScreen();
+    });
+
     fsm.onEnter(GAME_STATES.MENU, (payload, fromState) => {
       this.ui.showState(GAME_STATES.MENU);
       this.ui.setActiveMode(this.selectedDifficulty);
@@ -17322,6 +18338,7 @@ class AimTrainerGame {
       this.ui.setActiveMode(this.levelKeyFor(this.selectedDifficulty) || this.selectedDifficulty);
       this.background.setThemeTarget(this.themeAmountFor(this.selectedDifficulty), false);
       this.refreshWalletViews();
+      this.refreshLevelLocks();
       this.refreshBoard();
       this.ui.focusPrimaryAction(GAME_STATES.MENU);
     });
@@ -17370,26 +18387,26 @@ class AimTrainerGame {
     fsm.onEnter(GAME_STATES.GAMEOVER, (payload) => {
       const summary = payload.summary;
       const levelKey = summary.levelKey;
-      // Only standard (ranked) levels post scores; practice and arcade runs never go on a board.
-      const qualifies = summary.roundType === ROUND_TYPES.RANKED && this.leaderboard.qualifies(levelKey, summary.score);
-      this.pendingSaveSummary = qualifies ? summary : null;
+      const account = this.accounts.current;
       this.hud.setVisible(false);
       this.ui.showGameOver(summary, {
-        qualifies: qualifies,
-        projectedRank: levelKey !== null ? this.leaderboard.projectedRank(levelKey, summary.score) : 0,
-        defaultName: this.settings.get('playerName') || 'PLAYER',
-        entries: levelKey !== null ? this.leaderboard.getEntries(levelKey) : [],
+        entries: levelKey !== null && account !== null ? this.leaderboard.playerRuns(levelKey, account.id) : [],
         manager: this.leaderboard,
-        globalOnline: this.globalBoard.isOnline
+        highlightId: summary.savedEntryId || null
       });
+      if (summary.saveNotice) {
+        this.ui.showSaveNotice(summary.saveNotice, null);
+      }
+      this.ui.showUnlock(this.describeUnlock(summary));
       if (summary.coinAward) {
         this.ui.showCoinAward(summary.coinAward);
       } else if (summary.personalBest) {
         this.ui.showBestAward(summary.personalBest);
       }
       this.refreshWalletViews();
+      this.refreshLevelLocks();
       this.ui.showState(GAME_STATES.GAMEOVER);
-      this.ui.focusNameInput();
+      this.ui.focusResultAction();
       if (levelKey !== null) {
         this.changeBoardTab(levelKey);
       }
@@ -17597,7 +18614,7 @@ class AimTrainerGame {
 
     if (state === GAME_STATES.PLAYING) {
       this.updatePlaying(stepMs, stepSeconds);
-    } else if (state === GAME_STATES.MENU) {
+    } else if (this.isAttractState) {
       this.updateAttract(stepMs, stepSeconds);
     }
   }
@@ -17616,6 +18633,11 @@ class AimTrainerGame {
     const smoothing = MathUtils.exponentialSmoothingFactor(ARENA_RULES.swaySharpness, stepSeconds);
     this.cameraPosition.x += (normalizedX * ARENA_RULES.swayTranslationX - this.cameraPosition.x) * smoothing;
     this.cameraPosition.y += (normalizedY * ARENA_RULES.swayTranslationY - this.cameraPosition.y) * smoothing;
+  }
+
+  /** The menu and the sign-in screen float over the demo range. */
+  get isAttractState() {
+    return this.fsm.is(GAME_STATES.MENU) || this.fsm.is(GAME_STATES.SIGN_IN);
   }
 
   /** Gridshot holds the camera perfectly still: no sway, no shake. */
@@ -17685,13 +18707,13 @@ class AimTrainerGame {
       return;
     }
     const demoTarget = this.attractDemo.target;
-    if (this.fsm.is(GAME_STATES.MENU) && demoTarget !== null && demoTarget.isAlive) {
+    if (this.isAttractState && demoTarget !== null && demoTarget.isAlive) {
       this.aimPoint.copyFrom(demoTarget.position);
       return;
     }
     const pointer = this.input.pointerPosition;
     this.renderer.computeRay(pointer.x, pointer.y, this.rayOrigin, this.rayDirection);
-    const visibleTargets = this.fsm.is(GAME_STATES.MENU) ? this.attractTargets : this.targets;
+    const visibleTargets = this.isAttractState ? this.attractTargets : this.targets;
     const pick = this.pickTarget(this.rayOrigin, this.rayDirection, visibleTargets, this.pickResult || (this.pickResult = {}));
     const distance = pick.distance >= 0 ? pick.distance : this.intersectArena(this.rayOrigin, this.rayDirection);
     this.aimPoint.copyFrom(this.rayOrigin).addScaled(this.rayDirection, distance);
@@ -17761,7 +18783,12 @@ class AimTrainerGame {
      ===================================================================== */
 
   startFromMenu() {
-    if (!this.renderer.isSupported) {
+    if (!this.renderer.isSupported || !this.fsm.is(GAME_STATES.MENU)) {
+      return;
+    }
+    const levelKey = this.levelKeyFor(this.selectedDifficulty);
+    if (levelKey !== null && !this.isLevelUnlocked(levelKey)) {
+      this.explainLock(levelKey, this.selectedDifficulty === TRAINING_MODE_KEY || this.selectedDifficulty === TIME_ATTACK_MODE_KEY);
       return;
     }
     this.audio.unlock();
@@ -17804,7 +18831,6 @@ class AimTrainerGame {
     this.countdownElapsedMs = 0;
     this.countdownLastStep = -1;
     this.damageVignetteElapsedMs = Infinity;
-    this.pendingSaveSummary = null;
 
     this.hud.configureForRound(config, roundDurationMs, config.magazineCapacity, reloadEnabled);
     this.hud.setVisible(true);
@@ -17865,19 +18891,29 @@ class AimTrainerGame {
     const isArcade = summary.roundType === ROUND_TYPES.TIME_ATTACK || summary.roundType === ROUND_TYPES.GRIDSHOT;
     summary.coinAward = isArcade ? null : this.bankRoundCoins(summary);
     summary.personalBest = isArcade ? this.recordPersonalBest(summary) : null;
+    summary.unlockedLevel = this.checkUnlock(summary);
+    // Standard rounds with a positive score go on the leaderboard under the signed-in player.
+    summary.saveNotice = summary.roundType === ROUND_TYPES.RANKED && summary.score > 0 ? this.saveRun(summary) : '';
     this.lastSummary = summary;
-    this.audio.playGameOver();
+    // Any positive score is a win, even 1 point; only a negative score gets the sad drone.
+    if (summary.score > 0) {
+      this.audio.playVictory();
+    } else if (summary.score < 0) {
+      this.audio.playGameOver();
+    } else {
+      this.audio.playRoundOverNeutral();
+    }
     window.clearTimeout(this.coinSoundTimerId);
-    if (summary.roundType === ROUND_TYPES.RANKED) {
+    if (summary.roundType === ROUND_TYPES.RANKED && summary.coinAward.earned > 0) {
       const coinsEarned = summary.coinAward.earned;
-      this.coinSoundTimerId = window.setTimeout(() => this.audio.playCoinsBanked(coinsEarned), 650);
+      this.coinSoundTimerId = window.setTimeout(() => this.audio.playCoinsBanked(coinsEarned), 1250);
     }
     this.fsm.transition(GAME_STATES.GAMEOVER, { summary: summary });
   }
 
   /**
    * Converts a finished standard round's score to coins — ⌊score ÷ 10⌋ times
-   * the level's multiplier (Easy 1, Medium 1.5, Hard 2, Demon 3) — and banks
+   * the level's multiplier (Easy 1, Medium 2, Hard 8, Demon 100) — and banks
    * them in the inventory; Training Ground rounds bank nothing. Also reports
    * the next finish to save up for.
    */
@@ -17912,14 +18948,9 @@ class AimTrainerGame {
     const isGridshot = summary.roundType === ROUND_TYPES.GRIDSHOT;
     const key = isGridshot ? 'GRIDSHOT_' + summary.gridNodes : 'TIME_ATTACK_' + summary.levelKey;
     const value = isGridshot ? Math.round(summary.hitsPerSecond * 100) / 100 : Math.max(0, summary.score);
-    const bests = Object.assign({}, this.settings.get('personalBests'));
-    const previous = typeof bests[key] === 'number' ? bests[key] : 0;
-    const isNewBest = value > 0 && value > previous;
-    if (isNewBest) {
-      bests[key] = value;
-      this.settings.set('personalBests', bests);
-    }
-    const best = Math.max(previous, value);
+    const record = this.profile.recordBest(key, value);
+    const isNewBest = record.isNewBest;
+    const best = record.best;
     const arcadeNote = ' · arcade modes bank no coins';
     if (isGridshot) {
       return {
@@ -18068,7 +19099,7 @@ class AimTrainerGame {
   }
 
   handlePointerActivity() {
-    if (this.fsm.is(GAME_STATES.MENU)) {
+    if (this.isAttractState) {
       this.attractDemo.target = null;
     }
   }
@@ -18416,6 +19447,10 @@ class AimTrainerGame {
     if (MODE_KEYS.indexOf(difficultyKey) === -1) {
       return;
     }
+    if (DIFFICULTY_KEYS.indexOf(difficultyKey) !== -1 && !this.isLevelUnlocked(difficultyKey)) {
+      this.explainLock(difficultyKey, false);
+      return;
+    }
     const wasDemon = this.themeAmountFor(this.selectedDifficulty) > 0;
     this.selectedDifficulty = difficultyKey;
     this.settings.set('difficulty', difficultyKey);
@@ -18431,6 +19466,10 @@ class AimTrainerGame {
   /** Picks the level the Training Ground or Time Attack plays (whichever is selected). */
   selectLevel(levelKey) {
     if (DIFFICULTY_KEYS.indexOf(levelKey) === -1) {
+      return;
+    }
+    if (!this.isLevelUnlocked(levelKey)) {
+      this.explainLock(levelKey, true);
       return;
     }
     const wasDemon = this.themeAmountFor(this.selectedDifficulty) > 0;
@@ -18611,6 +19650,7 @@ class AimTrainerGame {
     }
     this.settings.set('roundSeconds', seconds);
     this.ui.setRoundLength(seconds);
+    this.refreshLevelLocks();
   }
 
   /** False when the browser, or the page embedding the game, does not allow full screen. */
@@ -18691,111 +19731,111 @@ class AimTrainerGame {
     }
   }
 
-  /** Shows a level's board (from the first page). */
+  /** Shows a level's board. */
   changeBoardTab(levelKey) {
     if (DIFFICULTY_KEYS.indexOf(levelKey) === -1) {
       return;
-    }
-    if (levelKey !== this.boardView.levelKey) {
-      this.boardView.offset = 0;
     }
     this.boardView.levelKey = levelKey;
     this.settings.set('boardTab', levelKey);
     this.refreshBoard();
   }
 
-  /** GLOBAL (the world's top 100 from the server) or LOCAL (this device's runs). */
+  /** GLOBAL (the top 500 players) or LOCAL (the signed-in player's own runs). */
   changeBoardScope(scope) {
     if (scope !== BOARD_SCOPES.GLOBAL && scope !== BOARD_SCOPES.LOCAL) {
       return;
-    }
-    if (scope !== this.boardView.scope) {
-      this.boardView.offset = 0;
     }
     this.boardView.scope = scope;
     this.settings.set('boardScope', scope);
     this.refreshBoard();
   }
 
-  /** Previous Ten (−1) or Next Ten (+1). */
-  pageBoard(direction) {
-    const view = this.boardView;
-    const pageSize = GAME_RULES.leaderboardPageSize;
-    const limit = view.scope === BOARD_SCOPES.GLOBAL ? Math.min(view.total, GAME_RULES.globalLeaderboardSize) : view.total;
-    const nextOffset = view.offset + direction * pageSize;
-    if (nextOffset < 0 || nextOffset >= limit) {
-      return;
-    }
-    view.offset = nextOffset;
-    this.refreshBoard();
-  }
-
-  /** Redraws the menu leaderboard: a slice of this device's runs, or a page fetched from the global board. */
+  /**
+   * Redraws the menu leaderboard. Played from the leaderboard server, it shows
+   * the world's top 500 players (or my runs there); otherwise the players and
+   * runs saved on this device.
+   */
   refreshBoard() {
     const view = this.boardView;
     const panel = this.boardPanel;
-    const pageSize = GAME_RULES.leaderboardPageSize;
-    const label = DIFFICULTY_CONFIG[view.levelKey].label;
+    const levelKey = view.levelKey;
+    const label = DIFFICULTY_CONFIG[levelKey].label;
+    const account = this.accounts.current;
+    const viewKey = view.scope + ':' + levelKey + ':' + (account !== null ? account.id : '');
+    const keepScroll = viewKey === view.shownKey;
+    view.shownKey = viewKey;
     panel.setScope(view.scope);
-    panel.setTab(view.levelKey);
+    panel.setTab(levelKey);
     panel.setServerHelp(view.scope === BOARD_SCOPES.GLOBAL && this.globalBoard.status === 'offline');
     view.requestId += 1;
-
-    if (view.scope === BOARD_SCOPES.LOCAL) {
-      panel.setBusy(false);
-      const entries = this.leaderboard.getEntries(view.levelKey);
-      view.total = entries.length;
-      view.offset = MathUtils.clamp(view.offset, 0, Math.max(0, Math.floor((entries.length - 1) / pageSize) * pageSize));
-      const rows = entries.slice(view.offset, view.offset + pageSize).map((entry, index) => ({
-        rank: view.offset + index + 1,
-        callsign: entry.name,
-        score: entry.score,
-        accuracyPercent: entry.accuracy * 100,
-        streak: entry.bestStreak,
-        isHighlight: entry.id === this.lastLocalEntryId
-      }));
-      panel.render({
-        rows: rows,
-        total: entries.length,
-        offset: view.offset,
-        pageSize: pageSize,
-        pageLimit: GAME_RULES.leaderboardEntriesPerMode,
-        caption: 'My scores, ' + label,
-        emptyText: 'No ' + label + ' runs on this device yet. Finish a standard round to post one.',
-        statusText: this.leaderboard.isPersistent ? 'Saved in this browser · best ' + GAME_RULES.leaderboardEntriesPerMode + ' per level' : 'Storage blocked · scores last this session',
-        canClear: entries.length > 0
-      });
-      return;
-    }
-
-    const status = this.globalBoard.status;
-    if (!this.globalBoard.isOnline) {
-      panel.setBusy(status === 'connecting');
-      panel.render({
-        rows: [],
-        total: 0,
-        offset: 0,
-        pageSize: pageSize,
-        pageLimit: GAME_RULES.globalLeaderboardSize,
-        caption: 'Global top 100, ' + label,
-        emptyText: status === 'connecting'
-          ? 'Connecting to the global leaderboard…'
-          : 'The global leaderboard server is not reachable from here, so the world top 100 cannot load. Your own runs are under My scores.',
-        statusText: status === 'connecting' ? 'Connecting…' : 'Global board offline',
-        canClear: false
-      });
-      return;
-    }
-
     const requestId = view.requestId;
+    const isTopBoard = view.scope === BOARD_SCOPES.GLOBAL;
+    const playersText = (count) => Formatters.formatInteger(count) + (count === 1 ? ' player' : ' players');
+    const runsText = (count) => Formatters.formatInteger(count) + (count === 1 ? ' run' : ' runs');
+
+    if (!this.globalBoard.isOnline) {
+      panel.setBusy(false);
+      if (isTopBoard) {
+        const players = this.leaderboard.topPlayers(levelKey, 'device');
+        const myRank = account !== null ? players.findIndex((entry) => entry.userId === account.id) + 1 : 0;
+        panel.render({
+          rows: players.map((entry, index) => ({
+            rank: index + 1,
+            callsign: entry.name,
+            score: entry.score,
+            accuracyPercent: entry.accuracy * 100,
+            streak: entry.bestStreak,
+            isHighlight: account !== null && entry.userId === account.id
+          })),
+          caption: 'Top 500 players on this device, ' + label,
+          emptyText: 'No ' + label + ' scores on this device yet. Finish a standard round to be the first.',
+          statusText: playersText(players.length) + ' on this device' + (myRank > 0 ? ' · you are #' + myRank : ''),
+          canClear: false,
+          keepScroll: keepScroll
+        });
+        this.revealNewRun();
+        return;
+      }
+      const runs = account !== null ? this.leaderboard.playerRuns(levelKey, account.id) : [];
+      panel.render({
+        rows: runs.map((entry, index) => ({
+          rank: index + 1,
+          callsign: entry.name,
+          score: entry.score,
+          accuracyPercent: entry.accuracy * 100,
+          streak: entry.bestStreak,
+          isHighlight: entry.id === this.lastLocalEntryId
+        })),
+        caption: 'My ' + label + ' runs',
+        emptyText: 'No ' + label + ' runs yet. Finish a standard round to save one.',
+        statusText: runsText(runs.length) + ' saved' + (this.leaderboard.isPersistent ? ' in this browser' : ' · storage blocked, this session only'),
+        canClear: runs.length > 0 && account !== null && !account.isOnline,
+        keepScroll: keepScroll
+      });
+      this.revealNewRun();
+      return;
+    }
+
+    if (account === null) {
+      panel.setBusy(false);
+      panel.render({ rows: [], caption: label, emptyText: 'Sign in to see the leaderboard.', statusText: '', canClear: false, keepScroll: false });
+      return;
+    }
     panel.setBusy(true);
-    this.globalBoard.fetchPage(DIFFICULTY_KEYS.indexOf(view.levelKey), view.offset, pageSize).then((page) => {
+    const difficulty = DIFFICULTY_KEYS.indexOf(levelKey);
+    const request = isTopBoard
+      ? this.globalBoard.fetchTop(difficulty, GAME_RULES.leaderboardSize)
+      : this.globalBoard.fetchPlayerRuns(difficulty, account.username, GAME_RULES.leaderboardSize);
+    request.then((page) => {
       if (requestId !== view.requestId) {
         return;
       }
-      const entries = Array.isArray(page.entries) ? page.entries : [];
-      view.total = Math.min(GAME_RULES.globalLeaderboardSize, Number(page.total) || 0);
       panel.setBusy(false);
+      const entries = Array.isArray(page.entries) ? page.entries : [];
+      const total = Number(page.total) || entries.length;
+      const isMine = (entry) => String(entry.callsign).toLowerCase() === account.username.toLowerCase();
+      const mine = entries.find(isMine);
       panel.render({
         rows: entries.map((entry) => ({
           rank: entry.rank,
@@ -18803,17 +19843,19 @@ class AimTrainerGame {
           score: entry.score,
           accuracyPercent: Number(entry.accuracy),
           streak: entry.maxStreak,
-          isHighlight: entry.id === this.lastGlobalEntryId
+          isHighlight: isTopBoard ? isMine(entry) : entry.id === this.lastGlobalEntryId
         })),
-        total: view.total,
-        offset: view.offset,
-        pageSize: pageSize,
-        pageLimit: GAME_RULES.globalLeaderboardSize,
-        caption: 'Global top 100, ' + label,
-        emptyText: 'No ' + label + ' scores on the global board yet. Finish a standard round and save it to be the first.',
-        statusText: 'Live from the global board',
-        canClear: false
+        caption: isTopBoard ? 'Top 500 players, ' + label : 'My ' + label + ' runs',
+        emptyText: isTopBoard
+          ? 'No ' + label + ' scores on the leaderboard yet. Finish a standard round to be the first.'
+          : 'No ' + label + ' runs yet. Finish a standard round to save one.',
+        statusText: isTopBoard
+          ? 'Live · ' + playersText(total) + (mine ? ' · you are #' + mine.rank : '')
+          : 'Live · ' + runsText(total),
+        canClear: false,
+        keepScroll: keepScroll
       });
+      this.revealNewRun();
     }).catch(() => {
       if (requestId !== view.requestId) {
         return;
@@ -18821,16 +19863,20 @@ class AimTrainerGame {
       panel.setBusy(false);
       panel.render({
         rows: [],
-        total: 0,
-        offset: 0,
-        pageSize: pageSize,
-        pageLimit: GAME_RULES.globalLeaderboardSize,
-        caption: 'Global top 100, ' + label,
-        emptyText: 'The global board did not answer. Try again in a moment; your own runs are under My scores.',
-        statusText: 'Global board unreachable',
-        canClear: false
+        caption: label,
+        emptyText: 'The leaderboard server did not answer. Try again in a moment.',
+        statusText: 'Leaderboard unreachable',
+        canClear: false,
+        keepScroll: false
       });
     });
+  }
+
+  /** After a run is saved, scrolls the menu board to the player's row once the board is on screen. */
+  revealNewRun() {
+    if (this.boardView.revealPending && this.boardPanel.revealHighlight()) {
+      this.boardView.revealPending = false;
+    }
   }
 
   /** Saves the leaderboard server that ships inside this file as hitscan-server.js. */
@@ -18841,22 +19887,29 @@ class AimTrainerGame {
     window.setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
 
-  /** Clears this device's runs for one level (the global board cannot be cleared from the game). */
+  /** Clears the signed-in player's runs on one level on this device. */
   clearBoard(levelKey) {
-    this.leaderboard.clearMode(levelKey);
-    this.boardView.offset = 0;
+    const account = this.accounts.current;
+    if (account === null || account.isOnline) {
+      return;
+    }
+    this.leaderboard.clearPlayer(levelKey, account.id);
     this.refreshBoard();
   }
 
-  saveScore(rawName) {
-    const summary = this.pendingSaveSummary;
-    if (summary === null) {
-      return;
-    }
-    const callsign = LeaderboardManager.sanitizeName(rawName) || 'PLAYER';
+  /**
+   * Saves a finished standard round under the signed-in account on this
+   * device, and posts it to the leaderboard server for an online account.
+   * Returns the line for the result screen.
+   */
+  saveRun(summary) {
+    const account = this.accounts.current;
+    const label = DIFFICULTY_CONFIG[summary.levelKey].label;
     const result = this.leaderboard.submit({
       id: IdentifierFactory.createEntryId(),
-      name: callsign,
+      userId: account.id,
+      source: account.isOnline ? 'online' : 'device',
+      name: account.username,
       mode: summary.levelKey,
       score: summary.score,
       accuracy: summary.accuracy,
@@ -18865,61 +19918,245 @@ class AimTrainerGame {
       bestStreak: summary.bestStreak,
       expired: summary.targetsExpired,
       durationMs: summary.durationMs,
+      roundSeconds: Math.round(summary.roundDurationMs / 1000),
       averageReactionMs: summary.averageReactionMs,
-      peakLevel: summary.peakLevel,
-      dateIso: new Date().toISOString()
+      dateIso: summary.finishedAt
     });
-    if (result.accepted) {
-      this.settings.set('playerName', callsign);
-      this.pendingSaveSummary = null;
-      this.lastLocalEntryId = result.entry.id;
-      this.audio.playUiConfirm();
+    if (!result.accepted) {
+      return 'This run could not be saved.';
     }
-    this.ui.showSaveResult(result, this.leaderboard.getEntries(summary.levelKey), this.leaderboard);
-    if (result.accepted) {
-      this.postGlobalScore(summary, result.entry);
+    this.lastLocalEntryId = result.entry.id;
+    this.boardView.revealPending = true;
+    summary.savedEntryId = result.entry.id;
+    const bestNote = result.isPersonalBest ? ' New personal best!' : '';
+    if (account.isOnline) {
+      this.postRunOnline(summary, result.entry, bestNote);
+      return 'Saved as ' + account.username + '. Posting to the leaderboard…' + bestNote;
     }
-    this.refreshBoard();
+    const storageNote = result.persisted ? '' : ' This browser is blocking storage, so it lasts this session only.';
+    return 'Saved as ' + account.username + '. You are #' + result.rank + ' of ' + result.players
+      + (result.players === 1 ? ' player' : ' players') + ' on ' + label + ' on this device.' + bestNote + storageNote;
   }
 
-  /** Signs and posts a saved standard-round score to the global board, then reports the world rank. */
-  postGlobalScore(summary, entry) {
-    if (!this.globalBoard.isOnline) {
-      this.ui.appendSaveNotice('The global board is offline, so this run stays on this device.', null);
-      return;
-    }
-    const callsign = GlobalLeaderboardClient.cleanCallsign(entry.name);
-    this.ui.appendSaveNotice('Posting to the global board…', null);
+  /** Signs and posts a saved run to the leaderboard server, then shows the world rank and any unlocks it reports. */
+  postRunOnline(summary, entry, bestNote) {
+    const account = this.accounts.current;
+    const label = DIFFICULTY_CONFIG[summary.levelKey].label;
     this.globalBoard.submit({
       id: entry.id,
-      userId: this.inventory.userId,
-      callsign: callsign,
+      callsign: account.username,
       difficulty: DIFFICULTY_KEYS.indexOf(summary.levelKey),
       score: summary.score,
       accuracy: summary.accuracy,
       maxStreak: summary.bestStreak,
       durationSeconds: Math.round(summary.roundDurationMs / 1000),
       finishedAt: summary.finishedAt
-    }).then((answer) => {
+    }, this.accounts.token).then((answer) => {
       this.lastGlobalEntryId = answer.id;
-      const label = DIFFICULTY_CONFIG[summary.levelKey].label;
-      const postedAs = callsign !== entry.name ? ' (as ' + callsign + ')' : '';
-      const rankText = answer.rank <= GAME_RULES.globalLeaderboardSize
-        ? 'Global ' + label + ' rank #' + answer.rank + ': you are in the world top ' + GAME_RULES.globalLeaderboardSize + '!'
-        : 'Global ' + label + ' rank #' + Formatters.formatInteger(answer.rank) + ' of ' + Formatters.formatInteger(answer.total) + '.';
-      this.ui.appendSaveNotice(rankText + postedAs, null);
-      if (this.boardView.scope === BOARD_SCOPES.GLOBAL && this.boardView.levelKey === summary.levelKey) {
-        this.boardView.offset = answer.rank <= GAME_RULES.globalLeaderboardSize
-          ? Math.floor((answer.rank - 1) / GAME_RULES.leaderboardPageSize) * GAME_RULES.leaderboardPageSize
-          : 0;
+      if (Array.isArray(answer.unlocked)) {
+        this.profile.setUnlocked(answer.unlocked);
+        this.refreshLevelLocks();
+      }
+      if (this.lastSummary === summary && this.fsm.is(GAME_STATES.GAMEOVER)) {
+        const rankText = answer.rank <= GAME_RULES.leaderboardSize
+          ? 'You are #' + answer.rank + ' of ' + Formatters.formatInteger(answer.total) + ' players on ' + label + ' in the world top 500!'
+          : 'You are #' + Formatters.formatInteger(answer.rank) + ' of ' + Formatters.formatInteger(answer.total) + ' players on ' + label + '.';
+        this.ui.showSaveNotice('Saved as ' + account.username + '. ' + rankText + bestNote, null);
       }
       this.refreshBoard();
     }).catch((error) => {
-      const text = error && error.status === 403
-        ? 'The global board refused this score (signature check failed). It is still saved on this device.'
-        : 'Could not post to the global board (' + (error && error.message ? error.message : 'no answer') + '). It is still saved on this device.';
-      this.ui.appendSaveNotice(text, 'miss');
+      if (this.lastSummary !== summary || !this.fsm.is(GAME_STATES.GAMEOVER)) {
+        return;
+      }
+      let text = 'The leaderboard server could not be reached, so this run is only saved on this device.';
+      if (error && error.status === 401) {
+        text = 'You were signed out of the leaderboard server, so this run is only saved on this device. Log out and sign in again.';
+      } else if (error && error.status === 403) {
+        text = 'The leaderboard refused this run (' + error.message + '). It is still saved on this device.';
+      }
+      this.ui.showSaveNotice(text, 'miss');
     });
+  }
+
+  /* =====================================================================
+     Accounts and level unlocks
+     ===================================================================== */
+
+  /** After the leaderboard server check: signs back in whoever was signed in last time, or asks for an account. */
+  restoreAccount() {
+    return this.accounts.restore().then((account) => {
+      if (account !== null) {
+        this.enterAsSignedIn();
+      } else {
+        this.openAccountScreen();
+      }
+    });
+  }
+
+  openAccountScreen() {
+    this.accountView.open({
+      mode: this.accounts.expectsSignIn ? 'SIGN_IN' : 'CREATE',
+      isOnline: this.accounts.isOnline,
+      connecting: false,
+      username: this.accounts.lastUsername
+    });
+    this.accountView.focus();
+  }
+
+  /** The sign-in screen's button: creates the account or signs in, then opens the menu. */
+  submitAccount(mode, username, password, confirmation) {
+    if (!this.fsm.is(GAME_STATES.SIGN_IN)) {
+      return;
+    }
+    const view = this.accountView;
+    this.audio.unlock();
+    if (mode === 'CREATE' && password !== confirmation) {
+      view.showError('The two passwords are not the same. Type them again.');
+      this.audio.playDenied();
+      return;
+    }
+    view.showError('');
+    view.setBusy(true, mode === 'CREATE' ? 'Creating account…' : 'Signing in…');
+    // Let the button repaint before the password is stretched (a fraction of a second).
+    window.setTimeout(() => {
+      const request = mode === 'CREATE' ? this.accounts.register(username, password) : this.accounts.signIn(username, password);
+      request.then((result) => {
+        view.setBusy(false);
+        if (!result.ok) {
+          view.showError(result.reason);
+          this.audio.playDenied();
+          return;
+        }
+        this.audio.playUiConfirm();
+        this.enterAsSignedIn();
+      });
+    }, 30);
+  }
+
+  /**
+   * Loads the signed-in account's inventory and progress, then opens the
+   * menu. The first account to sign in on this device takes over the coins,
+   * items, runs and bests saved before accounts existed.
+   */
+  enterAsSignedIn() {
+    const account = this.accounts.current;
+    const takesOverOldData = this.storage.read(STORAGE_KEYS.legacyClaimed) === null;
+    this.inventory = new InventoryStore(this.storage, account.id, { adoptLegacy: takesOverOldData });
+    this.profile = new PlayerProfile(this.storage, account.id);
+    if (takesOverOldData) {
+      this.leaderboard.assignLegacyRuns(account.id, account.username);
+      this.profile.mergeBests(this.settings.get('personalBests'));
+      this.settings.set('personalBests', {});
+      this.storage.write(STORAGE_KEYS.legacyClaimed, account.id);
+    }
+    if (account.isOnline && this.accounts.serverUnlocked !== null) {
+      this.profile.setUnlocked(this.accounts.serverUnlocked);
+    }
+    this.lastLocalEntryId = null;
+    this.lastGlobalEntryId = null;
+    this.boardView.revealPending = false;
+    this.audio.setSoundPack(this.inventory.equippedSoundPackId);
+    this.crosshair.setSettings(this.inventory.crosshair);
+    this.armoryView.crosshairEditor.setLook(this.inventory.crosshair);
+    this.ui.setPlayer(account);
+    this.ensureUnlockedSelection();
+    this.fsm.transition(GAME_STATES.MENU);
+  }
+
+  /** Log out (menu): back to the sign-in screen, so someone else can play. */
+  signOut() {
+    if (!this.fsm.is(GAME_STATES.MENU)) {
+      return;
+    }
+    this.accounts.signOut();
+    this.inventory = new InventoryStore(this.storage, null);
+    this.profile = new PlayerProfile(this.storage, null);
+    this.audio.setSoundPack(this.inventory.equippedSoundPackId);
+    this.crosshair.setSettings(this.inventory.crosshair);
+    this.ui.setPlayer(null);
+    this.audio.playUiConfirm();
+    this.fsm.transition(GAME_STATES.SIGN_IN);
+  }
+
+  isLevelUnlocked(levelKey) {
+    return this.profile.isUnlocked(levelKey);
+  }
+
+  /** Shows which levels are still locked, and what opens each for the round length now chosen. */
+  refreshLevelLocks() {
+    const roundSeconds = this.settings.get('roundSeconds');
+    const locks = {};
+    for (let index = 0; index < DIFFICULTY_KEYS.length; index += 1) {
+      const levelKey = DIFFICULTY_KEYS[index];
+      locks[levelKey] = this.isLevelUnlocked(levelKey) ? '' : LevelUnlocks.describe(levelKey, roundSeconds);
+    }
+    this.ui.setLevelLocks(locks);
+  }
+
+  /**
+   * Moves the menu off any level this player has not unlocked (for example
+   * after switching accounts), and turns the leaderboard to the level they
+   * are set to play.
+   */
+  ensureUnlockedSelection() {
+    const highestOpen = DIFFICULTY_KEYS.filter((levelKey) => this.isLevelUnlocked(levelKey)).pop() || 'EASY';
+    if (!this.isLevelUnlocked(this.trainingLevel)) {
+      this.trainingLevel = highestOpen;
+      this.settings.set('trainingLevel', highestOpen);
+    }
+    if (!this.isLevelUnlocked(this.timeAttackLevel)) {
+      this.timeAttackLevel = highestOpen;
+      this.settings.set('timeAttackLevel', highestOpen);
+    }
+    if (DIFFICULTY_KEYS.indexOf(this.selectedDifficulty) !== -1 && !this.isLevelUnlocked(this.selectedDifficulty)) {
+      this.selectedDifficulty = highestOpen;
+      this.settings.set('difficulty', highestOpen);
+    }
+    this.ui.setSelectedDifficulty(this.selectedDifficulty);
+    this.ui.setLevel(this.levelKeyFor(this.selectedDifficulty) || this.trainingLevel);
+    const boardLevel = this.levelKeyFor(this.selectedDifficulty);
+    if (boardLevel !== null) {
+      this.boardView.levelKey = boardLevel;
+      this.settings.set('boardTab', boardLevel);
+    }
+    this.refreshLevelLocks();
+  }
+
+  /** A locked level was picked: a denied buzz and what opens it. */
+  explainLock(levelKey, fromLevelPicker) {
+    this.audio.playDenied();
+    this.ui.showLockNote(levelKey, DIFFICULTY_CONFIG[levelKey].label + ' is locked. To unlock it, '
+      + LevelUnlocks.describe(levelKey, this.settings.get('roundSeconds')) + '.', fromLevelPicker);
+  }
+
+  /**
+   * After a standard round: opens the next level when the score was fair for
+   * the round length. Returns the level opened just now, or null.
+   */
+  checkUnlock(summary) {
+    if (summary.roundType !== ROUND_TYPES.RANKED) {
+      return null;
+    }
+    const earned = LevelUnlocks.levelEarnedBy(summary.levelKey, summary.score, Math.round(summary.roundDurationMs / 1000));
+    return earned !== null && this.profile.unlock(earned) ? earned : null;
+  }
+
+  /** The result screen's unlock line: a new level, or how far this run was from the next one. */
+  describeUnlock(summary) {
+    if (summary.unlockedLevel) {
+      return DIFFICULTY_CONFIG[summary.unlockedLevel].label + ' unlocked! Pick it in the menu.';
+    }
+    const step = LevelUnlocks.stepFrom(summary.levelKey);
+    if (summary.roundType !== ROUND_TYPES.RANKED || step === null || this.isLevelUnlocked(step.unlocks)) {
+      return '';
+    }
+    const roundSeconds = Math.round(summary.roundDurationMs / 1000);
+    const nextLabel = DIFFICULTY_CONFIG[step.unlocks].label;
+    if (roundSeconds < UNLOCK_RULES.minimumRoundSeconds) {
+      return nextLabel + ' unlocks from rounds of ' + UNLOCK_RULES.minimumRoundSeconds + ' s or more.';
+    }
+    return nextLabel + ' unlocks at ' + Formatters.formatInteger(LevelUnlocks.targetScore(step, roundSeconds)) + ' points in a '
+      + roundSeconds + ' s ' + DIFFICULTY_CONFIG[summary.levelKey].label + ' round. This run: ' + Formatters.formatInteger(summary.score) + '.';
   }
 
   /** The address the share card's QR code opens: the server's public address, this page, or the project page. */
@@ -18940,7 +20177,7 @@ class AimTrainerGame {
     if (summary === null || this.isSharing || !this.fsm.is(GAME_STATES.GAMEOVER)) {
       return;
     }
-    const callsign = LeaderboardManager.sanitizeName(this.ui.typedCallsign) || this.settings.get('playerName') || 'PLAYER';
+    const callsign = this.accounts.current !== null ? this.accounts.current.username : 'PLAYER';
     const levelConfig = DIFFICULTY_CONFIG[summary.levelKey] || null;
     const hitsText = summary.shotsHit + (summary.shotsHit === 1 ? ' hit' : ' hits');
     let detailText = Math.round(summary.roundDurationMs / 1000) + ' s round · ' + hitsText;
@@ -19135,7 +20372,7 @@ class AimTrainerGame {
     renderer.setTheme(arenaState.themeAmount);
     renderer.drawArena(arenaState, timeSeconds);
 
-    const visibleTargets = state === GAME_STATES.MENU || state === GAME_STATES.ARMORY ? this.attractTargets : this.targets;
+    const visibleTargets = state === GAME_STATES.MENU || state === GAME_STATES.SIGN_IN || state === GAME_STATES.ARMORY ? this.attractTargets : this.targets;
     for (let index = 0; index < visibleTargets.length; index += 1) {
       visibleTargets[index].captureRenderState(alpha);
     }
@@ -19482,6 +20719,9 @@ class AimTrainerGame {
             ScreenShakeSystem: ScreenShakeSystem,
             PolygonUtils: PolygonUtils,
             InventoryStore: InventoryStore,
+            AccountService: AccountService,
+            DeviceAccounts: DeviceAccounts,
+            PlayerProfile: PlayerProfile,
             SkinCatalog: SkinCatalog,
             SoundPackCatalog: SoundPackCatalog,
             KeyframeTrack: KeyframeTrack,
@@ -19499,11 +20739,14 @@ class AimTrainerGame {
             GRIDSHOT_RULES: GRIDSHOT_RULES,
             SKIN_CATALOG: SKIN_CATALOG,
             SKIN_RARITIES: SKIN_RARITIES,
-            SOUND_PACKS: SOUND_PACKS
+            SOUND_PACKS: SOUND_PACKS,
+            UNLOCK_RULES: UNLOCK_RULES,
+            ACCOUNT_RULES: ACCOUNT_RULES
           },
           functions: {
             createRoundConfig: createRoundConfig,
-            timeAttackSpawnDelayMs: timeAttackSpawnDelayMs
+            timeAttackSpawnDelayMs: timeAttackSpawnDelayMs,
+            LevelUnlocks: LevelUnlocks
           }
         };
       }
@@ -19525,27 +20768,34 @@ class AimTrainerGame {
 'use strict';
 
 /*
- * HITSCAN global leaderboard server. It ships inside hitscan-3d.html; the
- * game's Leaderboard panel ("Download the server") saves it as
- * hitscan-server.js. No dependencies: Node.js 22.13 or newer (it uses the
- * built-in node:sqlite).
+ * HITSCAN leaderboard server. It ships inside hitscan-3d.html; the game's
+ * Leaderboard panel ("How do I turn on the global board?" → "Download the
+ * server") saves it as hitscan-server.js. No dependencies: Node.js 22.13 or
+ * newer (it uses the built-in node:sqlite).
  *
  * RUN IT next to the game file:
  *
  *   LEADERBOARD_PASSPHRASE='pick-your-own-secret' node hitscan-server.js
  *
- * then open http://localhost:8787 and play from there: the menu's Global
- * top 100 is live, and saving a standard round (Easy to Demon) posts it.
- * The server serves the game from hitscan-3d.html in the same folder (or
- * the page named on the command line: node hitscan-server.js "my copy.html").
- * Node prints a one-time "SQLite is an experimental feature" warning; that
- * is expected.
+ * then open http://localhost:8787 and play from there. Players create an
+ * account (username and password) that is kept here, so they can sign in
+ * on any device that opens the game from this server; the menu shows the
+ * top 500 players live. The server serves the game from hitscan-3d.html in
+ * the same folder (or the page named on the command line:
+ * node hitscan-server.js "my copy.html"). Node prints a one-time "SQLite is
+ * an experimental feature" warning; that is expected.
  *
  * ROUTES
  *   GET  /                  the game
  *   GET  /api/config        the signing passphrase and the game's public address
- *   GET  /api/leaderboard   ?difficulty=0..3&offset=0&limit=10, one page of the top 100
- *   POST /api/scores        a signed score: saved when the signature matches, dropped when not
+ *   POST /api/register      {username, password}: a new account and a session token
+ *   POST /api/login         {username, password}: a session token
+ *   GET  /api/me            the account a session token belongs to, and its unlocked levels
+ *   POST /api/logout        ends the session
+ *   GET  /api/leaderboard   ?difficulty=0..3&limit=500: the top players, each by their best run
+ *                           ?difficulty=0..3&player=NAME: that player's own runs
+ *   POST /api/scores        a signed score from a signed-in player: saved when the
+ *                           signature matches, dropped when not
  *   GET  /api/health        {"ok":true}
  *
  * SETTINGS (environment variables)
@@ -19560,12 +20810,19 @@ class AimTrainerGame {
  *                           address is read from X-Forwarded-For; anyone can fake that
  *                           header otherwise
  *
- * THE TABLE (SQLite, created on start; see SCHEMA_SQL): Leaderboard with a
- * unique record id, the player's user id, a callsign of at most 12
- * characters, the difficulty as a tiny integer (0 Easy, 1 Medium, 2 Hard,
- * 3 Demon), the raw score, the accuracy percentage to two decimals, the max
- * streak, the round length in seconds and the finish time. Ranking: higher
- * score, then higher accuracy, then the earlier run.
+ * THE TABLES (SQLite, created on start; see SCHEMA_SQL). Leaderboard: a
+ * unique record id, the player's user id, the callsign (their username, at
+ * most 12 characters), the difficulty as a tiny integer (0 Easy, 1 Medium,
+ * 2 Hard, 3 Demon), the raw score, the accuracy percentage to two decimals,
+ * the max streak, the round length in seconds and the finish time. Users:
+ * the accounts, with each password scrypt-hashed under its own salt.
+ * Sessions: the SHA-256 of each signed-in session token (never the token).
+ * Boards rank players by their best run: higher score, then higher
+ * accuracy, then the earlier run.
+ *
+ * LEVEL UNLOCKS. Every account starts with Easy. A standard round with a
+ * fair score opens the next level (see UNLOCK_RULES, the same numbers as
+ * the game's); scores on a level the player has not unlocked are refused.
  *
  * ANTI-CHEAT. The game joins callsign|score|accuracy|passphrase (accuracy
  * always with two decimals, e.g. "ACE|48210|93.47|<passphrase>") and sends
@@ -19580,16 +20837,20 @@ class AimTrainerGame {
  * files between restarts will do: upload this file and the game page, set
  * LEADERBOARD_PASSPHRASE, DATABASE_FILE (on the persistent disk),
  * PUBLIC_URL and, behind a proxy, TRUST_PROXY=1, then run
- * node hitscan-server.js. If the game page is hosted somewhere else (for
- * example GitHub Pages), set GLOBAL_LEADERBOARD_SERVER in the game to this
- * server's address; the API already allows requests from any site (CORS).
+ * node hitscan-server.js. Use https:// so passwords travel encrypted. If the
+ * game page is hosted somewhere else (for example GitHub Pages), set
+ * GLOBAL_LEADERBOARD_SERVER in the game to this server's address; the API
+ * already allows requests from any site (CORS).
  */
 
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const { promisify } = require('node:util');
 const { DatabaseSync } = require('node:sqlite');
+
+const scrypt = promisify(crypto.scrypt);
 
 const DEFAULT_PASSPHRASE = 'hitscan-range-key-change-me';
 const SETTINGS = Object.freeze({
@@ -19605,31 +20866,50 @@ const SETTINGS = Object.freeze({
 });
 
 const LIMITS = Object.freeze({
-  topSize: 100,
-  maxPageSize: 25,
+  boardSize: 500,
   maxBodyBytes: 4096,
   minDurationSeconds: 10,
   maxDurationSeconds: 150,
   // Plausibility ceiling: nobody lands more than 8 hits a second for a whole round.
   maxHitsPerSecond: 8,
-  futureToleranceMs: 5 * 60 * 1000
+  futureToleranceMs: 5 * 60 * 1000,
+  sessionDays: 90,
+  // Per minute: sign-in tries per address and per username, and new accounts per address
+  // (a class behind one school address may sign up together).
+  loginsPerAddress: 60,
+  loginsPerUsername: 10,
+  registrationsPerAddress: 40
 });
+
+const LEVEL_KEYS = ['EASY', 'MEDIUM', 'HARD', 'DEMON'];
 
 // Base points of one hit per level (0 Easy, 1 Medium, 2 Hard, 3 Demon), as in the game.
 const BASE_HIT_POINTS = [100, 150, 220, 300];
 
-const CALLSIGN_PATTERN = /^[A-Z0-9._-](?:[A-Z0-9 ._-]{0,10}[A-Z0-9._-])?$/;
-const USER_ID_PATTERN = /^USR-[a-z0-9]{8,32}$/;
+// Level unlocks, the same as UNLOCK_RULES in the game: a round of 30 s or more scoring at least
+// scorePerMinute × seconds ÷ 60 on a level opens the next one.
+const UNLOCK_RULES = Object.freeze({
+  minimumRoundSeconds: 30,
+  steps: [
+    { level: 'EASY', unlocks: 'MEDIUM', scorePerMinute: 30000 },
+    { level: 'MEDIUM', unlocks: 'HARD', scorePerMinute: 35000 },
+    { level: 'HARD', unlocks: 'DEMON', scorePerMinute: 30000 }
+  ]
+});
+
+const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,12}$/;
+const PASSWORD_LENGTH = Object.freeze({ minimum: 6, maximum: 64 });
 const RECORD_ID_PATTERN = /^[A-Za-z0-9-]{4,48}$/;
 const ACCURACY_PATTERN = /^(?:100\.00|\d{1,2}\.\d{2})$/;
 const SIGNATURE_PATTERN = /^[0-9a-f]{64}$/;
+const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
 
 // The column types read the same way in MySQL or PostgreSQL if the board ever moves there.
 const SCHEMA_SQL = [
   'CREATE TABLE IF NOT EXISTS Leaderboard (',
   '  id               VARCHAR(48)  PRIMARY KEY,',  // unique record id, e.g. RUN-mh2k1x9a-4f0qz
   '  user_id          VARCHAR(40)  NOT NULL,',     // the player's account id, e.g. USR-k3j9x0q2m7b1c4d8
-  '  callsign         VARCHAR(12)  NOT NULL,',
+  '  callsign         VARCHAR(12)  NOT NULL,',     // the player's username
   '  difficulty       TINYINT      NOT NULL,',     // 0 Easy, 1 Medium, 2 Hard, 3 Demon
   '  score            INTEGER      NOT NULL,',
   '  accuracy         DECIMAL(5,2) NOT NULL,',     // hit percentage with two decimals, e.g. 93.47
@@ -19644,7 +20924,22 @@ const SCHEMA_SQL = [
   '  CHECK (duration_seconds BETWEEN 10 AND 150)',
   ');',
   'CREATE INDEX IF NOT EXISTS leaderboard_ranking',
-  '  ON Leaderboard (difficulty, score DESC, accuracy DESC, finished_at, id);'
+  '  ON Leaderboard (difficulty, score DESC, accuracy DESC, finished_at, id);',
+  'CREATE INDEX IF NOT EXISTS leaderboard_player ON Leaderboard (user_id, difficulty);',
+  'CREATE TABLE IF NOT EXISTS Users (',
+  '  id            VARCHAR(40)  PRIMARY KEY,',
+  '  username      VARCHAR(12)  NOT NULL,',        // as typed
+  '  username_key  VARCHAR(12)  NOT NULL UNIQUE,', // lower case, so names differing only in case clash
+  '  password_hash VARCHAR(128) NOT NULL,',        // scrypt, 64 bytes as hex
+  '  password_salt VARCHAR(32)  NOT NULL,',
+  '  created_at    TIMESTAMP    NOT NULL',
+  ');',
+  'CREATE TABLE IF NOT EXISTS Sessions (',
+  '  token_hash VARCHAR(64) PRIMARY KEY,',          // SHA-256 of the session token
+  '  user_id    VARCHAR(40) NOT NULL,',
+  '  created_at TIMESTAMP   NOT NULL,',
+  '  expires_at TIMESTAMP   NOT NULL',
+  ');'
 ].join('\n');
 
 /**
@@ -19676,37 +20971,129 @@ function findGameFile() {
    --------------------------------------------------------------------------- */
 
 const database = new DatabaseSync(SETTINGS.databaseFile);
+// A board saved by the version before accounts holds runs nobody owns: keep them aside and start fresh.
+const savedColumns = database.prepare("SELECT name FROM pragma_table_info('Leaderboard')").all().map((row) => row.name);
+if (savedColumns.length > 0 && savedColumns.indexOf('user_id') === -1) {
+  database.exec('DROP INDEX IF EXISTS leaderboard_ranking; ALTER TABLE Leaderboard RENAME TO Leaderboard_before_accounts;');
+  console.log('[hitscan] the scores saved before accounts were moved to the table Leaderboard_before_accounts');
+}
 database.exec(SCHEMA_SQL);
 
 const RANKING_ORDER = 'score DESC, accuracy DESC, finished_at ASC, id ASC';
+// Each player's best run on a level: the first row of their runs in ranking order.
+const BEST_RUNS = 'SELECT * FROM (SELECT id, user_id, callsign, score, accuracy, max_streak, duration_seconds, finished_at, '
+  + 'ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ' + RANKING_ORDER + ') AS player_row '
+  + 'FROM Leaderboard WHERE difficulty = ?) WHERE player_row = 1';
 const statements = {
   insert: database.prepare(
     'INSERT INTO Leaderboard (id, user_id, callsign, difficulty, score, accuracy, max_streak, duration_seconds, finished_at) '
     + 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ),
   findById: database.prepare('SELECT * FROM Leaderboard WHERE id = ?'),
-  countLevel: database.prepare('SELECT COUNT(*) AS total FROM Leaderboard WHERE difficulty = ?'),
-  countBetter: database.prepare(
-    'SELECT COUNT(*) AS better FROM Leaderboard WHERE difficulty = ? AND ('
+  topPlayers: database.prepare(BEST_RUNS + ' ORDER BY ' + RANKING_ORDER + ' LIMIT ?'),
+  countPlayers: database.prepare('SELECT COUNT(DISTINCT user_id) AS total FROM Leaderboard WHERE difficulty = ?'),
+  bestRunOf: database.prepare('SELECT * FROM Leaderboard WHERE user_id = ? AND difficulty = ? ORDER BY ' + RANKING_ORDER + ' LIMIT 1'),
+  countBetterPlayers: database.prepare(
+    'SELECT COUNT(*) AS better FROM (' + BEST_RUNS + ') WHERE '
     + 'score > ? OR (score = ? AND accuracy > ?) '
     + 'OR (score = ? AND accuracy = ? AND finished_at < ?) '
-    + 'OR (score = ? AND accuracy = ? AND finished_at = ? AND id < ?))'
+    + 'OR (score = ? AND accuracy = ? AND finished_at = ? AND id < ?)'
   ),
-  page: database.prepare(
+  playerRuns: database.prepare(
     'SELECT id, callsign, score, accuracy, max_streak, duration_seconds, finished_at FROM Leaderboard '
-    + 'WHERE difficulty = ? ORDER BY ' + RANKING_ORDER + ' LIMIT ? OFFSET ?'
-  )
+    + 'WHERE difficulty = ? AND user_id = ? ORDER BY ' + RANKING_ORDER + ' LIMIT ?'
+  ),
+  countPlayerRuns: database.prepare('SELECT COUNT(*) AS total FROM Leaderboard WHERE difficulty = ? AND user_id = ?'),
+  qualifyingRun: database.prepare(
+    'SELECT 1 AS found FROM Leaderboard WHERE user_id = ? AND difficulty = ? AND duration_seconds >= ? AND score * 60 >= ? * duration_seconds LIMIT 1'
+  ),
+  insertUser: database.prepare('INSERT INTO Users (id, username, username_key, password_hash, password_salt, created_at) VALUES (?, ?, ?, ?, ?, ?)'),
+  findUserByKey: database.prepare('SELECT * FROM Users WHERE username_key = ?'),
+  findUserById: database.prepare('SELECT * FROM Users WHERE id = ?'),
+  insertSession: database.prepare('INSERT INTO Sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)'),
+  findSession: database.prepare('SELECT * FROM Sessions WHERE token_hash = ?'),
+  deleteSession: database.prepare('DELETE FROM Sessions WHERE token_hash = ?'),
+  deleteExpiredSessions: database.prepare('DELETE FROM Sessions WHERE expires_at < ?')
 };
 
-/** 1-based position of a stored row among its level's runs. */
-function rankOf(row) {
-  const better = statements.countBetter.get(
-    row.difficulty,
-    row.score, row.score, row.accuracy,
-    row.score, row.accuracy, row.finished_at,
-    row.score, row.accuracy, row.finished_at, row.id
+/** A player's place among the players on a level, by their best run (0 when they have no run there). */
+function playerRank(userId, difficulty) {
+  const best = statements.bestRunOf.get(userId, difficulty);
+  if (!best) {
+    return 0;
+  }
+  const better = statements.countBetterPlayers.get(
+    difficulty,
+    best.score, best.score, best.accuracy,
+    best.score, best.accuracy, best.finished_at,
+    best.score, best.accuracy, best.finished_at, best.id
   ).better;
   return Number(better) + 1;
+}
+
+/** The levels a player has opened: Easy, plus each level whose unlock run they have posted. */
+function unlockedLevels(userId) {
+  const unlocked = ['EASY'];
+  for (const step of UNLOCK_RULES.steps) {
+    const found = statements.qualifyingRun.get(userId, LEVEL_KEYS.indexOf(step.level), UNLOCK_RULES.minimumRoundSeconds, step.scorePerMinute);
+    if (found) {
+      unlocked.push(step.unlocks);
+    }
+  }
+  return LEVEL_KEYS.filter((level) => unlocked.indexOf(level) !== -1);
+}
+
+/* ---------------------------------------------------------------------------
+   Accounts and sessions
+   --------------------------------------------------------------------------- */
+
+async function hashPassword(password, salt) {
+  return (await scrypt(password, salt, 64)).toString('hex');
+}
+
+function sha256(text) {
+  return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
+}
+
+function newUserId() {
+  const bytes = crypto.randomBytes(16);
+  return 'USR-' + Array.from(bytes, (byte) => (byte % 36).toString(36)).join('');
+}
+
+/** Starts a session for a user; the token goes back to the game, only its hash is kept here. */
+function startSession(userId) {
+  const token = crypto.randomBytes(32).toString('hex');
+  const now = Date.now();
+  statements.insertSession.run(sha256(token), userId, new Date(now).toISOString(), new Date(now + LIMITS.sessionDays * 86400000).toISOString());
+  return token;
+}
+
+/** The token from "Authorization: Bearer <token>", or null. */
+function bearerToken(request) {
+  const header = request.headers.authorization;
+  const match = typeof header === 'string' ? /^Bearer ([0-9a-f]{64})$/.exec(header.trim()) : null;
+  return match && TOKEN_PATTERN.test(match[1]) ? match[1] : null;
+}
+
+/** The signed-in user for a request, or null. */
+function authenticate(request) {
+  const token = bearerToken(request);
+  if (token === null) {
+    return null;
+  }
+  const session = statements.findSession.get(sha256(token));
+  if (!session || Date.parse(session.expires_at) < Date.now()) {
+    return null;
+  }
+  return statements.findUserById.get(session.user_id) || null;
+}
+
+function accountAnswer(user, token) {
+  const answer = { user: { id: user.id, username: user.username }, unlocked: unlockedLevels(user.id) };
+  if (token) {
+    answer.token = token;
+  }
+  return answer;
 }
 
 /* ---------------------------------------------------------------------------
@@ -19715,9 +21102,7 @@ function rankOf(row) {
 
 /** The game's signature: SHA-256 of "callsign|score|accuracy|passphrase". */
 function expectedSignature(callsign, score, accuracyText) {
-  return crypto.createHash('sha256')
-    .update(callsign + '|' + score + '|' + accuracyText + '|' + SETTINGS.passphrase, 'utf8')
-    .digest('hex');
+  return sha256(callsign + '|' + score + '|' + accuracyText + '|' + SETTINGS.passphrase);
 }
 
 function signatureMatches(submission) {
@@ -19745,11 +21130,8 @@ function validationError(body) {
   if (typeof body.id !== 'string' || !RECORD_ID_PATTERN.test(body.id)) {
     return 'bad record id';
   }
-  if (typeof body.userId !== 'string' || !USER_ID_PATTERN.test(body.userId)) {
-    return 'bad user id';
-  }
-  if (typeof body.callsign !== 'string' || !CALLSIGN_PATTERN.test(body.callsign)) {
-    return 'callsigns are 1 to 12 characters: A-Z, 0-9, space, dot, dash or underscore';
+  if (typeof body.callsign !== 'string') {
+    return 'missing callsign';
   }
   if (!Number.isInteger(body.difficulty) || body.difficulty < 0 || body.difficulty > 3) {
     return 'difficulty must be 0, 1, 2 or 3';
@@ -19791,7 +21173,7 @@ function validationError(body) {
 const BASE_HEADERS = Object.freeze({
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'X-Content-Type-Options': 'nosniff'
 });
 
@@ -19829,22 +21211,23 @@ function readJsonBody(request) {
   });
 }
 
-/** At most RATE_LIMIT_PER_MINUTE submissions a minute from one address. */
-const recentSubmissions = new Map();
-function isRateLimited(address) {
+/** Counts actions per key over the last minute; true once a key goes past its limit. */
+const recentActions = new Map();
+function isRateLimited(key, perMinute) {
   const now = Date.now();
-  const times = (recentSubmissions.get(address) || []).filter((time) => now - time < 60000);
+  const times = (recentActions.get(key) || []).filter((time) => now - time < 60000);
   times.push(now);
-  recentSubmissions.set(address, times);
-  return times.length > SETTINGS.submissionsPerMinute;
+  recentActions.set(key, times);
+  return times.length > perMinute;
 }
 setInterval(() => {
   const now = Date.now();
-  for (const [address, times] of recentSubmissions) {
+  for (const [key, times] of recentActions) {
     if (times.every((time) => now - time >= 60000)) {
-      recentSubmissions.delete(address);
+      recentActions.delete(key);
     }
   }
+  statements.deleteExpiredSessions.run(new Date(now).toISOString());
 }, 60000).unref();
 
 function clientAddress(request) {
@@ -19878,55 +21261,115 @@ function serveGame(response) {
   });
 }
 
+async function handleRegister(request, response) {
+  if (isRateLimited('register:' + clientAddress(request), LIMITS.registrationsPerAddress)) {
+    sendJson(response, 429, { reason: 'too many new accounts from here; wait a minute' });
+    return;
+  }
+  const body = await readJsonBody(request);
+  const username = body && typeof body.username === 'string' ? body.username.trim() : '';
+  const password = body && typeof body.password === 'string' ? body.password : '';
+  if (!USERNAME_PATTERN.test(username)) {
+    sendJson(response, 400, { reason: 'usernames are 3 to 12 letters, numbers, dots, dashes or underscores' });
+    return;
+  }
+  if (password.length < PASSWORD_LENGTH.minimum || password.length > PASSWORD_LENGTH.maximum) {
+    sendJson(response, 400, { reason: 'passwords need ' + PASSWORD_LENGTH.minimum + ' to ' + PASSWORD_LENGTH.maximum + ' characters' });
+    return;
+  }
+  const key = username.toLowerCase();
+  if (statements.findUserByKey.get(key)) {
+    sendJson(response, 409, { reason: 'that username is already taken; pick another one, or sign in' });
+    return;
+  }
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = await hashPassword(password, salt);
+  const id = newUserId();
+  try {
+    statements.insertUser.run(id, username, key, hash, salt, new Date().toISOString());
+  } catch (error) {
+    // Two sign-ups with the same name at the same moment: the unique index lets only one through.
+    sendJson(response, 409, { reason: 'that username is already taken; pick another one, or sign in' });
+    return;
+  }
+  console.log('[hitscan] new account ' + username);
+  sendJson(response, 201, accountAnswer(statements.findUserById.get(id), startSession(id)));
+}
+
+async function handleLogin(request, response) {
+  const body = await readJsonBody(request);
+  const username = body && typeof body.username === 'string' ? body.username.trim() : '';
+  const password = body && typeof body.password === 'string' ? body.password : '';
+  const key = username.toLowerCase();
+  if (isRateLimited('login:' + clientAddress(request), LIMITS.loginsPerAddress) || isRateLimited('login-name:' + key, LIMITS.loginsPerUsername)) {
+    sendJson(response, 429, { reason: 'too many sign-in tries; wait a minute' });
+    return;
+  }
+  const user = USERNAME_PATTERN.test(username) && password.length <= PASSWORD_LENGTH.maximum ? statements.findUserByKey.get(key) : null;
+  if (!user) {
+    sendJson(response, 401, { reason: 'wrong username or password' });
+    return;
+  }
+  const hash = Buffer.from(await hashPassword(password, user.password_salt), 'hex');
+  if (!crypto.timingSafeEqual(hash, Buffer.from(user.password_hash, 'hex'))) {
+    sendJson(response, 401, { reason: 'wrong username or password' });
+    return;
+  }
+  sendJson(response, 200, accountAnswer(user, startSession(user.id)));
+}
+
 function handleLeaderboard(url, response) {
   const difficulty = Number(url.searchParams.get('difficulty'));
-  const offset = Number(url.searchParams.get('offset') || 0);
-  const limit = Number(url.searchParams.get('limit') || 10);
+  const limit = Number(url.searchParams.get('limit') || LIMITS.boardSize);
+  const player = url.searchParams.get('player');
   if (!Number.isInteger(difficulty) || difficulty < 0 || difficulty > 3) {
     sendJson(response, 400, { reason: 'difficulty must be 0, 1, 2 or 3' });
     return;
   }
-  if (!Number.isInteger(offset) || offset < 0 || offset >= LIMITS.topSize || !Number.isInteger(limit) || limit < 1 || limit > LIMITS.maxPageSize) {
-    sendJson(response, 400, { reason: 'offset must be 0 to 99 and limit 1 to 25' });
+  if (!Number.isInteger(limit) || limit < 1 || limit > LIMITS.boardSize) {
+    sendJson(response, 400, { reason: 'limit must be 1 to ' + LIMITS.boardSize });
     return;
   }
-  const pageLimit = Math.min(limit, LIMITS.topSize - offset);
-  const rows = statements.page.all(difficulty, pageLimit, offset);
-  const total = Math.min(LIMITS.topSize, Number(statements.countLevel.get(difficulty).total));
-  sendJson(response, 200, {
-    difficulty: difficulty,
-    offset: offset,
-    limit: pageLimit,
-    total: total,
-    entries: rows.map((row, index) => ({
-      rank: offset + index + 1,
-      id: row.id,
-      callsign: row.callsign,
-      score: Number(row.score),
-      accuracy: Math.round(Number(row.accuracy) * 100) / 100,
-      maxStreak: Number(row.max_streak),
-      durationSeconds: Number(row.duration_seconds),
-      finishedAt: row.finished_at
-    }))
+  const toEntry = (row, index) => ({
+    rank: index + 1,
+    id: row.id,
+    callsign: row.callsign,
+    score: Number(row.score),
+    accuracy: Math.round(Number(row.accuracy) * 100) / 100,
+    maxStreak: Number(row.max_streak),
+    durationSeconds: Number(row.duration_seconds),
+    finishedAt: row.finished_at
   });
+  if (player !== null) {
+    const user = USERNAME_PATTERN.test(player) ? statements.findUserByKey.get(player.toLowerCase()) : null;
+    const rows = user ? statements.playerRuns.all(difficulty, user.id, limit) : [];
+    const total = user ? Number(statements.countPlayerRuns.get(difficulty, user.id).total) : 0;
+    sendJson(response, 200, { difficulty: difficulty, player: user ? user.username : player, total: total, entries: rows.map(toEntry) });
+    return;
+  }
+  const rows = statements.topPlayers.all(difficulty, limit);
+  sendJson(response, 200, { difficulty: difficulty, total: Number(statements.countPlayers.get(difficulty).total), entries: rows.map(toEntry) });
 }
 
 async function handleSubmission(request, response) {
   const address = clientAddress(request);
-  if (isRateLimited(address)) {
+  if (isRateLimited('scores:' + address, SETTINGS.submissionsPerMinute)) {
     sendJson(response, 429, { accepted: false, reason: 'too many scores at once; wait a minute' });
     return;
   }
-  let body;
-  try {
-    body = await readJsonBody(request);
-  } catch (error) {
-    sendJson(response, error.status || 400, { accepted: false, reason: error.message });
+  const user = authenticate(request);
+  if (user === null) {
+    sendJson(response, 401, { accepted: false, reason: 'sign in to post scores' });
     return;
   }
+  const body = await readJsonBody(request);
   const problem = validationError(body);
   if (problem !== null) {
     sendJson(response, 400, { accepted: false, reason: problem });
+    return;
+  }
+  if (body.callsign !== user.username) {
+    sendJson(response, 400, { accepted: false, reason: 'scores are posted under your own username' });
     return;
   }
   // The anti-cheat step: rebuild the signature with this server's passphrase; a mismatch drops the score.
@@ -19935,11 +21378,15 @@ async function handleSubmission(request, response) {
     sendJson(response, 403, { accepted: false, reason: 'signature mismatch' });
     return;
   }
+  if (unlockedLevels(user.id).indexOf(LEVEL_KEYS[body.difficulty]) === -1) {
+    sendJson(response, 403, { accepted: false, reason: 'that level is still locked for ' + user.username });
+    return;
+  }
 
   const row = {
     id: body.id,
-    user_id: body.userId,
-    callsign: body.callsign,
+    user_id: user.id,
+    callsign: user.username,
     difficulty: body.difficulty,
     score: body.score,
     accuracy: Number(body.accuracy),
@@ -19949,21 +21396,32 @@ async function handleSubmission(request, response) {
   };
   const existing = statements.findById.get(row.id);
   if (existing) {
-    // A retry of a score already saved answers with its rank; a different run reusing the id is refused.
-    const isSameRun = existing.user_id === row.user_id && Number(existing.score) === row.score && existing.difficulty === row.difficulty;
-    if (!isSameRun) {
+    // A retry of a score already saved answers with the rank; a different run reusing the id is refused.
+    if (existing.user_id !== user.id || Number(existing.score) !== row.score || existing.difficulty !== row.difficulty) {
       sendJson(response, 409, { accepted: false, reason: 'that record id is taken' });
       return;
     }
-    sendJson(response, 200, { accepted: true, id: existing.id, rank: rankOf(existing), total: Number(statements.countLevel.get(existing.difficulty).total) });
-    return;
+  } else {
+    statements.insert.run(row.id, row.user_id, row.callsign, row.difficulty, row.score, row.accuracy, row.max_streak, row.duration_seconds, row.finished_at);
   }
-  statements.insert.run(row.id, row.user_id, row.callsign, row.difficulty, row.score, row.accuracy, row.max_streak, row.duration_seconds, row.finished_at);
-  const stored = statements.findById.get(row.id);
-  const rank = rankOf(stored);
-  const total = Number(statements.countLevel.get(row.difficulty).total);
-  console.log('[hitscan] saved ' + row.callsign + ' ' + row.score + ' on level ' + row.difficulty + ' (rank ' + rank + ' of ' + total + ')');
-  sendJson(response, 201, { accepted: true, id: row.id, rank: rank, total: total });
+  const rank = playerRank(user.id, row.difficulty);
+  const total = Number(statements.countPlayers.get(row.difficulty).total);
+  if (!existing) {
+    console.log('[hitscan] saved ' + row.callsign + ' ' + row.score + ' on ' + LEVEL_KEYS[row.difficulty] + ' (#' + rank + ' of ' + total + ' players)');
+  }
+  sendJson(response, existing ? 200 : 201, { accepted: true, id: row.id, rank: rank, total: total, unlocked: unlockedLevels(user.id) });
+}
+
+/** Runs an async route, answering with its error's status (or 500) if it throws. */
+function runRoute(handler, request, response) {
+  handler(request, response).catch((error) => {
+    if (error && error.status) {
+      sendJson(response, error.status, { reason: error.message });
+      return;
+    }
+    console.error('[hitscan] request failed', error);
+    sendJson(response, 500, { reason: 'server error' });
+  });
 }
 
 const server = http.createServer((request, response) => {
@@ -19982,14 +21440,28 @@ const server = http.createServer((request, response) => {
     } else if (route === 'GET /' || route === 'GET /hitscan-3d.html') {
       serveGame(response);
     } else if (route === 'GET /api/config') {
-      sendJson(response, 200, { passphrase: SETTINGS.passphrase, publicUrl: SETTINGS.publicUrl, topSize: LIMITS.topSize });
+      sendJson(response, 200, { passphrase: SETTINGS.passphrase, publicUrl: SETTINGS.publicUrl, boardSize: LIMITS.boardSize });
+    } else if (route === 'POST /api/register') {
+      runRoute(handleRegister, request, response);
+    } else if (route === 'POST /api/login') {
+      runRoute(handleLogin, request, response);
+    } else if (route === 'GET /api/me') {
+      const user = authenticate(request);
+      if (user === null) {
+        sendJson(response, 401, { reason: 'not signed in' });
+      } else {
+        sendJson(response, 200, accountAnswer(user, null));
+      }
+    } else if (route === 'POST /api/logout') {
+      const token = bearerToken(request);
+      if (token !== null) {
+        statements.deleteSession.run(sha256(token));
+      }
+      sendJson(response, 200, { ok: true });
     } else if (route === 'GET /api/leaderboard') {
       handleLeaderboard(url, response);
     } else if (route === 'POST /api/scores') {
-      handleSubmission(request, response).catch((error) => {
-        console.error('[hitscan] submission failed', error);
-        sendJson(response, 500, { accepted: false, reason: 'server error' });
-      });
+      runRoute(handleSubmission, request, response);
     } else if (route === 'GET /api/health') {
       sendJson(response, 200, { ok: true });
     } else {
