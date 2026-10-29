@@ -1495,12 +1495,60 @@ kbd {
   padding: 14px 4px 0;
 }
 
+/* "How do I turn on the global board?": a small link that opens the server instructions. */
 .board__server {
+  margin-top: 12px;
+}
+
+.board__server-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--steel-muted);
+  list-style: none;
+  cursor: pointer;
+}
+
+.board__server-link::-webkit-details-marker {
+  display: none;
+}
+
+.board__server-link::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 140ms ease;
+}
+
+.board__server[open] .board__server-link::before {
+  transform: rotate(45deg);
+}
+
+.board__server-link span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.board__server-link:hover {
+  color: var(--steel-bright);
+}
+
+.board__server-link:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+.board__server-body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 10px;
   padding: 12px 14px;
   font-size: var(--step--1);
   color: var(--steel-muted);
@@ -3153,11 +3201,14 @@ kbd {
                 <tbody id="menu-board-body"></tbody>
               </table>
               <p class="board__empty" id="menu-board-empty" hidden>No scores on this board yet.</p>
-              <div class="board__server" id="board-server-help" hidden>
-                <p>The global top 100 runs on a small server that comes inside this file. Save it next to this game, run it with Node.js 22.13 or newer, then play at <b>http://localhost:8787</b>.</p>
-                <code class="board__command">node hitscan-server.js</code>
-                <button class="button-secondary button-small" id="board-server-download" type="button">Download the server</button>
-              </div>
+              <details class="board__server" id="board-server-help" hidden>
+                <summary class="board__server-link"><span>How do I turn on the global board?</span></summary>
+                <div class="board__server-body">
+                  <p>The global top 100 runs on a small server that comes inside this file. Save it next to this game, run it with Node.js 22.13 or newer, then play at <b>http://localhost:8787</b>.</p>
+                  <code class="board__command">node hitscan-server.js</code>
+                  <button class="button-secondary button-small" id="board-server-download" type="button">Download the server</button>
+                </div>
+              </details>
             </div>
             <div class="board__pager">
               <button class="button-secondary button-small" id="board-prev" type="button">Previous Ten</button>
@@ -12781,7 +12832,7 @@ class LeaderboardPanel {
     this.elements.panel.setAttribute('aria-busy', isBusy ? 'true' : 'false');
   }
 
-  /** How to start the leaderboard server that ships in this file (shown while the global board is offline). */
+  /** The link to the instructions for the leaderboard server that ships in this file (shown while the global board is offline). */
   setServerHelp(isVisible) {
     this.elements.serverHelp.hidden = !isVisible;
   }
