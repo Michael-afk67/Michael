@@ -153,10 +153,9 @@ kbd {
   cursor: none;
 }
 
-/* The reticle overlay only carries content during a round. */
+/* The overlay carries the reticle and effects during a round, and premium finish effects in the Armory. */
 .app[data-state="SIGN_IN"] .overlay,
 .app[data-state="MENU"] .overlay,
-.app[data-state="ARMORY"] .overlay,
 .app[data-state="GAMEOVER"] .overlay {
   visibility: hidden;
 }
@@ -4766,7 +4765,8 @@ const SKIN_RARITIES = deepFreeze({
   ELITE: { key: 'ELITE', label: 'Elite', color: '#9b63ff', glow: [0.5, 0.28, 1.0] },
   PRESTIGE: { key: 'PRESTIGE', label: 'Prestige', color: '#ff4fd2', glow: [1.0, 0.24, 0.8] },
   LEGENDARY: { key: 'LEGENDARY', label: 'Legendary', color: '#ffc23d', glow: [1.0, 0.7, 0.18] },
-  MYTHIC: { key: 'MYTHIC', label: 'Mythic', color: '#ff4433', glow: [1.0, 0.2, 0.08] }
+  MYTHIC: { key: 'MYTHIC', label: 'Mythic', color: '#ff4433', glow: [1.0, 0.2, 0.08] },
+  PREMIUM: { key: 'PREMIUM', label: 'Premium Vault', color: '#38f5ff', glow: [0.22, 0.96, 1.0] }
 });
 
 const DEFAULT_SKIN_ID = 'FACTORY';
@@ -4861,6 +4861,40 @@ const SKIN_CATALOG = deepFreeze([
     description: 'Charred steel split by molten cracks that flicker like a forge. Made for Demon runs.',
     swatch: 'radial-gradient(circle at 30% 66%, rgba(255, 210, 90, 0.95) 0 6%, rgba(255, 84, 0, 0.8) 14%, transparent 34%), radial-gradient(circle at 72% 30%, rgba(255, 130, 20, 0.9) 0 5%, rgba(255, 40, 0, 0.6) 12%, transparent 30%), linear-gradient(140deg, #2a0d08, #0e0505)',
     shardColors: ['#ffd25a', '#ff5400', '#ff8214']
+  },
+  // The Premium Vault: finishes with their own effects (`effect`) in the shop and on the inspect key (F).
+  {
+    id: 'VOLCANIC_MAGMA',
+    shaderId: 9,
+    name: 'Volcanic Magma',
+    price: 50000,
+    rarity: 'PREMIUM',
+    effect: 'MAGMA',
+    description: 'Basalt that glows from inside and smokes at the barrel. Inspect it (F): the barrel tilts up, the body cracks open, ash erupts and lava drips onto the floor, pools and turns to smoke.',
+    swatch: 'radial-gradient(circle at 35% 60%, rgba(255, 200, 80, 0.95) 0 5%, rgba(255, 90, 0, 0.85) 12%, transparent 30%), repeating-linear-gradient(120deg, transparent 0 9px, rgba(255, 80, 0, 0.75) 9px 11px, transparent 11px 20px), linear-gradient(140deg, #24120c, #090504)',
+    shardColors: ['#ffb02e', '#ff4a00', '#ffd25a']
+  },
+  {
+    id: 'CYBER_HOLOGRAM',
+    shaderId: 10,
+    name: 'Cyber Hologram',
+    price: 75000,
+    rarity: 'PREMIUM',
+    effect: 'HOLOGRAM',
+    description: 'A see-through shell with a neon-blue wireframe sliding across it. Inspect it (F): it glitches out of existence into green binary code and projects a spinning Ultra Demon above the sight.',
+    swatch: 'linear-gradient(90deg, rgba(56, 245, 255, 0.9) 0 1px, transparent 1px) 0 0 / 9px 9px, linear-gradient(0deg, rgba(56, 245, 255, 0.9) 0 1px, transparent 1px) 0 0 / 9px 9px, linear-gradient(140deg, rgba(12, 40, 60, 0.9), rgba(4, 12, 20, 0.95))',
+    shardColors: ['#38f5ff', '#7cf9ff', '#2be38a']
+  },
+  {
+    id: 'GALACTIC_NEBULA',
+    shaderId: 11,
+    name: 'Galactic Nebula',
+    price: 100000,
+    rarity: 'PREMIUM',
+    effect: 'NEBULA',
+    description: 'Turning galaxies, purple stardust and twinkling stars trapped inside the frame. Inspect it (F): a finger spin opens a black hole that sends purple gravity rings across your screen.',
+    swatch: 'radial-gradient(circle at 30% 35%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 70%, #fff 0 1px, transparent 2px), radial-gradient(circle at 60% 30%, rgba(255, 110, 220, 0.85), transparent 40%), radial-gradient(circle at 35% 70%, rgba(110, 90, 255, 0.9), transparent 45%), #0a0618',
+    shardColors: ['#b46bff', '#ff6bd8', '#6be1ff']
   }
 ]);
 
@@ -4911,18 +4945,27 @@ const SOUND_PACKS = deepFreeze([
     description: 'The house sound: a heavy pistol report and glass orbs that ring when they break.'
   },
   {
-    id: 'ARCADE',
-    name: 'Arcade 8-Bit',
-    price: 1500,
-    description: 'Square-wave blasts and coin-chime hits, straight out of an old cabinet.'
+    id: 'ASMR',
+    name: 'ASMR Click',
+    price: 2000,
+    description: 'Crisp, hollow wooden pops that never tire your ears; a bullseye is a water drop into a glass bowl.'
   },
   {
-    id: 'NEON',
-    name: 'Neon Laser',
-    price: 3500,
-    description: 'Sawtooth zaps for every shot and bright synth bells for every hit.'
+    id: 'CRYSTAL',
+    name: 'Crystal Glass',
+    price: 4000,
+    description: 'Every orb shatters like a thin sheet of glass; a bullseye rings a metal chime that echoes left and right.'
+  },
+  {
+    id: 'RETRO',
+    name: 'Retro 16-Bit',
+    price: 6000,
+    description: 'Lo-fi chip blips that jump an octave; a bullseye fires a ring-modulated neon laser blast.'
   }
 ]);
+
+/** Packs from before: Arcade 8-Bit and Neon Laser became Retro 16-Bit (owners keep it, and keep it equipped). */
+const LEGACY_SOUND_PACKS = deepFreeze({ ARCADE: 'RETRO', NEON: 'RETRO', 'Arcade 8-Bit': 'Retro 16-Bit', 'Neon Laser': 'Retro 16-Bit' });
 
 const SoundPackCatalog = {
   byId(packId) {
@@ -6812,11 +6855,12 @@ class SoundFXEngine {
    * @param {number} [intensity=1] loudness scalar (recoil heat raises it slightly)
    */
   playGunshot(panValue = 0, intensity = 1) {
-    if (this.soundPack === 'ARCADE') {
-      return this.playArcadeGunshot(panValue, intensity);
+    // ASMR swaps the bang for a soft knock, Retro for a chip zap; Crystal keeps the standard report.
+    if (this.soundPack === 'ASMR') {
+      return this.playAsmrGunshot(panValue, intensity);
     }
-    if (this.soundPack === 'NEON') {
-      return this.playNeonGunshot(panValue, intensity);
+    if (this.soundPack === 'RETRO') {
+      return this.playArcadeGunshot(panValue, intensity);
     }
     return this.runVoice('gunshot', (context, startTime) => {
       const ownedNodes = [];
@@ -6945,11 +6989,14 @@ class SoundFXEngine {
     const classification = ColorUtils.classifyHue(hue);
     const profile = HUE_SONIC_PROFILES[classification.band.id];
     const pitch = MathUtils.clamp(comboPitch, 0.5, GAME_RULES.comboPitchMaximum);
-    if (this.soundPack === 'ARCADE') {
-      return this.playArcadeHit(profile, panValue, isBullseye, pitch);
+    if (this.soundPack === 'ASMR') {
+      return this.playAsmrHit(profile, panValue, isBullseye, pitch);
     }
-    if (this.soundPack === 'NEON') {
-      return this.playNeonHit(profile, panValue, isBullseye, pitch);
+    if (this.soundPack === 'CRYSTAL') {
+      return this.playCrystalHit(profile, panValue, isBullseye, pitch);
+    }
+    if (this.soundPack === 'RETRO') {
+      return this.playRetroHit(profile, panValue, isBullseye, pitch);
     }
 
     // Fine pitch drift inside the band: ±0.5 semitone from band start to band end.
@@ -7055,7 +7102,7 @@ class SoundFXEngine {
     this.soundPack = SoundPackCatalog.byId(packId) !== null ? packId : DEFAULT_SOUND_PACK_ID;
   }
 
-  /** Arcade shot: a square wave diving from 880 to 110 Hz over a short crunch of noise. */
+  /** Retro shot: a square wave diving from 880 to 110 Hz over a short crunch of noise. */
   playArcadeGunshot(panValue, intensity) {
     return this.runVoice('arcadeGunshot', (context, startTime) => {
       const ownedNodes = [];
@@ -7094,127 +7141,223 @@ class SoundFXEngine {
     });
   }
 
-  /** Neon shot: a resonant sawtooth zap sweeping down from 1.9 kHz over a sine thump. */
-  playNeonGunshot(panValue, intensity) {
-    return this.runVoice('neonGunshot', (context, startTime) => {
+  /* ---------------------------------------------------------------------
+     Sound packs: ASMR Click, Crystal Glass and Retro 16-Bit
+     --------------------------------------------------------------------- */
+
+  /** A short tone with a quick pitch move and an exponential decay; returns the oscillator (its end time in `endTime`). */
+  playPartial(context, destination, ownedNodes, type, startTime, fromHz, toHz, sweepSeconds, peak, decaySeconds) {
+    const oscillator = context.createOscillator();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(fromHz, startTime);
+    if (toHz !== fromHz) {
+      oscillator.frequency.exponentialRampToValueAtTime(toHz, startTime + sweepSeconds);
+    }
+    const envelope = context.createGain();
+    envelope.gain.setValueAtTime(0.0001, startTime);
+    envelope.gain.exponentialRampToValueAtTime(peak, startTime + 0.003);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + decaySeconds);
+    oscillator.connect(envelope);
+    envelope.connect(destination);
+    ownedNodes.push(oscillator, envelope);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + decaySeconds + 0.02);
+    oscillator.endTime = startTime + decaySeconds;
+    return oscillator;
+  }
+
+  /** Of two sources, the one that ends later (a voice is retired when its longest source ends). */
+  static laterSource(first, second) {
+    if (!first) {
+      return second;
+    }
+    return second && second.endTime > first.endTime ? second : first;
+  }
+
+  /** A burst of filtered noise; returns the source (its end time in `endTime`). */
+  playNoiseBurst(context, destination, ownedNodes, startTime, filterType, frequency, q, peak, decaySeconds) {
+    const noise = this.createNoiseSource();
+    const filter = context.createBiquadFilter();
+    filter.type = filterType;
+    filter.frequency.setValueAtTime(frequency, startTime);
+    filter.Q.setValueAtTime(q, startTime);
+    const envelope = context.createGain();
+    envelope.gain.setValueAtTime(0.0001, startTime);
+    envelope.gain.exponentialRampToValueAtTime(peak, startTime + 0.002);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + decaySeconds);
+    noise.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(destination);
+    ownedNodes.push(noise, filter, envelope);
+    noise.start(startTime, this.randomNoiseOffset());
+    noise.stop(startTime + decaySeconds + 0.02);
+    noise.endTime = startTime + decaySeconds;
+    return noise;
+  }
+
+  /** An echo: the input repeats every delaySeconds, each repeat feedback times quieter and a little darker. */
+  createEcho(context, destination, ownedNodes, delaySeconds, feedback, panValue) {
+    const input = context.createGain();
+    const delay = context.createDelay(1);
+    delay.delayTime.setValueAtTime(delaySeconds, context.currentTime);
+    const loop = context.createGain();
+    loop.gain.setValueAtTime(feedback, context.currentTime);
+    const darken = context.createBiquadFilter();
+    darken.type = 'lowpass';
+    darken.frequency.setValueAtTime(5200, context.currentTime);
+    input.connect(delay);
+    delay.connect(darken);
+    darken.connect(loop);
+    loop.connect(delay);
+    let output = destination;
+    if (this.supportsStereoPanner && typeof panValue === 'number') {
+      const panner = context.createStereoPanner();
+      panner.pan.value = panValue;
+      panner.connect(destination);
+      ownedNodes.push(panner);
+      output = panner;
+    }
+    darken.connect(output);
+    ownedNodes.push(input, delay, loop, darken);
+    return input;
+  }
+
+  /** ASMR shot: a soft, dry wooden "tock" instead of a bang. */
+  playAsmrGunshot(panValue, intensity) {
+    return this.runVoice('asmrGunshot', (context, startTime) => {
       const ownedNodes = [];
       const voiceOutput = this.createVoiceOutput(panValue * 0.35, ownedNodes);
-      const level = MathUtils.clamp(0.42 * intensity, 0.05, 0.6);
-
-      const zap = context.createOscillator();
-      zap.type = 'sawtooth';
-      zap.frequency.setValueAtTime(1900, startTime);
-      zap.frequency.exponentialRampToValueAtTime(180, startTime + 0.16);
-      const zapFilter = context.createBiquadFilter();
-      zapFilter.type = 'lowpass';
-      zapFilter.Q.setValueAtTime(9, startTime);
-      zapFilter.frequency.setValueAtTime(5200, startTime);
-      zapFilter.frequency.exponentialRampToValueAtTime(420, startTime + 0.16);
-      const zapEnvelope = context.createGain();
-      zapEnvelope.gain.setValueAtTime(level, startTime);
-      zapEnvelope.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.19);
-      zap.connect(zapFilter);
-      zapFilter.connect(zapEnvelope);
-      zapEnvelope.connect(voiceOutput);
-      ownedNodes.push(zap, zapFilter, zapEnvelope);
-
-      const thump = context.createOscillator();
-      thump.type = 'sine';
-      thump.frequency.setValueAtTime(130, startTime);
-      thump.frequency.exponentialRampToValueAtTime(48, startTime + 0.12);
-      const thumpEnvelope = context.createGain();
-      thumpEnvelope.gain.setValueAtTime(level * 1.3, startTime);
-      thumpEnvelope.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.14);
-      thump.connect(thumpEnvelope);
-      thumpEnvelope.connect(voiceOutput);
-      ownedNodes.push(thump, thumpEnvelope);
-
-      zap.start(startTime);
-      thump.start(startTime);
-      zap.stop(startTime + 0.21);
-      thump.stop(startTime + 0.16);
-      this.retireVoiceWhenEnded(zap, ownedNodes);
+      const level = MathUtils.clamp(0.3 * intensity, 0.05, 0.4);
+      const knock = this.playPartial(context, voiceOutput, ownedNodes, 'sine', startTime, 950, 620, 0.03, level, 0.09);
+      this.playNoiseBurst(context, voiceOutput, ownedNodes, startTime, 'highpass', 2600, 0.7, level * 0.35, 0.012);
+      this.retireVoiceWhenEnded(knock, ownedNodes);
     });
   }
 
-  /** Arcade hit: a two-note square "coin" chime a fourth apart; a bullseye adds the octave. */
-  playArcadeHit(profile, panValue, isBullseye, pitch) {
-    const baseFrequency = 494 * profile.pitchMultiplier * pitch;
-    const ratios = isBullseye ? [1, 1.3348, 2] : [1, 1.3348];
-    const noteLength = 0.07 / pitch;
-    return this.runVoice('arcadeHit', (context, startTime) => {
+  /**
+   * ASMR hit: a crisp, hollow wooden bubble-wrap pop (a bandpassed snap over
+   * a short wooden body tone). A bullseye is a heavy water drop into a glass
+   * bowl: the rising "plip", the bowl ringing, and a soft echo.
+   */
+  playAsmrHit(profile, panValue, isBullseye, pitch) {
+    const tune = profile.pitchMultiplier * pitch;
+    return this.runVoice('asmrHit', (context, startTime) => {
       const ownedNodes = [];
       const voiceOutput = this.createVoiceOutput(panValue * 0.8, ownedNodes);
-      let lastNote = null;
-      for (let index = 0; index < ratios.length; index += 1) {
-        const noteStart = startTime + index * noteLength;
-        const noteEnd = noteStart + (index === ratios.length - 1 ? noteLength * 3 : noteLength);
-        const note = context.createOscillator();
-        note.type = 'square';
-        note.frequency.setValueAtTime(baseFrequency * ratios[index], noteStart);
+      let longest = null;
+      if (!isBullseye) {
+        longest = this.playNoiseBurst(context, voiceOutput, ownedNodes, startTime, 'bandpass', 1700 * tune, 5, 0.32, 0.014);
+        longest = SoundFXEngine.laterSource(longest, this.playPartial(context, voiceOutput, ownedNodes, 'sine', startTime, 1050 * tune, 700 * tune, 0.025, 0.24, 0.075));
+        longest = SoundFXEngine.laterSource(longest, this.playPartial(context, voiceOutput, ownedNodes, 'triangle', startTime + 0.002, 1890 * tune, 1890 * tune, 0, 0.06, 0.04));
+        this.retireVoiceWhenEnded(longest, ownedNodes);
+        return;
+      }
+      const echo = this.createEcho(context, voiceOutput, ownedNodes, 0.17, 0.32, null);
+      // The drop: a sine that sweeps up as the water closes ("plip").
+      longest = this.playPartial(context, voiceOutput, ownedNodes, 'sine', startTime, 380 * tune, 1500 * tune, 0.06, 0.34, 0.13);
+      // The bowl: high, slightly inharmonic glass partials that ring and echo.
+      [[2100, 0.07, 1.1], [3170, 0.05, 0.9], [4620, 0.035, 0.7]].forEach((partial) => {
+        longest = SoundFXEngine.laterSource(longest, this.playPartial(context, voiceOutput, ownedNodes, 'sine', startTime + 0.05, partial[0] * pitch, partial[0] * pitch, 0, partial[1], partial[2]));
+        this.playPartial(context, echo, ownedNodes, 'sine', startTime + 0.05, partial[0] * pitch, partial[0] * pitch, 0, partial[1] * 0.8, partial[2] * 0.6);
+      });
+      this.retireVoiceWhenEnded(longest, ownedNodes);
+    });
+  }
+
+  /**
+   * Crystal hit: a thin sheet of glass breaking into tiny pieces (a sharp
+   * high crack, then a scatter of tiny high tinkles across the stereo field).
+   * A bullseye adds a resonant metallic chime whose echoes bounce left and right.
+   */
+  playCrystalHit(profile, panValue, isBullseye, pitch) {
+    const tune = profile.pitchMultiplier * pitch;
+    return this.runVoice('crystalHit', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(panValue * 0.7, ownedNodes);
+      let longest = this.playNoiseBurst(context, voiceOutput, ownedNodes, startTime, 'highpass', 3400, 0.8, 0.3, 0.045);
+      const pieces = isBullseye ? 7 : 9;
+      for (let index = 0; index < pieces; index += 1) {
+        const at = startTime + 0.004 + Math.random() * 0.17;
+        const frequency = MathUtils.randomRange(3200, 7800) * Math.sqrt(tune);
+        longest = SoundFXEngine.laterSource(longest, this.playPartial(context, voiceOutput, ownedNodes, 'sine', at, frequency, frequency * 0.98, 0.04, MathUtils.randomRange(0.025, 0.06), MathUtils.randomRange(0.04, 0.09)));
+      }
+      if (isBullseye) {
+        // The chime: bell-like inharmonic partials, echoed hard left and hard right at different delays.
+        const left = this.createEcho(context, voiceOutput, ownedNodes, 0.13, 0.45, -0.9);
+        const right = this.createEcho(context, voiceOutput, ownedNodes, 0.2, 0.45, 0.9);
+        const base = 1180 * pitch;
+        [[1, 0.13, 1.6], [2.76, 0.07, 1.1], [5.4, 0.04, 0.8], [8.93, 0.025, 0.5]].forEach((partial) => {
+          longest = SoundFXEngine.laterSource(longest, this.playPartial(context, voiceOutput, ownedNodes, 'sine', startTime + 0.01, base * partial[0], base * partial[0], 0, partial[1], partial[2]));
+          this.playPartial(context, left, ownedNodes, 'sine', startTime + 0.01, base * partial[0], base * partial[0], 0, partial[1] * 0.7, partial[2] * 0.5);
+          this.playPartial(context, right, ownedNodes, 'sine', startTime + 0.01, base * partial[0], base * partial[0], 0, partial[1] * 0.7, partial[2] * 0.5);
+        });
+      }
+      this.retireVoiceWhenEnded(longest, ownedNodes);
+    });
+  }
+
+  /** A staircase transfer curve: squeezes a signal onto a few levels, like an old sound chip. */
+  getCrushCurve() {
+    if (!this.crushCurve) {
+      const curve = new Float32Array(1024);
+      for (let index = 0; index < curve.length; index += 1) {
+        const x = index / (curve.length - 1) * 2 - 1;
+        curve[index] = Math.round(x * 6) / 6;
+      }
+      this.crushCurve = curve;
+    }
+    return this.crushCurve;
+  }
+
+  /**
+   * Retro hit: a lo-fi chip blip that jumps up an octave. A bullseye is an
+   * explosive neon laser blast: a diving sawtooth over a burst of noise,
+   * passed through a ring modulator for a metallic edge.
+   */
+  playRetroHit(profile, panValue, isBullseye, pitch) {
+    const tune = profile.pitchMultiplier * pitch;
+    return this.runVoice('retroHit', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(panValue * 0.8, ownedNodes);
+      const crush = context.createWaveShaper();
+      crush.curve = this.getCrushCurve();
+      crush.connect(voiceOutput);
+      ownedNodes.push(crush);
+      if (!isBullseye) {
+        const base = 523.25 * tune;
+        const blip = context.createOscillator();
+        blip.type = 'square';
+        blip.frequency.setValueAtTime(base, startTime);
+        blip.frequency.setValueAtTime(base * 2, startTime + 0.045);
         const envelope = context.createGain();
         envelope.gain.setValueAtTime(0.0001, startTime);
-        envelope.gain.setValueAtTime(0.14, noteStart);
-        envelope.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
-        note.connect(envelope);
-        envelope.connect(voiceOutput);
-        ownedNodes.push(note, envelope);
-        note.start(noteStart);
-        note.stop(noteEnd + 0.01);
-        lastNote = note;
+        envelope.gain.exponentialRampToValueAtTime(0.16, startTime + 0.004);
+        envelope.gain.setValueAtTime(0.16, startTime + 0.08);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.13);
+        blip.connect(envelope);
+        envelope.connect(crush);
+        ownedNodes.push(blip, envelope);
+        blip.start(startTime);
+        blip.stop(startTime + 0.15);
+        this.retireVoiceWhenEnded(blip, ownedNodes);
+        return;
       }
-      this.retireVoiceWhenEnded(lastNote, ownedNodes);
-    });
-  }
-
-  /** Neon hit: an FM synth bell (sine carrier, 3.5× modulator); a bullseye adds a high ping. */
-  playNeonHit(profile, panValue, isBullseye, pitch) {
-    const carrierFrequency = 660 * profile.pitchMultiplier * pitch;
-    const timeScale = 1 / pitch;
-    return this.runVoice('neonHit', (context, startTime) => {
-      const ownedNodes = [];
-      const voiceOutput = this.createVoiceOutput(panValue * 0.8, ownedNodes);
-      const endTime = startTime + 0.42 * timeScale;
-
+      // Ring modulator: the blast's level is multiplied by a 430 Hz sine (a gain driven around zero).
+      const ring = context.createGain();
+      ring.gain.setValueAtTime(0, startTime);
       const carrier = context.createOscillator();
       carrier.type = 'sine';
-      carrier.frequency.setValueAtTime(carrierFrequency, startTime);
-      const modulator = context.createOscillator();
-      modulator.type = 'sine';
-      modulator.frequency.setValueAtTime(carrierFrequency * 3.5, startTime);
-      const modulationDepth = context.createGain();
-      modulationDepth.gain.setValueAtTime(carrierFrequency * 2.2, startTime);
-      modulationDepth.gain.exponentialRampToValueAtTime(carrierFrequency * 0.05, startTime + 0.3 * timeScale);
-      modulator.connect(modulationDepth);
-      modulationDepth.connect(carrier.frequency);
-      const envelope = context.createGain();
-      envelope.gain.setValueAtTime(0.0001, startTime);
-      envelope.gain.exponentialRampToValueAtTime(isBullseye ? 0.28 : 0.2, startTime + 0.006);
-      envelope.gain.exponentialRampToValueAtTime(0.0001, endTime);
-      carrier.connect(envelope);
-      envelope.connect(voiceOutput);
-      ownedNodes.push(carrier, modulator, modulationDepth, envelope);
-
+      carrier.frequency.setValueAtTime(430, startTime);
+      carrier.connect(ring.gain);
+      ring.connect(crush);
+      ownedNodes.push(ring, carrier);
+      const laser = this.playPartial(context, ring, ownedNodes, 'sawtooth', startTime, 2400 * Math.sqrt(tune), 110, 0.34, 0.5, 0.42);
+      this.playNoiseBurst(context, voiceOutput, ownedNodes, startTime, 'lowpass', 900, 0.8, 0.4, 0.3);
+      this.playPartial(context, voiceOutput, ownedNodes, 'square', startTime, 1046.5 * pitch, 2093 * pitch, 0.08, 0.07, 0.2);
       carrier.start(startTime);
-      modulator.start(startTime);
-      carrier.stop(endTime + 0.02);
-      modulator.stop(endTime + 0.02);
-
-      if (isBullseye) {
-        const ping = context.createOscillator();
-        ping.type = 'sine';
-        ping.frequency.setValueAtTime(carrierFrequency * 2, startTime);
-        const pingEnvelope = context.createGain();
-        pingEnvelope.gain.setValueAtTime(0.0001, startTime);
-        pingEnvelope.gain.exponentialRampToValueAtTime(0.1, startTime + 0.03 * timeScale);
-        pingEnvelope.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.3 * timeScale);
-        ping.connect(pingEnvelope);
-        pingEnvelope.connect(voiceOutput);
-        ownedNodes.push(ping, pingEnvelope);
-        ping.start(startTime);
-        ping.stop(endTime);
-      }
-      this.retireVoiceWhenEnded(carrier, ownedNodes);
+      carrier.stop(startTime + 0.45);
+      // The laser is the longest sound, so the voice retires when it ends.
+      this.retireVoiceWhenEnded(laser, ownedNodes);
     });
   }
 
@@ -7882,6 +8025,110 @@ class SoundFXEngine {
   }
 
   /** Weapon inspect: two soft cloth-and-steel swishes and a light tick as the pistol turns. */
+  /** Premium finish inspects: an eruption for Magma, a digital glitch for the Hologram, a black hole for the Nebula. */
+  playSkinInspect(effect) {
+    if (effect === 'MAGMA') {
+      return this.playEruption();
+    }
+    if (effect === 'HOLOGRAM') {
+      return this.playGlitch();
+    }
+    if (effect === 'NEBULA') {
+      return this.playBlackHole();
+    }
+    return false;
+  }
+
+  /** Magma: a rumble that swells as the body cracks, a deep thump as it erupts, then sizzling drips. */
+  playEruption() {
+    return this.runVoice('eruption', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(0.25, ownedNodes);
+      const rumble = this.createNoiseSource();
+      const rumbleFilter = context.createBiquadFilter();
+      rumbleFilter.type = 'lowpass';
+      rumbleFilter.frequency.setValueAtTime(140, startTime);
+      rumbleFilter.frequency.exponentialRampToValueAtTime(520, startTime + 0.4);
+      rumbleFilter.frequency.exponentialRampToValueAtTime(160, startTime + 1.6);
+      const rumbleLevel = context.createGain();
+      rumbleLevel.gain.setValueAtTime(0.0001, startTime);
+      rumbleLevel.gain.exponentialRampToValueAtTime(0.5, startTime + 0.38);
+      rumbleLevel.gain.exponentialRampToValueAtTime(0.0001, startTime + 1.7);
+      rumble.connect(rumbleFilter);
+      rumbleFilter.connect(rumbleLevel);
+      rumbleLevel.connect(voiceOutput);
+      ownedNodes.push(rumble, rumbleFilter, rumbleLevel);
+      rumble.start(startTime, this.randomNoiseOffset());
+      rumble.stop(startTime + 1.75);
+      this.playPartial(context, voiceOutput, ownedNodes, 'sine', startTime + 0.38, 120, 38, 0.35, 0.55, 0.5);
+      let longest = rumble;
+      longest.endTime = startTime + 1.7;
+      for (let index = 0; index < 9; index += 1) {
+        const at = startTime + 0.7 + index * 0.22 + Math.random() * 0.1;
+        longest = SoundFXEngine.laterSource(longest, this.playNoiseBurst(context, voiceOutput, ownedNodes, at, 'bandpass', MathUtils.randomRange(2400, 4200), 3, 0.08, 0.09));
+      }
+      this.retireVoiceWhenEnded(longest, ownedNodes);
+    });
+  }
+
+  /** Hologram: stuttering square blips and crushed noise bursts, like a signal breaking up. */
+  playGlitch() {
+    return this.runVoice('glitch', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(0.2, ownedNodes);
+      const crush = context.createWaveShaper();
+      crush.curve = this.getCrushCurve();
+      crush.connect(voiceOutput);
+      ownedNodes.push(crush);
+      let longest = null;
+      for (let index = 0; index < 14; index += 1) {
+        const at = startTime + index * 0.045 + Math.random() * 0.02;
+        if (index % 3 === 0) {
+          longest = SoundFXEngine.laterSource(longest, this.playNoiseBurst(context, crush, ownedNodes, at, 'highpass', 1200, 0.7, 0.2, 0.035));
+        } else {
+          const frequency = MathUtils.randomRange(300, 2400);
+          longest = SoundFXEngine.laterSource(longest, this.playPartial(context, crush, ownedNodes, 'square', at, frequency, frequency * MathUtils.randomRange(0.5, 2), 0.03, 0.09, 0.04));
+        }
+      }
+      longest = SoundFXEngine.laterSource(longest, this.playPartial(context, crush, ownedNodes, 'square', startTime + 0.7, 1760, 220, 0.25, 0.08, 0.3));
+      this.retireVoiceWhenEnded(longest, ownedNodes);
+    });
+  }
+
+  /** Nebula: a deep tone falling into the black hole under a swirling, darkening whoosh. */
+  playBlackHole() {
+    return this.runVoice('blackHole', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(0.15, ownedNodes);
+      const fall = this.playPartial(context, voiceOutput, ownedNodes, 'sine', startTime + 0.45, 640, 38, 1.7, 0.3, 2.1);
+      const whoosh = this.createNoiseSource();
+      const swirl = context.createBiquadFilter();
+      swirl.type = 'bandpass';
+      swirl.Q.setValueAtTime(4, startTime);
+      swirl.frequency.setValueAtTime(2600, startTime + 0.45);
+      swirl.frequency.exponentialRampToValueAtTime(160, startTime + 2.4);
+      const wobble = context.createOscillator();
+      wobble.frequency.setValueAtTime(6, startTime);
+      const wobbleDepth = context.createGain();
+      wobbleDepth.gain.setValueAtTime(300, startTime);
+      wobble.connect(wobbleDepth);
+      wobbleDepth.connect(swirl.frequency);
+      const whooshLevel = context.createGain();
+      whooshLevel.gain.setValueAtTime(0.0001, startTime);
+      whooshLevel.gain.exponentialRampToValueAtTime(0.35, startTime + 0.9);
+      whooshLevel.gain.exponentialRampToValueAtTime(0.0001, startTime + 2.5);
+      whoosh.connect(swirl);
+      swirl.connect(whooshLevel);
+      whooshLevel.connect(voiceOutput);
+      ownedNodes.push(whoosh, swirl, wobble, wobbleDepth, whooshLevel);
+      whoosh.start(startTime, this.randomNoiseOffset());
+      whoosh.stop(startTime + 2.55);
+      wobble.start(startTime);
+      wobble.stop(startTime + 2.55);
+      this.retireVoiceWhenEnded(fall, ownedNodes);
+    });
+  }
+
   playInspect() {
     return this.runVoice('inspect', (context, startTime) => {
       const ownedNodes = [];
@@ -9766,7 +10013,11 @@ const GUN_ANCHORS = deepFreeze({
   magazineDropAxis: { x: 0, y: -0.951, z: 0.309 },
   magazineCenter: { x: 0, y: -0.016, z: 0.009 },
   wrist: { x: 0.005, y: -0.052, z: 0.04 },
-  showcaseCenter: { x: 0, y: 0.004, z: -0.061 }
+  showcaseCenter: { x: 0, y: 0.004, z: -0.061 },
+  // Premium finish effects: the trigger finger (the spin axis), the middle of the frame, and just above the sight.
+  trigger: { x: 0, y: 0.012, z: -0.035 },
+  frameCenter: { x: 0, y: 0.03, z: -0.075 },
+  sightTop: { x: 0, y: 0.072, z: -0.1 }
 });
 
 /** Finish slots the viewmodel shader reads from material.w to apply weapon finishes. */
@@ -10403,6 +10654,10 @@ class GunController3D {
     };
 
     this.bodyMatrix = Mat4.create();
+    // The hand follows the grip but not a finger spin (the pistol turns on the trigger finger).
+    this.handMatrix = Mat4.create();
+    // How the inspect key moves the pistol: 'STANDARD', 'TILT' (barrel up) or 'SPIN' (around the trigger finger).
+    this.inspectStyle = 'STANDARD';
     this.slideMatrix = Mat4.create();
     this.magazineMatrix = Mat4.create();
     this.forearmMatrix = Mat4.create();
@@ -10918,6 +11173,14 @@ class GunController3D {
     pose.forearmYaw = aimYaw * 0.3 * aimWeight + inspect.yaw * 0.22;
     pose.forearmPitch = aimPitch * 0.35 * aimWeight + inspect.pitch * 0.3;
     pose.forearmRoll = aimRoll * 0.3 * aimWeight + inspect.roll * 0.3;
+    // Premium finishes inspect their own way: Magma tilts the barrel up; Nebula spins on the trigger finger.
+    let spin = 0;
+    if (this.inspectStyle === 'TILT') {
+      pose.yaw = aimYaw * aimWeight + inspect.yaw * 0.35 + breathingYaw + kickYaw;
+      pose.pitch += 0.8 * inspect.weight;
+    } else if (this.inspectStyle === 'SPIN' && this.inspectElapsedMs < GAME_RULES.inspectDurationMs) {
+      spin = TAU * 2 * MathUtils.easeInOutSine(MathUtils.clamp((this.inspectElapsedMs - 450) / 1900, 0, 1));
+    }
     this.computeReloadPose(pose, this.reloadProgress);
     this.computeDrawPose(pose);
     state.inspectWeight = inspect.weight;
@@ -10928,6 +11191,13 @@ class GunController3D {
     Mat4.rotateX(body, body, pose.pitch + torque);
     Mat4.rotateZ(body, body, pose.roll);
     Mat4.translate(body, body, 0, 0, kickBack);
+    Mat4.copy(this.handMatrix, body);
+    if (spin !== 0) {
+      const trigger = GUN_ANCHORS.trigger;
+      Mat4.translate(body, body, 0, trigger.y, trigger.z);
+      Mat4.rotateX(body, body, -spin);
+      Mat4.translate(body, body, 0, -trigger.y, -trigger.z);
+    }
 
     Mat4.translate(this.slideMatrix, body, 0, 0, slideFraction * GUN_ANCHORS.slideTravel);
 
@@ -10943,7 +11213,7 @@ class GunController3D {
 
     // Forearm hinges at the wrist and follows the hand only partway.
     const wrist = GUN_ANCHORS.wrist;
-    this.localToCamera(wrist, body, this.wristCamera);
+    this.localToCamera(wrist, this.handMatrix, this.wristCamera);
     const forearm = this.forearmMatrix;
     Mat4.translation(forearm, this.wristCamera.x, this.wristCamera.y, this.wristCamera.z);
     Mat4.rotateY(forearm, forearm, pose.forearmYaw);
@@ -10985,6 +11255,7 @@ class GunController3D {
     state.droppedVisible = false;
     state.armVisible = false;
     state.inspectWeight = 0;
+    Mat4.copy(this.handMatrix, this.bodyMatrix);
   }
 
   /* ---------------------------------------------------------------------
@@ -12812,7 +13083,8 @@ class InventoryStore {
     validated.roundsBanked = InventoryStore.toCoinCount(candidate.roundsBanked);
     if (Array.isArray(candidate.purchased)) {
       for (let index = 0; index < candidate.purchased.length; index += 1) {
-        const item = InventoryStore.itemByName(candidate.purchased[index]);
+        const name = candidate.purchased[index];
+        const item = InventoryStore.itemByName(Object.prototype.hasOwnProperty.call(LEGACY_SOUND_PACKS, name) ? LEGACY_SOUND_PACKS[name] : name);
         if (item !== null && item.price > 0 && validated.purchased.indexOf(item.name) === -1) {
           validated.purchased.push(item.name);
         }
@@ -12823,8 +13095,9 @@ class InventoryStore {
     if (owns(SkinCatalog.byId(equipped.weaponSkin))) {
       validated.equipped.weaponSkin = equipped.weaponSkin;
     }
-    if (owns(SoundPackCatalog.byId(equipped.soundPack))) {
-      validated.equipped.soundPack = equipped.soundPack;
+    const soundPack = Object.prototype.hasOwnProperty.call(LEGACY_SOUND_PACKS, equipped.soundPack) ? LEGACY_SOUND_PACKS[equipped.soundPack] : equipped.soundPack;
+    if (owns(SoundPackCatalog.byId(soundPack))) {
+      validated.equipped.soundPack = soundPack;
     }
     const crosshair = CrosshairRenderer.normalize(Object.assign({}, candidate.crosshair, { style: equipped.crosshairStyle }));
     validated.equipped.crosshairStyle = crosshair.style;
@@ -13850,6 +14123,374 @@ const LevelFaces = {
     }
   }
 };
+
+/* =========================================================================
+   SkinEffects — the Premium Vault finishes' screen effects, drawn on the
+   overlay at points on the pistol (the game passes them in every step):
+   Volcanic Magma's barrel smoke, ash eruption and lava drips that pool on
+   the floor for 2 s before turning to smoke; Cyber Hologram's stream of
+   green binary code and the spinning Ultra Demon it projects above the
+   sight; Galactic Nebula's purple gravity rings rippling across the screen.
+   ========================================================================= */
+
+const SKIN_EFFECT_RULES = deepFreeze({
+  smokeIntervalMs: 150,
+  dripIntervalMs: 110,
+  codeIntervalMs: 45,
+  ringIntervalMs: 360,
+  poolLifeMs: 2000,
+  lavaGravityPx: 900,
+  ashGravityPx: 320,
+  ringLifeMs: 1500,
+  maximumParticles: 260
+});
+
+class SkinEffects {
+  constructor() {
+    this.particles = [];
+    this.rings = [];
+    this.effect = null;
+    this.elapsedMs = Infinity;
+    this.durationMs = GAME_RULES.inspectDurationMs;
+    this.clockMs = 0;
+    this.smokeClockMs = 0;
+    this.dripClockMs = 0;
+    this.codeClockMs = 0;
+    this.ringClockMs = 0;
+    this.hasErupted = false;
+    this.anchors = { muzzle: { x: 0, y: 0, visible: false }, frame: { x: 0, y: 0, visible: false }, sight: { x: 0, y: 0, visible: false } };
+    this.floorY = 0;
+    this.viewWidth = 0;
+    this.viewHeight = 0;
+    this.hologramFace = null;
+    this.prepareHologramFace();
+  }
+
+  /**
+   * The Ultra Demon face, tinted cyan with scanlines like a projection, drawn
+   * once into its own canvas (the face is an SVG image, so it loads first).
+   */
+  prepareHologramFace() {
+    if (typeof document === 'undefined' || typeof Image === 'undefined') {
+      return;
+    }
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const context = canvas.getContext('2d');
+      if (context === null) {
+        return;
+      }
+      context.drawImage(image, 0, 0, 128, 128);
+      context.globalCompositeOperation = 'source-atop';
+      context.fillStyle = 'rgba(56, 245, 255, 0.55)';
+      context.fillRect(0, 0, 128, 128);
+      context.fillStyle = 'rgba(0, 20, 30, 0.35)';
+      for (let row = 0; row < 128; row += 4) {
+        context.fillRect(0, row, 128, 1.5);
+      }
+      this.hologramFace = canvas;
+    };
+    image.src = LevelFaces.dataUrl('ULTRA_DEMON');
+  }
+
+  /** Starts a finish's inspect effect (MAGMA, HOLOGRAM or NEBULA). */
+  start(effect) {
+    this.effect = effect;
+    this.elapsedMs = 0;
+    this.hasErupted = false;
+    this.dripClockMs = 0;
+    this.codeClockMs = 0;
+    this.ringClockMs = 0;
+  }
+
+  /** Ends the inspect effect (lava already falling, smoke and rings play out). */
+  stop() {
+    this.elapsedMs = Infinity;
+  }
+
+  clear() {
+    this.stop();
+    this.particles.length = 0;
+    this.rings.length = 0;
+  }
+
+  get isActive() {
+    return this.elapsedMs < this.durationMs;
+  }
+
+  /** The inspect's strength, 0 to 1: a quick rise, a hold, a quick fall (the same shape as the pistol's inspect). */
+  get weight() {
+    return this.isActive ? INSPECT_TRACKS.weight.sample(this.elapsedMs / 1000) : 0;
+  }
+
+  /** Where the pistol is on screen this step, and the screen's size (the floor is near the bottom). */
+  setAnchors(muzzle, frame, sight, viewWidth, viewHeight) {
+    const anchors = this.anchors;
+    anchors.muzzle.x = muzzle.x;
+    anchors.muzzle.y = muzzle.y;
+    anchors.muzzle.visible = muzzle.visible;
+    anchors.frame.x = frame.x;
+    anchors.frame.y = frame.y;
+    anchors.frame.visible = frame.visible;
+    anchors.sight.x = sight.x;
+    anchors.sight.y = sight.y;
+    anchors.sight.visible = sight.visible;
+    this.viewWidth = viewWidth;
+    this.viewHeight = viewHeight;
+    this.floorY = viewHeight - 18;
+  }
+
+  spawn(particle) {
+    if (this.particles.length >= SKIN_EFFECT_RULES.maximumParticles) {
+      this.particles.shift();
+    }
+    particle.ageMs = 0;
+    this.particles.push(particle);
+  }
+
+  spawnSmoke(x, y, scale) {
+    this.spawn({
+      kind: 'SMOKE',
+      x: x + MathUtils.randomRange(-4, 4),
+      y: y,
+      vx: MathUtils.randomRange(-10, 10),
+      vy: MathUtils.randomRange(-46, -26),
+      size: MathUtils.randomRange(5, 9) * scale,
+      lifeMs: MathUtils.randomRange(1500, 2300)
+    });
+  }
+
+  /**
+   * Advances the effects. `previewEffect` is the effect of the finish shown in
+   * the Armory (its smoke rises there even without an inspect), or null.
+   */
+  update(deltaMs, previewEffect) {
+    const seconds = deltaMs / 1000;
+    const anchors = this.anchors;
+    this.clockMs += deltaMs;
+    if (this.isActive) {
+      this.elapsedMs += deltaMs;
+    }
+    const weight = this.weight;
+    const effect = this.isActive ? this.effect : null;
+
+    // Magma: smoke from the barrel while it is shown in the Armory (and while it is inspected).
+    if ((previewEffect === 'MAGMA' || effect === 'MAGMA') && anchors.muzzle.visible) {
+      this.smokeClockMs += deltaMs;
+      if (this.smokeClockMs >= SKIN_EFFECT_RULES.smokeIntervalMs) {
+        this.smokeClockMs = 0;
+        this.spawnSmoke(anchors.muzzle.x, anchors.muzzle.y, 1);
+      }
+    }
+    if (effect === 'MAGMA' && anchors.frame.visible) {
+      // The eruption: a burst of bright ash as the body cracks open.
+      if (!this.hasErupted && this.elapsedMs > 380) {
+        this.hasErupted = true;
+        for (let index = 0; index < 46; index += 1) {
+          this.spawn({
+            kind: 'ASH',
+            x: anchors.frame.x + MathUtils.randomRange(-14, 14),
+            y: anchors.frame.y + MathUtils.randomRange(-6, 6),
+            vx: MathUtils.randomRange(-110, 110),
+            vy: MathUtils.randomRange(-460, -180),
+            size: MathUtils.randomRange(1.4, 3.2),
+            lifeMs: MathUtils.randomRange(700, 1400)
+          });
+        }
+        for (let index = 0; index < 6; index += 1) {
+          this.spawnSmoke(anchors.frame.x, anchors.frame.y - 6, 1.4);
+        }
+      }
+      // Lava keeps dripping while the inspect holds.
+      this.dripClockMs += deltaMs;
+      if (weight > 0.6 && this.dripClockMs >= SKIN_EFFECT_RULES.dripIntervalMs) {
+        this.dripClockMs = MathUtils.randomRange(-40, 0);
+        this.spawn({
+          kind: 'LAVA',
+          x: anchors.frame.x + MathUtils.randomRange(-26, 18),
+          y: anchors.frame.y + MathUtils.randomRange(4, 16),
+          vx: MathUtils.randomRange(-14, 14),
+          vy: MathUtils.randomRange(10, 60),
+          size: MathUtils.randomRange(3, 5.5),
+          lifeMs: 4000
+        });
+      }
+    }
+    if (effect === 'HOLOGRAM' && anchors.frame.visible) {
+      this.codeClockMs += deltaMs;
+      while (weight > 0.2 && this.codeClockMs >= SKIN_EFFECT_RULES.codeIntervalMs) {
+        this.codeClockMs -= SKIN_EFFECT_RULES.codeIntervalMs;
+        this.spawn({
+          kind: 'CODE',
+          text: Math.random() < 0.5 ? '0' : '1',
+          x: anchors.frame.x + MathUtils.randomRange(-70, 40),
+          y: anchors.frame.y + MathUtils.randomRange(-10, 40),
+          vx: MathUtils.randomRange(-8, 8),
+          vy: MathUtils.randomRange(-130, -60),
+          size: MathUtils.randomRange(11, 18),
+          lifeMs: MathUtils.randomRange(900, 1700)
+        });
+      }
+    }
+    if (effect === 'NEBULA' && anchors.frame.visible) {
+      this.ringClockMs += deltaMs;
+      if (weight > 0.5 && this.ringClockMs >= SKIN_EFFECT_RULES.ringIntervalMs) {
+        this.ringClockMs = 0;
+        this.rings.push({ x: anchors.frame.x, y: anchors.frame.y, ageMs: 0 });
+      }
+    }
+
+    for (let index = this.particles.length - 1; index >= 0; index -= 1) {
+      const particle = this.particles[index];
+      particle.ageMs += deltaMs;
+      if (particle.kind === 'LAVA') {
+        particle.vy += SKIN_EFFECT_RULES.lavaGravityPx * seconds;
+        particle.x += particle.vx * seconds;
+        particle.y += particle.vy * seconds;
+        if (particle.y >= this.floorY) {
+          // It lands on the floor grid and pools.
+          particle.kind = 'POOL';
+          particle.y = this.floorY;
+          particle.ageMs = 0;
+          particle.lifeMs = SKIN_EFFECT_RULES.poolLifeMs;
+          particle.width = MathUtils.randomRange(14, 26);
+        }
+      } else if (particle.kind === 'POOL') {
+        if (particle.ageMs >= particle.lifeMs) {
+          // The pool cools into smoke.
+          this.spawnSmoke(particle.x, particle.y - 2, 1.1);
+          this.spawnSmoke(particle.x + 5, particle.y - 2, 0.9);
+        }
+      } else {
+        if (particle.kind === 'ASH') {
+          particle.vy += SKIN_EFFECT_RULES.ashGravityPx * seconds;
+        } else if (particle.kind === 'SMOKE') {
+          particle.size += 9 * seconds;
+          particle.vx *= Math.exp(-0.8 * seconds);
+        }
+        particle.x += particle.vx * seconds;
+        particle.y += particle.vy * seconds;
+      }
+      if (particle.ageMs >= particle.lifeMs) {
+        this.particles.splice(index, 1);
+      }
+    }
+    for (let index = this.rings.length - 1; index >= 0; index -= 1) {
+      this.rings[index].ageMs += deltaMs;
+      if (this.rings[index].ageMs >= SKIN_EFFECT_RULES.ringLifeMs) {
+        this.rings.splice(index, 1);
+      }
+    }
+  }
+
+  render(context) {
+    if (this.particles.length === 0 && this.rings.length === 0 && !(this.isActive && this.effect === 'HOLOGRAM')) {
+      return;
+    }
+    context.save();
+    const maximumRadius = Math.hypot(this.viewWidth, this.viewHeight);
+    for (let index = 0; index < this.rings.length; index += 1) {
+      const ring = this.rings[index];
+      const progress = ring.ageMs / SKIN_EFFECT_RULES.ringLifeMs;
+      const radius = 12 + MathUtils.easeOutCubic(progress) * maximumRadius;
+      context.globalAlpha = 0.55 * (1 - progress);
+      context.lineWidth = 2 + 10 * (1 - progress);
+      context.strokeStyle = 'rgb(150, 70, 255)';
+      context.beginPath();
+      context.arc(ring.x, ring.y, radius, 0, TAU);
+      context.stroke();
+    }
+    for (let index = 0; index < this.particles.length; index += 1) {
+      const particle = this.particles[index];
+      const life = MathUtils.clamp(particle.ageMs / particle.lifeMs, 0, 1);
+      if (particle.kind === 'SMOKE') {
+        context.globalCompositeOperation = 'source-over';
+        context.globalAlpha = 0.45 * (1 - life) * Math.min(1, particle.ageMs / 160);
+        context.fillStyle = 'rgb(48, 40, 38)';
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.size, 0, TAU);
+        context.fill();
+      } else if (particle.kind === 'ASH' || particle.kind === 'LAVA') {
+        context.globalCompositeOperation = 'lighter';
+        context.globalAlpha = particle.kind === 'ASH' ? 1 - life : 1;
+        context.fillStyle = particle.kind === 'ASH' ? 'rgb(255, 150, 40)' : 'rgb(255, 70, 10)';
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.size, 0, TAU);
+        context.fill();
+        context.globalAlpha *= 0.35;
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.size * 2.4, 0, TAU);
+        context.fill();
+      } else if (particle.kind === 'POOL') {
+        const grow = Math.min(1, particle.ageMs / 180);
+        const cool = 1 - MathUtils.smoothstep(0.55, 1, life);
+        context.globalCompositeOperation = 'lighter';
+        context.globalAlpha = 0.9 * cool;
+        context.fillStyle = 'rgb(255, 90, 15)';
+        context.beginPath();
+        context.ellipse(particle.x, particle.y, particle.width * grow, particle.width * 0.28 * grow, 0, 0, TAU);
+        context.fill();
+        context.globalAlpha = 0.6 * cool;
+        context.fillStyle = 'rgb(255, 200, 80)';
+        context.beginPath();
+        context.ellipse(particle.x, particle.y - 1, particle.width * 0.45 * grow, particle.width * 0.1 * grow, 0, 0, TAU);
+        context.fill();
+      } else if (particle.kind === 'CODE') {
+        context.globalCompositeOperation = 'lighter';
+        context.globalAlpha = (1 - life) * (0.6 + 0.4 * Math.random());
+        context.fillStyle = 'rgb(60, 255, 140)';
+        context.font = '700 ' + Math.round(particle.size) + 'px ' + FONT_STACKS.data;
+        context.textAlign = 'center';
+        context.fillText(particle.text, particle.x, particle.y);
+      }
+    }
+    context.globalCompositeOperation = 'source-over';
+    if (this.isActive && this.effect === 'HOLOGRAM' && this.anchors.sight.visible) {
+      this.renderHologram(context);
+    }
+    context.restore();
+  }
+
+  /** The projector on the sight rail: a light cone and the spinning Ultra Demon face above it. */
+  renderHologram(context) {
+    const weight = this.weight;
+    if (weight < 0.15) {
+      return;
+    }
+    const sight = this.anchors.sight;
+    const size = 64;
+    const faceX = sight.x;
+    const faceY = sight.y - size * 0.95;
+    const flicker = 0.75 + 0.25 * Math.sin(this.clockMs * 0.05) * Math.sin(this.clockMs * 0.013);
+    context.globalCompositeOperation = 'lighter';
+    context.globalAlpha = 0.28 * weight;
+    const cone = context.createLinearGradient(0, sight.y, 0, faceY);
+    cone.addColorStop(0, 'rgba(56, 245, 255, 0.9)');
+    cone.addColorStop(1, 'rgba(56, 245, 255, 0)');
+    context.fillStyle = cone;
+    context.beginPath();
+    context.moveTo(sight.x - 3, sight.y);
+    context.lineTo(sight.x + 3, sight.y);
+    context.lineTo(faceX + size * 0.5, faceY + size * 0.3);
+    context.lineTo(faceX - size * 0.5, faceY + size * 0.3);
+    context.closePath();
+    context.fill();
+    if (this.hologramFace !== null) {
+      // It turns like a spinning model, but never thinner than a third of its width.
+      const turn = Math.cos(this.clockMs / 1000 * 3.2);
+      context.save();
+      context.translate(faceX, faceY);
+      context.scale((turn < 0 ? -1 : 1) * (0.35 + 0.65 * Math.abs(turn)), 1);
+      context.globalAlpha = 0.85 * weight * flicker;
+      context.drawImage(this.hologramFace, -size / 2, -size / 2, size, size);
+      context.restore();
+    }
+    context.globalCompositeOperation = 'source-over';
+  }
+}
 
 /* -------------------------------------------------------------------------
    UIController — menu, pause and result screens
@@ -17617,6 +18258,71 @@ const SHADER_SOURCES = (function buildShaderSources() {
     '  s.height = -crack * 0.00006;',
     '  s.bump = 1.0;',
     '  s.wear = 0.0;',
+    '}',
+    '',
+    '/* Volcanic Magma: basalt with lava glowing through veins that pulse; an inspect (effect 0 to 1) cracks it wide open. */',
+    'void finishMagma(float slot, vec3 p, vec3 n, float time, float effect, inout Surface s) {',
+    '  float rock = 0.7 + 0.6 * noise3(p * 380.0);',
+    '  s.albedo = srgb(vec3(0.07, 0.055, 0.05)) * rock;',
+    '  s.roughness = 0.86;',
+    '  s.metalness = 0.05;',
+    '  s.wear = 0.0;',
+    '  vec2 uv = planarUv(p, n) / 0.009;',
+    '  vec2 cells = voronoi(uv + vec2(fbm3(p * 70.0 + vec3(0.0, time * 0.05, 0.0)) * 0.9));',
+    '  float edge = cells.y - cells.x;',
+    '  float width = 0.012 + 0.05 * effect;',
+    '  float crack = 1.0 - smoothstep(width, width + 0.035, edge);',
+    '  float pulse = 0.55 + 0.45 * sin(time * 2.6 + p.z * 40.0);',
+    '  float flow = fbm3(p * 120.0 + vec3(0.0, -time * 0.4, time * 0.25));',
+    '  vec3 lava = mix(vec3(0.9, 0.12, 0.01), vec3(1.0, 0.45, 0.08), flow);',
+    '  float vein = smoothstep(0.62, 0.8, fbm3(p * 95.0 + vec3(time * 0.03)));',
+    '  s.emission = lava * (crack * (0.7 + 2.6 * effect) * (0.55 + 0.45 * pulse) + vein * 0.18 * pulse) + vec3(0.5, 0.06, 0.0) * pulse * (0.05 + 0.2 * effect);',
+    '  s.height = -crack * 0.00008;',
+    '  s.bump = 1.0;',
+    '}',
+    '',
+    '/* Cyber Hologram: a see-through shell with a neon-blue wireframe panning across it; an inspect flickers it out. */',
+    'void finishHologram(float slot, vec3 p, vec3 n, float time, float effect, inout Surface s) {',
+    '  vec2 uv = planarUv(p, n) / 0.006 + vec2(time * 0.9, time * 0.35);',
+    '  vec2 cell = abs(fract(uv) - 0.5);',
+    '  float line = smoothstep(0.41, 0.47, max(cell.x, cell.y));',
+    '  float scan = 0.5 + 0.5 * sin(p.y * 900.0 - time * 9.0);',
+    '  s.albedo = srgb(vec3(0.02, 0.06, 0.1));',
+    '  s.roughness = 0.2;',
+    '  s.metalness = 0.0;',
+    '  s.wear = 0.0;',
+    '  s.emission = vec3(0.15, 0.72, 1.0) * (line * 1.9 + 0.16 + scan * 0.12);',
+    '  float flicker = step(0.4, hash12(vec2(floor(time * 28.0), slot)));',
+    '  float shown = mix(1.0, flicker * (1.0 - effect), smoothstep(0.0, 0.25, effect));',
+    '  s.alpha = clamp(0.22 + line * 0.72 + scan * 0.06, 0.0, 1.0) * shown;',
+    '}',
+    '',
+    '/* Galactic Nebula: slowly turning clouds, stardust and twinkling stars under a glossy shell; an inspect opens a black hole. */',
+    'void finishNebula(float slot, vec3 p, vec3 n, float time, float effect, inout Surface s) {',
+    '  vec3 q = p - vec3(0.0, 0.03, -0.075);',
+    '  float radius = length(q.yz);',
+    '  float angle = time * 0.12 + effect * 3.0 / (0.15 + radius * 60.0);',
+    '  float c = cos(angle);',
+    '  float sn = sin(angle);',
+    '  vec3 r = vec3(q.x, c * q.y - sn * q.z, sn * q.y + c * q.z);',
+    '  float cloud = fbm3(r * 60.0 + vec3(time * 0.04));',
+    '  float dust = fbm3(r * 160.0 - vec3(time * 0.03));',
+    '  vec3 nebula = mix(vec3(0.25, 0.05, 0.45), vec3(0.95, 0.25, 0.75), cloud) * smoothstep(0.35, 0.75, cloud)',
+    '    + vec3(0.2, 0.45, 1.0) * smoothstep(0.55, 0.8, dust) * 0.6;',
+    '  vec3 starCell = floor(r * 900.0);',
+    '  float star = step(0.985, hash13(starCell));',
+    '  float twinkle = 0.5 + 0.5 * sin(time * 4.0 + hash13(starCell + vec3(7.0)) * 30.0);',
+    '  float holeSize = 0.03 * effect + 0.0001;',
+    '  float d = radius / holeSize;',
+    '  float core = (1.0 - smoothstep(0.6, 1.0, d)) * step(0.01, effect);',
+    '  float ringBand = (d - 1.15) * 3.0;',
+    '  float ring = exp(-ringBand * ringBand) * step(0.01, effect);',
+    '  s.albedo = srgb(vec3(0.015, 0.012, 0.03));',
+    '  s.roughness = 0.25;',
+    '  s.metalness = 0.0;',
+    '  s.coat = 1.0;',
+    '  s.wear = 0.0;',
+    '  s.emission = (nebula * 0.9 + vec3(1.0) * star * twinkle * 1.6) * (1.0 - core) + vec3(0.75, 0.35, 1.0) * ring * 2.5;',
     '}'
   ].join('\n');
 
@@ -17666,6 +18372,7 @@ const SHADER_SOURCES = (function buildShaderSources() {
       '  float wearClean;',
       '  vec3 wearAlbedo;',
       '  float wearMetal;',
+      '  float alpha;',
       '};',
       'vec3 srgb(vec3 color) {',
       '  return pow(color, vec3(2.2));',
@@ -17812,6 +18519,7 @@ const SHADER_SOURCES = (function buildShaderSources() {
       '  float slot = vMaterial.w;',
       '  float skin = uParams.x;',
       '  float time = uParams.y;',
+      '  float effect = uParams.w;',
       '  Surface s;',
       '  s.albedo = srgb(vColor.rgb);',
       '  s.roughness = vMaterial.x;',
@@ -17824,8 +18532,11 @@ const SHADER_SOURCES = (function buildShaderSources() {
       '  s.wearClean = 0.0;',
       '  s.wearAlbedo = vec3(0.56, 0.57, 0.59);',
       '  s.wearMetal = 1.0;',
+      '  s.alpha = 1.0;',
       '#ifdef WITH_FINISHES',
-      '  if (slot > 0.5 && slot < 6.5) {',
+      '  // The Cyber Hologram also covers the unfinished parts (sights, magazine, accessories), so the whole pistol fades.',
+      '  bool hologramPart = skin > 9.5 && skin < 10.5 && slot < 6.5;',
+      '  if ((slot > 0.5 && slot < 6.5) || hologramPart) {',
       '    if (skin < 0.5) {',
       '      finishFactory(slot, s);',
       '    } else if (skin < 1.5) {',
@@ -17842,8 +18553,14 @@ const SHADER_SOURCES = (function buildShaderSources() {
       '      finishCircuit(slot, p, localNormal, time, s);',
       '    } else if (skin < 7.5) {',
       '      finishGold(slot, p, localNormal, s);',
-      '    } else {',
+      '    } else if (skin < 8.5) {',
       '      finishHellfire(slot, p, localNormal, time, s);',
+      '    } else if (skin < 9.5) {',
+      '      finishMagma(slot, p, localNormal, time, effect, s);',
+      '    } else if (skin < 10.5) {',
+      '      finishHologram(slot, p, localNormal, time, effect, s);',
+      '    } else {',
+      '      finishNebula(slot, p, localNormal, time, effect, s);',
       '    }',
       '  }',
       '#else',
@@ -17906,7 +18623,10 @@ const SHADER_SOURCES = (function buildShaderSources() {
       '  color += s.albedo * uFlash.rgb * uFlash.a * 0.18 * (1.0 - s.metalness * 0.5);',
       '  color += s.emission;',
       '  color = acesFilm(color * uParams.z);',
-      '  gl_FragColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);',
+      '  if (s.alpha < 0.02) {',
+      '    discard;',
+      '  }',
+      '  gl_FragColor = vec4(pow(color, vec3(1.0 / 2.2)), s.alpha);',
       '}'
     ].join('\n');
   }
@@ -18475,7 +19195,9 @@ class Renderer3D {
     program.use(this.attributeState);
     gl.enable(gl.DEPTH_TEST);
     gl.depthMask(true);
-    gl.disable(gl.BLEND);
+    // Blending lets the Cyber Hologram finish be see-through; every other finish writes alpha 1.
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.uniformMatrix4fv(uniforms.uProjection, false, this.projectionWithShake);
     gl.uniform3fv(uniforms.uKeyColor, lighting.key);
     gl.uniform3fv(uniforms.uFillColor, lighting.fill);
@@ -18498,18 +19220,20 @@ class Renderer3D {
     this.paramsUniform[0] = this.viewmodelHasFinishes ? frame.finishId : 0;
     this.paramsUniform[1] = frame.timeSeconds % 600;
     this.paramsUniform[2] = VIEWMODEL_LIGHTING.exposure;
-    this.paramsUniform[3] = 0;
+    this.paramsUniform[3] = this.viewmodelHasFinishes ? frame.finishEffect || 0 : 0;
     gl.uniform4fv(uniforms.uParams, this.paramsUniform);
     for (let index = 0; index < parts.length; index += 1) {
       const part = parts[index];
       if (!part.visible) {
         continue;
       }
+      gl.depthMask(!(frame.isSeeThrough && part.role !== 'arm'));
       Mat4.normalMatrix(this.normalMatrix, part.matrix);
       gl.uniformMatrix4fv(uniforms.uModelView, false, part.matrix);
       gl.uniformMatrix3fv(uniforms.uNormalMatrix, false, this.normalMatrix);
       part.mesh.draw(program);
     }
+    gl.depthMask(true);
   }
 
   /** Debris (shards, ash, casings) streamed as world-space lit triangles. */
@@ -19158,7 +19882,10 @@ class AimTrainerGame {
     this.coinSoundTimerId = 0;
     this.showcaseCenter = new Vector3D(0.05, 0, -0.5);
     this.showcaseGlowColor = [0.55, 0.6, 0.68];
-    this.viewmodelFrame = { flashColor: null, flashIntensity: 0, finishId: 0, timeSeconds: 0 };
+    this.viewmodelFrame = { flashColor: null, flashIntensity: 0, finishId: 0, finishEffect: 0, isSeeThrough: false, timeSeconds: 0 };
+    this.skinEffects = new SkinEffects();
+    this.skinAnchorScreens = { muzzle: { x: 0, y: 0, visible: false }, frame: { x: 0, y: 0, visible: false }, sight: { x: 0, y: 0, visible: false } };
+    this.scratchAnchorWorld = new Vector3D();
 
     this.cameraPosition = new Vector3D(0, 0, 0);
     this.previousCameraPosition = new Vector3D(0, 0, 0);
@@ -19699,6 +20426,7 @@ class AimTrainerGame {
     this.crosshair.update(stepMs, this.gun.recoilEnergy, this.input.currentPointerSpeed(performance.now()));
     this.background.update(stepMs);
     this.effects.update(stepSeconds);
+    this.updateSkinEffects(stepMs, isArmory);
     this.damageVignetteElapsedMs += stepMs;
     this.updateDemonAmbience();
 
@@ -19707,6 +20435,43 @@ class AimTrainerGame {
     } else if (this.isAttractState) {
       this.updateAttract(stepMs, stepSeconds);
     }
+  }
+
+  /**
+   * Premium finishes: the pistol inspects in the finish's own style, and its
+   * screen effects follow the pistol (the Armory shows the shop preview).
+   */
+  updateSkinEffects(stepMs, isArmory) {
+    const finish = this.activeFinish;
+    const effect = finish.effect || null;
+    this.gun.inspectStyle = effect === 'MAGMA' ? 'TILT' : effect === 'NEBULA' ? 'SPIN' : 'STANDARD';
+    const skinEffects = this.skinEffects;
+    if (!isArmory && skinEffects.isActive && !this.gun.isInspecting) {
+      // Firing or reloading cut the inspect short.
+      skinEffects.stop();
+    }
+    if (this.renderer.isSupported) {
+      const muzzle = this.projectGunAnchor(GUN_ANCHORS.muzzle, this.skinAnchorScreens.muzzle);
+      const frame = this.projectGunAnchor(GUN_ANCHORS.frameCenter, this.skinAnchorScreens.frame);
+      const sight = this.projectGunAnchor(GUN_ANCHORS.sightTop, this.skinAnchorScreens.sight);
+      skinEffects.setAnchors(muzzle, frame, sight, this.viewportWidth, this.viewportHeight);
+    }
+    skinEffects.update(stepMs, isArmory ? effect : null);
+  }
+
+  /** A point on the pistol (gun-local) on screen: { x, y, visible }. */
+  projectGunAnchor(anchor, output) {
+    const world = this.gun.localToWorld(anchor, this.gun.bodyMatrix, this.scratchAnchorWorld);
+    output.visible = this.renderer.projectToScreen(world, output);
+    return output;
+  }
+
+  /** How strongly a premium finish's shader effect shows: its inspect in game, the shop preview's in the Armory. */
+  get finishEffectAmount() {
+    if (!this.activeFinish.effect) {
+      return 0;
+    }
+    return this.fsm.is(GAME_STATES.ARMORY) ? this.skinEffects.weight : this.gun.renderState.inspectWeight;
   }
 
   /** Small head movement toward the cursor gives near orbs visible parallax (centered in the armory). */
@@ -20924,6 +21689,22 @@ class AimTrainerGame {
     }
     if (this.gun.startInspect()) {
       this.audio.playInspect();
+      const effect = this.activeFinish.effect;
+      if (effect) {
+        this.skinEffects.start(effect);
+        this.audio.playSkinInspect(effect);
+      }
+    }
+  }
+
+  /** F in the Armory: the showcase spin, and a premium finish's inspect effect. */
+  inspectShowcase() {
+    this.gun.playShowcaseSpin();
+    this.audio.playSlideRack(0.25);
+    const effect = this.activeFinish.effect;
+    if (effect && !this.skinEffects.isActive) {
+      this.skinEffects.start(effect);
+      this.audio.playSkinInspect(effect);
     }
   }
 
@@ -21616,8 +22397,7 @@ class AimTrainerGame {
           this.armoryView.setTab('CROSSHAIR');
         } else if (code === 'KeyF' && !event.repeat) {
           event.preventDefault();
-          this.gun.playShowcaseSpin();
-          this.audio.playSlideRack(0.25);
+          this.inspectShowcase();
         } else if (code === 'KeyM') {
           event.preventDefault();
           this.toggleMute();
@@ -21737,6 +22517,8 @@ class AimTrainerGame {
     frame.flashColor = arenaState.flashColor;
     frame.flashIntensity = arenaState.flashIntensity;
     frame.finishId = this.activeFinish.shaderId;
+    frame.finishEffect = this.finishEffectAmount;
+    frame.isSeeThrough = this.activeFinish.effect === 'HOLOGRAM';
     frame.timeSeconds = timeSeconds;
     renderer.drawViewmodel(this.buildViewmodelParts(), frame);
 
@@ -21773,7 +22555,7 @@ class AimTrainerGame {
       parts.push({ mesh: meshes.slide, matrix: this.gun.slideMatrix, visible: true, role: 'gun' });
       parts.push({ mesh: meshes.magazine, matrix: this.gun.magazineMatrix, visible: true, role: 'magazine' });
       parts.push({ mesh: meshes.magazine, matrix: this.gun.droppedMagazine.matrix, visible: false, role: 'dropped' });
-      parts.push({ mesh: meshes.hand, matrix: this.gun.bodyMatrix, visible: true, role: 'arm' });
+      parts.push({ mesh: meshes.hand, matrix: this.gun.handMatrix, visible: true, role: 'arm' });
     }
     const renderState = this.gun.renderState;
     for (let index = 0; index < parts.length; index += 1) {
@@ -21911,6 +22693,7 @@ class AimTrainerGame {
     context.save();
     this.shake.apply(context);
     this.renderTrails(context);
+    this.skinEffects.render(context);
     this.effects.renderOverlay(context);
     this.renderCountdown(context);
     this.renderDamageVignette(context);
