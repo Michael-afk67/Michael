@@ -20,6 +20,7 @@
   --steel-muted: #8796ad;
   --steel-bright: #e4eaf3;
   --brass: #e2ae48;
+  --neon: #38f5ff;
   --brass-dim: #8c6822;
   --signal-hit: #46e3a7;
   --signal-miss: #ff5a6c;
@@ -885,6 +886,288 @@ kbd {
 .segmented button[data-locked="true"]::before {
   content: "\1F512\00A0";
   font-size: 0.85em;
+}
+
+/* ------------------------------------------------------------------
+   The level journey: seven faces on a line, the chosen level below
+   ------------------------------------------------------------------ */
+.level-face {
+  display: inline-block;
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+
+.level-face svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.level-face[data-face="DEMON_GOD"] svg {
+  filter: drop-shadow(0 0 3px rgba(56, 245, 255, 0.85));
+}
+
+.level-face[data-face="ULTRA_DEMON"] svg {
+  filter: drop-shadow(0 0 3px rgba(255, 52, 36, 0.9));
+}
+
+.level-face--small {
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+  vertical-align: -4px;
+}
+
+.mode-grid--journey {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journey {
+  --journey-progress: 0%;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  align-items: center;
+  padding: 6px 2px 10px;
+}
+
+/* The path: lit up to the furthest open level. */
+.journey::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 4px);
+  left: 7%;
+  right: 7%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--neon) var(--journey-progress), var(--steel-line) var(--journey-progress));
+  box-shadow: 0 0 10px rgba(56, 245, 255, 0.35);
+}
+
+.journey__node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: 100%;
+  max-width: 62px;
+  aspect-ratio: 1;
+  padding: 0;
+  background: var(--gunmetal-raised);
+  border: 2px solid var(--steel-line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 160ms ease, transform 140ms ease;
+}
+
+.journey__node .level-face {
+  width: 76%;
+  height: 76%;
+}
+
+.journey__node:hover {
+  transform: translateY(-2px);
+}
+
+.journey__node:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 3px;
+}
+
+.journey__node[aria-checked="true"] {
+  border-color: var(--neon);
+  box-shadow: 0 0 0 3px rgba(56, 245, 255, 0.22), 0 0 18px rgba(56, 245, 255, 0.5);
+}
+
+.journey__number {
+  position: absolute;
+  right: -5px;
+  bottom: -6px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  font: 700 11px/19px var(--font-data);
+  text-align: center;
+  color: var(--ink-on-brass);
+  background: var(--brass);
+  border-radius: 10px;
+}
+
+.journey__node[data-locked="true"] {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.journey__node[data-locked="true"] .level-face {
+  filter: grayscale(1) brightness(0.45);
+}
+
+.journey__node[data-locked="true"]::after,
+.journey__node[data-beaten="true"]::after {
+  position: absolute;
+  top: -7px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  border-radius: 50%;
+}
+
+.journey__node[data-locked="true"]::after {
+  content: "\1F512";
+  background: var(--range-black);
+}
+
+.journey__node[data-beaten="true"]::after {
+  content: "\2713";
+  font-weight: 800;
+  color: #062012;
+  background: var(--signal-hit);
+}
+
+.journey__node[data-denied="true"] {
+  animation: lock-deny 360ms ease;
+}
+
+.journey-detail {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--gunmetal-raised);
+  border: 1px solid var(--steel-line);
+  border-radius: var(--radius-s);
+}
+
+.journey-detail__face {
+  width: 64px;
+  height: 64px;
+}
+
+.journey-detail[data-locked="true"] .journey-detail__face {
+  filter: grayscale(1) brightness(0.5);
+}
+
+.journey-detail__eyebrow {
+  margin: 0;
+  font: 700 11px var(--font-data);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.journey-detail__title {
+  margin: 2px 0 4px;
+  font-family: var(--font-stencil);
+  font-size: 24px;
+  line-height: 1.05;
+  color: var(--steel-bright);
+}
+
+.journey-detail__summary {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--steel-muted);
+}
+
+.journey-detail__goal {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--steel-bright);
+}
+
+.journey-detail[data-locked="true"] .journey-detail__goal {
+  color: var(--brass);
+}
+
+.journey-detail[data-beaten="true"] .journey-detail__goal {
+  color: var(--signal-hit);
+}
+
+.mode-extras__label {
+  margin-top: 4px;
+}
+
+.mode-extras__hint {
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--steel-muted);
+}
+
+.mode-extras {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mode-extras .mode-card {
+  grid-column: auto;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: 9px;
+  padding: 11px 10px 10px;
+}
+
+.mode-extras .mode-card .orb-icon,
+.mode-extras .mode-card .grid-icon {
+  transform: scale(0.82);
+}
+
+.mode-extras .mode-card__name {
+  font-size: 16px;
+}
+
+.mode-extras .mode-card__spec {
+  font-size: 10.5px;
+}
+
+.segmented--levels {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.segmented--levels button {
+  padding: 7px 2px;
+  white-space: nowrap;
+}
+
+.segmented--levels button[data-locked="true"]::before {
+  content: none;
+}
+
+.segmented--levels button[data-locked="true"] .level-face {
+  filter: grayscale(1) brightness(0.5);
+}
+
+.tab--level {
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 720px) {
+  .mode-extras {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .journey-detail {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .journey-detail__face {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 .mode-card[aria-checked="true"] .mode-card__key {
@@ -1896,6 +2179,162 @@ kbd {
   background: linear-gradient(90deg, rgba(226, 174, 72, 0.18), transparent 80%);
   border: 1px solid rgba(226, 174, 72, 0.45);
   border-radius: var(--radius-s);
+}
+
+/* XP on the result screen */
+.xp-award {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid rgba(56, 245, 255, 0.35);
+  border-radius: var(--radius-s);
+  background: linear-gradient(90deg, rgba(56, 245, 255, 0.1), transparent 70%);
+}
+
+.xp-award__line,
+.xp-award__meta {
+  margin: 0;
+}
+
+.xp-award__value {
+  font-family: var(--font-stencil);
+  font-size: 26px;
+  color: var(--neon);
+}
+
+.xp-award__level {
+  font-weight: 700;
+  color: var(--steel-bright);
+}
+
+.xp-award__bar {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--steel-line);
+}
+
+.xp-award__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--neon);
+  box-shadow: 0 0 8px var(--neon);
+  transition: width 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.xp-award__meta {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--steel-muted);
+}
+
+.cta--next {
+  background: linear-gradient(90deg, #38f5ff, #7c5cff);
+  color: #04121a;
+}
+
+.board-table__crown {
+  margin-left: 5px;
+  filter: drop-shadow(0 0 4px rgba(255, 200, 40, 0.8));
+}
+
+/* Milestone: a full-screen badge when a level is beaten for the first time */
+.milestone {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: radial-gradient(circle at 50% 45%, rgba(20, 30, 70, 0.82), rgba(3, 5, 12, 0.94));
+  animation: milestone-in 320ms ease-out;
+}
+
+.milestone[hidden] {
+  display: none;
+}
+
+.milestone__rays {
+  position: absolute;
+  inset: -50%;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 210, 63, 0.12) 0deg 8deg, transparent 8deg 22deg);
+  animation: milestone-spin 18s linear infinite;
+  pointer-events: none;
+}
+
+.milestone__badge {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: min(440px, 100%);
+  padding: 30px 24px 24px;
+  text-align: center;
+  background: linear-gradient(160deg, #1b2440, #0d1224);
+  border: 2px solid var(--neon);
+  border-radius: 18px;
+  box-shadow: 0 0 0 4px rgba(56, 245, 255, 0.15), 0 0 60px rgba(56, 245, 255, 0.35), 0 0 120px rgba(124, 92, 255, 0.3);
+  animation: milestone-pop 520ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.milestone__face {
+  width: 128px;
+  height: 128px;
+  filter: drop-shadow(0 0 18px rgba(255, 210, 63, 0.6));
+}
+
+.milestone__eyebrow {
+  margin: 4px 0 0;
+  font: 800 13px var(--font-data);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffd23f;
+}
+
+.milestone__title {
+  margin: 0;
+  font-family: var(--font-stencil);
+  font-size: clamp(30px, 7vw, 44px);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 18px rgba(56, 245, 255, 0.7);
+}
+
+.milestone__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 4px;
+  font-weight: 800;
+  font-size: 18px;
+  color: #ffd23f;
+}
+
+.milestone__actions {
+  justify-content: center;
+}
+
+@keyframes milestone-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes milestone-pop {
+  0% { opacity: 0; transform: scale(0.6) rotate(-4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes milestone-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milestone,
+  .milestone__badge,
+  .milestone__rays {
+    animation: none;
+  }
 }
 
 /* ------------------------------------------------------------------
@@ -3099,7 +3538,7 @@ kbd {
       </div>
 
       <div class="hud__block hud__block--clock">
-        <span class="hud__label" id="hud-mode">Medium · 60 s</span>
+        <span class="hud__label" id="hud-mode">Super Easy · 60 s</span>
         <span class="hud__value hud__value--clock" id="hud-clock">60.0</span>
         <div class="hud__timebar" id="hud-timebar" aria-hidden="true"><span id="hud-timebar-fill"></span></div>
         <div class="hud__shields" id="hud-shields" aria-label="Shields remaining" hidden></div>
@@ -3194,64 +3633,85 @@ kbd {
       <div class="console__grid">
         <div class="setup">
           <div class="field" role="group" aria-labelledby="label-difficulty">
-            <p class="field__label" id="label-difficulty">Difficulty</p>
-            <div class="mode-grid" id="mode-grid" role="radiogroup" aria-labelledby="label-difficulty">
-              <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="EASY" id="mode-card-easy">
-                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 152; --orb-size: 38px;"></span></span>
-                <span class="mode-card__name">Easy</span>
-                <span class="mode-card__spec">r 40–50 px · 4.0 s<br>static · ×1 coins</span>
-                <kbd class="mode-card__key">1</kbd>
-              </button>
-              <button class="mode-card" type="button" role="radio" aria-checked="true" tabindex="0" data-difficulty="MEDIUM" id="mode-card-medium">
-                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 40; --orb-size: 32px;"></span></span>
-                <span class="mode-card__name">Medium</span>
-                <span class="mode-card__spec">r 30–38 px · 2.6 s<br>slow bounce · ×2 coins</span>
-                <span class="mode-card__lock" hidden></span>
-                <kbd class="mode-card__key">2</kbd>
-              </button>
-              <button class="mode-card" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="HARD" id="mode-card-hard">
-                <span class="mode-card__orb"><span class="orb-icon" style="--orb-hue: 22; --orb-size: 28px;"></span></span>
-                <span class="mode-card__name">Hard</span>
-                <span class="mode-card__spec">r 22–29 px · 1.65 s<br>fast drift · ×8 coins</span>
-                <span class="mode-card__lock" hidden></span>
-                <kbd class="mode-card__key">3</kbd>
-              </button>
-              <button class="mode-card mode-card--demon" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="DEMON" id="mode-card-demon">
-                <span class="mode-card__orb"><span class="orb-icon orb-icon--demon" style="--orb-hue: 2; --orb-size: 24px;"></span></span>
-                <span class="mode-card__name">Demon</span>
-                <span class="mode-card__spec">r 18–24 px · 1.4 s<br>erratic · ×100 coins</span>
-                <span class="mode-card__lock" hidden></span>
-                <kbd class="mode-card__key">4</kbd>
-              </button>
-              <button class="mode-card mode-card--training" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="TRAINING" id="mode-card-training">
-                <span class="mode-card__orb"><span class="orb-icon orb-icon--training" style="--orb-hue: 192; --orb-size: 30px;"></span></span>
-                <span class="mode-card__name">Training Ground</span>
-                <span class="mode-card__spec">play any level with the same rules<br>practice only · no coins, no leaderboard</span>
-                <kbd class="mode-card__key">5</kbd>
-              </button>
-              <button class="mode-card mode-card--time" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="TIME_ATTACK" id="mode-card-time-attack">
-                <span class="mode-card__orb"><span class="orb-icon orb-icon--time" style="--orb-hue: 48; --orb-size: 30px;"></span></span>
-                <span class="mode-card__name">Time Attack</span>
-                <span class="mode-card__spec">hits add time · 30 s<br>60 s max · any level</span>
-                <kbd class="mode-card__key">6</kbd>
-              </button>
-              <button class="mode-card mode-card--grid" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="GRIDSHOT" id="mode-card-gridshot">
-                <span class="mode-card__orb"><span class="grid-icon" aria-hidden="true"><i></i><i data-live="true"></i><i></i><i></i><i></i><i data-live="true"></i><i data-live="true"></i><i></i><i></i></span></span>
-                <span class="mode-card__name">Gridshot</span>
-                <span class="mode-card__spec">3 orbs on a fixed grid<br>locked camera · hits/s</span>
-                <kbd class="mode-card__key">7</kbd>
-              </button>
+            <p class="field__label" id="label-difficulty">Level journey</p>
+            <div class="mode-grid mode-grid--journey" id="mode-grid" role="radiogroup" aria-labelledby="label-difficulty">
+              <div class="journey" id="journey">
+                <button class="journey__node" type="button" role="radio" aria-checked="true" tabindex="0" data-difficulty="SUPER_EASY" id="mode-card-super-easy" aria-label="Level 1: First Steps (Super Easy)" title="Level 1: First Steps">
+                  <span class="level-face" data-face="SUPER_EASY"></span>
+                  <span class="journey__number">1</span>
+                </button>
+                <button class="journey__node" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="EASY" id="mode-card-easy" aria-label="Level 2: The Shrinking Ring (Easy)" title="Level 2: The Shrinking Ring">
+                  <span class="level-face" data-face="EASY"></span>
+                  <span class="journey__number">2</span>
+                </button>
+                <button class="journey__node" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="NORMAL" id="mode-card-normal" aria-label="Level 3: Constant Motion (Normal)" title="Level 3: Constant Motion">
+                  <span class="level-face" data-face="NORMAL"></span>
+                  <span class="journey__number">3</span>
+                </button>
+                <button class="journey__node" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="HARD" id="mode-card-hard" aria-label="Level 4: The Bouncing Arena (Hard)" title="Level 4: The Bouncing Arena">
+                  <span class="level-face" data-face="HARD"></span>
+                  <span class="journey__number">4</span>
+                </button>
+                <button class="journey__node" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="INSANE" id="mode-card-insane" aria-label="Level 5: Chaotic Reflection (Insane)" title="Level 5: Chaotic Reflection">
+                  <span class="level-face" data-face="INSANE"></span>
+                  <span class="journey__number">5</span>
+                </button>
+                <button class="journey__node" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="DEMON_GOD" id="mode-card-demon-god" aria-label="Level 6: The Ghost Matrix (Demon God)" title="Level 6: The Ghost Matrix">
+                  <span class="level-face" data-face="DEMON_GOD"></span>
+                  <span class="journey__number">6</span>
+                </button>
+                <button class="journey__node" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="ULTRA_DEMON" id="mode-card-ultra-demon" aria-label="Level 7: Absolute Pandemonium (Ultra Demon)" title="Level 7: Absolute Pandemonium">
+                  <span class="level-face" data-face="ULTRA_DEMON"></span>
+                  <span class="journey__number">7</span>
+                </button>
+              </div>
+              <div class="journey-detail" id="journey-detail" aria-live="polite">
+                <span class="level-face journey-detail__face" id="journey-detail-face"></span>
+                <div class="journey-detail__text">
+                  <p class="journey-detail__eyebrow" id="journey-detail-eyebrow">Level 1 · Super Easy</p>
+                  <p class="journey-detail__title" id="journey-detail-title">First Steps</p>
+                  <p class="journey-detail__summary" id="journey-detail-summary"></p>
+                  <p class="journey-detail__goal" id="journey-detail-goal"></p>
+                </div>
+              </div>
+              <p class="field__label mode-extras__label" id="label-extras">Extra modes <span class="mode-extras__hint" id="mode-extras-hint">· open after Level 1</span></p>
+              <div class="mode-extras" id="mode-extras">
+                <button class="mode-card mode-card--training" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="TRAINING" id="mode-card-training">
+                  <span class="mode-card__orb"><span class="orb-icon orb-icon--training" style="--orb-hue: 192; --orb-size: 30px;"></span></span>
+                  <span class="mode-card__name">Training Ground</span>
+                  <span class="mode-card__spec">any open level, same rules<br>practice · no coins or board</span>
+                  <span class="mode-card__lock" hidden></span>
+                  <kbd class="mode-card__key">8</kbd>
+                </button>
+                <button class="mode-card mode-card--time" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="TIME_ATTACK" id="mode-card-time-attack">
+                  <span class="mode-card__orb"><span class="orb-icon orb-icon--time" style="--orb-hue: 48; --orb-size: 30px;"></span></span>
+                  <span class="mode-card__name">Time Attack</span>
+                  <span class="mode-card__spec">hits add time · 30 s<br>60 s max · any open level</span>
+                  <span class="mode-card__lock" hidden></span>
+                  <kbd class="mode-card__key">9</kbd>
+                </button>
+                <button class="mode-card mode-card--grid" type="button" role="radio" aria-checked="false" tabindex="-1" data-difficulty="GRIDSHOT" id="mode-card-gridshot">
+                  <span class="mode-card__orb"><span class="grid-icon" aria-hidden="true"><i></i><i data-live="true"></i><i></i><i></i><i></i><i data-live="true"></i><i data-live="true"></i><i></i><i></i></span></span>
+                  <span class="mode-card__name">Gridshot</span>
+                  <span class="mode-card__spec">3 orbs on a fixed grid<br>locked camera · hits/s</span>
+                  <span class="mode-card__lock" hidden></span>
+                  <kbd class="mode-card__key">0</kbd>
+                </button>
+              </div>
             </div>
             <p class="field__note lock-note" id="mode-lock-note" role="status" hidden></p>
           </div>
 
           <div class="field" role="group" aria-labelledby="label-level" id="level-field" hidden>
             <p class="field__label" id="label-level">Training level</p>
-            <div class="segmented" id="level-options" role="radiogroup" aria-labelledby="label-level">
-              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="EASY" id="level-easy">Easy</button>
-              <button type="button" role="radio" aria-checked="true" tabindex="0" data-level="MEDIUM" id="level-medium">Medium</button>
-              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="HARD" id="level-hard">Hard</button>
-              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="DEMON" id="level-demon">Demon</button>
+            <div class="segmented segmented--levels" id="level-options" role="radiogroup" aria-labelledby="label-level">
+              <button type="button" role="radio" aria-checked="true" tabindex="0" data-level="SUPER_EASY" id="level-super-easy" title="Level 1: Super Easy" aria-label="Level 1: Super Easy"><span class="level-face level-face--small" data-face="SUPER_EASY"></span>1</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="EASY" id="level-easy" title="Level 2: Easy" aria-label="Level 2: Easy"><span class="level-face level-face--small" data-face="EASY"></span>2</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="NORMAL" id="level-normal" title="Level 3: Normal" aria-label="Level 3: Normal"><span class="level-face level-face--small" data-face="NORMAL"></span>3</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="HARD" id="level-hard" title="Level 4: Hard" aria-label="Level 4: Hard"><span class="level-face level-face--small" data-face="HARD"></span>4</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="INSANE" id="level-insane" title="Level 5: Insane" aria-label="Level 5: Insane"><span class="level-face level-face--small" data-face="INSANE"></span>5</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="DEMON_GOD" id="level-demon-god" title="Level 6: Demon God" aria-label="Level 6: Demon God"><span class="level-face level-face--small" data-face="DEMON_GOD"></span>6</button>
+              <button type="button" role="radio" aria-checked="false" tabindex="-1" data-level="ULTRA_DEMON" id="level-ultra-demon" title="Level 7: Ultra Demon" aria-label="Level 7: Ultra Demon"><span class="level-face level-face--small" data-face="ULTRA_DEMON"></span>7</button>
             </div>
             <p class="field__note lock-note" id="level-lock-note" role="status" hidden></p>
             <p class="field__note" id="level-note">Same orbs and scoring as the real level. Nothing is earned: no coins and no leaderboard.</p>
@@ -3326,7 +3786,7 @@ kbd {
             <button class="cta" id="start-button" type="button">Start round <kbd>Enter</kbd></button>
             <button class="button-secondary" id="fullscreen-button" type="button" hidden>Full screen</button>
           </div>
-          <p class="controls-hint controls-hint--keyboard">Click to fire · <kbd>R</kbd> or right-click reloads · <kbd>F</kbd> inspects the pistol · <kbd>L</kbd> laser on/off · <kbd>B</kbd> Armory · <kbd>C</kbd> crosshair · <kbd>Esc</kbd> pauses · <kbd>M</kbd> mutes · <kbd>1</kbd>–<kbd>7</kbd> pick a mode</p>
+          <p class="controls-hint controls-hint--keyboard">Click to fire · <kbd>R</kbd> or right-click reloads · <kbd>F</kbd> inspects the pistol · <kbd>L</kbd> laser on/off · <kbd>B</kbd> Armory · <kbd>C</kbd> crosshair · <kbd>Esc</kbd> pauses · <kbd>M</kbd> mutes · <kbd>1</kbd>–<kbd>7</kbd> pick a level · <kbd>8</kbd> <kbd>9</kbd> <kbd>0</kbd> extra modes</p>
           <p class="controls-hint controls-hint--touch">Tap an orb to fire. Tap the magazine counter in the corner to reload early; it also reloads itself when empty. The laser sight switch is above, and the Armory and Crosshair buttons sit under your coins.</p>
         </div>
 
@@ -3349,7 +3809,7 @@ kbd {
               <button class="button-secondary loadout__button" id="armory-button" type="button">Armory <kbd>B</kbd></button>
               <button class="button-secondary loadout__button" id="crosshair-button" type="button">Crosshair <kbd>C</kbd></button>
             </div>
-            <p class="loadout__rate">Standard rounds bank ⌊score ÷ 10⌋ coins × Easy 1 · Medium 2 · Hard 8 · Demon 100</p>
+            <p class="loadout__rate">Levels bank ⌊score ÷ 10⌋ coins × the level: 1 · 1 · 2 · 8 · 30 · 100 · 200 (Level 1 to 7)</p>
           </aside>
           <div class="board" id="menu-board">
             <div class="board__head">
@@ -3359,22 +3819,26 @@ kbd {
                 <button type="button" role="radio" aria-checked="false" tabindex="-1" data-board-scope="LOCAL" id="board-scope-local">My scores</button>
               </div>
             </div>
-            <div class="tabs board__tabs" id="menu-board-tabs" role="tablist" aria-label="Leaderboard level">
-              <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="EASY" id="board-tab-easy">Easy</button>
-              <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="menu-board-panel" data-board-mode="MEDIUM" id="board-tab-medium">Medium</button>
-              <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="HARD" id="board-tab-hard">Hard</button>
-              <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="DEMON" id="board-tab-demon">Demon</button>
+            <div class="tabs board__tabs" id="menu-board-tabs" role="tablist" aria-label="Leaderboard">
+              <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="menu-board-panel" data-board-mode="XP" id="board-tab-xp" title="Lifetime XP">XP</button>
+              <button class="tab tab--level" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="SUPER_EASY" id="board-tab-super-easy" title="Level 1: Super Easy" aria-label="Level 1: Super Easy"><span class="level-face level-face--small" data-face="SUPER_EASY"></span>1</button>
+              <button class="tab tab--level" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="EASY" id="board-tab-easy" title="Level 2: Easy" aria-label="Level 2: Easy"><span class="level-face level-face--small" data-face="EASY"></span>2</button>
+              <button class="tab tab--level" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="NORMAL" id="board-tab-normal" title="Level 3: Normal" aria-label="Level 3: Normal"><span class="level-face level-face--small" data-face="NORMAL"></span>3</button>
+              <button class="tab tab--level" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="HARD" id="board-tab-hard" title="Level 4: Hard" aria-label="Level 4: Hard"><span class="level-face level-face--small" data-face="HARD"></span>4</button>
+              <button class="tab tab--level" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="INSANE" id="board-tab-insane" title="Level 5: Insane" aria-label="Level 5: Insane"><span class="level-face level-face--small" data-face="INSANE"></span>5</button>
+              <button class="tab tab--level" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="DEMON_GOD" id="board-tab-demon-god" title="Level 6: Demon God" aria-label="Level 6: Demon God"><span class="level-face level-face--small" data-face="DEMON_GOD"></span>6</button>
+              <button class="tab tab--level" type="button" role="tab" aria-selected="false" aria-controls="menu-board-panel" data-board-mode="ULTRA_DEMON" id="board-tab-ultra-demon" title="Level 7: Ultra Demon" aria-label="Level 7: Ultra Demon"><span class="level-face level-face--small" data-face="ULTRA_DEMON"></span>7</button>
             </div>
-            <div class="board__panel" id="menu-board-panel" role="tabpanel" aria-labelledby="board-tab-medium" aria-busy="false">
+            <div class="board__panel" id="menu-board-panel" role="tabpanel" aria-labelledby="board-tab-xp" aria-busy="false">
               <div class="board__scroll" id="menu-board-scroll" tabindex="0" aria-label="Leaderboard rows. Scroll for more.">
                 <table class="board-table" id="menu-board-table">
-                  <caption class="visually-hidden" id="menu-board-caption">Top 500, Medium</caption>
+                  <caption class="visually-hidden" id="menu-board-caption">Top 500 by XP</caption>
                   <thead>
                     <tr>
                       <th scope="col" class="board-table__rank">Rank</th>
                       <th scope="col">Player</th>
-                      <th scope="col" class="board-table__num">Score</th>
-                      <th scope="col" class="board-table__num">Acc · Streak</th>
+                      <th scope="col" class="board-table__num" id="board-head-score">Score</th>
+                      <th scope="col" class="board-table__num" id="board-head-meta">Acc · Streak</th>
                     </tr>
                   </thead>
                   <tbody id="menu-board-body"></tbody>
@@ -3425,7 +3889,7 @@ kbd {
       <div class="result-head">
         <div class="grade" id="over-grade" data-grade="B" aria-label="Grade">B</div>
         <div>
-          <p class="eyebrow" id="over-eyebrow">Medium · 60 s</p>
+          <p class="eyebrow" id="over-eyebrow">Super Easy · 60 s</p>
           <h2 class="screen__title" id="over-title">Round complete</h2>
           <div class="result-score">
             <span class="result-score__value" id="over-score">0</span>
@@ -3443,6 +3907,12 @@ kbd {
         <p class="coin-award__next" id="over-coins-next"></p>
       </div>
 
+      <div class="xp-award" id="over-xp" hidden>
+        <p class="xp-award__line"><span class="xp-award__value" id="over-xp-earned">+0 XP</span> <span class="xp-award__level" id="over-xp-level">Player level 1</span></p>
+        <div class="xp-award__bar" aria-hidden="true"><span class="xp-award__fill" id="over-xp-fill"></span></div>
+        <p class="xp-award__meta" id="over-xp-meta">0 / 100 XP to level 2</p>
+      </div>
+
       <dl class="stat-grid" id="over-stats"></dl>
 
       <p class="notice" id="over-save-notice" aria-live="polite" hidden></p>
@@ -3451,7 +3921,7 @@ kbd {
       <div class="result-board" id="over-result-board">
         <div class="board" id="over-board">
           <div class="board__head">
-            <h3 class="board__title" id="over-board-title">Medium top 10</h3>
+            <h3 class="board__title" id="over-board-title">Your best runs</h3>
           </div>
           <ol class="board__list" id="over-board-list" aria-label="Top scores for this mode"></ol>
           <p class="board__empty" id="over-board-empty" hidden>No saved scores for this mode yet.</p>
@@ -3459,12 +3929,28 @@ kbd {
       </div>
 
       <div class="actions screen__actions">
+        <button class="cta cta--next" id="over-next" type="button" hidden>Next Level <kbd>N</kbd></button>
         <button class="cta" id="over-play-again" type="button">Run it back <kbd>Enter</kbd></button>
         <button class="button-secondary" id="over-share" type="button">Share score <kbd>S</kbd></button>
         <button class="button-secondary" id="over-armory" type="button">Armory <kbd>B</kbd></button>
         <button class="button-secondary" id="over-menu" type="button">Change mode</button>
       </div>
       <p class="notice" id="over-share-notice" aria-live="polite" hidden></p>
+    </div>
+
+    <!-- Milestone: a level beaten for the first time -->
+    <div class="milestone" id="milestone" role="dialog" aria-modal="true" aria-labelledby="milestone-title" hidden>
+      <div class="milestone__rays" aria-hidden="true"></div>
+      <div class="milestone__badge">
+        <span class="level-face milestone__face" id="milestone-face"></span>
+        <p class="milestone__eyebrow" id="milestone-eyebrow">Level 2 unlocked</p>
+        <h2 class="milestone__title" id="milestone-title">The Shrinking Ring</h2>
+        <p class="milestone__reward"><svg class="coin-icon" viewBox="0 0 24 24" aria-hidden="true"><circle class="coin-icon__rim" cx="12" cy="12" r="10.2"/><circle class="coin-icon__face" cx="12" cy="12" r="6.8"/><path class="coin-icon__mark" d="M12 7.4v2.8M12 13.8v2.8M7.4 12h2.8M13.8 12h2.8"/></svg> <span id="milestone-reward">+500 bonus coins</span></p>
+        <div class="actions milestone__actions">
+          <button class="cta" id="milestone-next" type="button">Play Level 2 <kbd>N</kbd></button>
+          <button class="button-secondary" id="milestone-close" type="button">Later</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3491,7 +3977,7 @@ kbd {
           </div>
 
           <div class="armory__section" id="armory-section-finishes" role="tabpanel" aria-labelledby="armory-tab-finishes">
-            <p class="armory__rate">Standard rounds bank coins: <b>⌊score ÷ 10⌋ × the level bonus</b> (Easy ×1, Medium ×2, Hard ×8, Demon ×100). Pick a finish to preview it on the pistol; your shots burst in its colors.</p>
+            <p class="armory__rate">Standard rounds bank coins: <b>⌊score ÷ 10⌋ × the level bonus</b> (Levels 1 and 2 ×1, Normal ×2, Hard ×8, Insane ×30, Demon God ×100, Ultra Demon ×200). Pick a finish to preview it on the pistol; your shots burst in its colors.</p>
             <div class="skin-list" id="skin-list" role="listbox" aria-label="Weapon finishes" aria-orientation="vertical"></div>
             <div class="skin-detail" id="skin-detail">
               <div class="skin-detail__top">
@@ -3624,8 +4110,13 @@ const PLAY_PHASES = deepFreeze({
 const MOVEMENT_TYPES = deepFreeze({
   STATIC: 'STATIC',
   LINEAR_BOUNCE: 'LINEAR_BOUNCE',
-  SINE_DRIFT: 'SINE_DRIFT'
+  SINE_DRIFT: 'SINE_DRIFT',
+  // Falls under gravity and bounces off the floor like a basketball.
+  GRAVITY_BOUNCE: 'GRAVITY_BOUNCE'
 });
+
+/** Which way a moving orb sets off: anywhere in 3D, side to side, or diagonally across the screen (no depth). */
+const HEADINGS = deepFreeze({ ANY: 'ANY', HORIZONTAL: 'HORIZONTAL', PLANAR: 'PLANAR' });
 
 const ROUND_END_REASONS = deepFreeze({
   TIME_EXPIRED: 'TIME_EXPIRED',
@@ -3637,8 +4128,11 @@ const ROUND_END_REASONS = deepFreeze({
    Every value the engine reads about a mode lives here and nowhere else.
    ------------------------------------------------------------------------- */
 
-/** The four ranked levels, easiest first. Each keeps its own leaderboards and pays coins. */
-const DIFFICULTY_KEYS = deepFreeze(['EASY', 'MEDIUM', 'HARD', 'DEMON']);
+/**
+ * The journey: seven levels, easiest first. Each opens only once the one
+ * before it is beaten (see UNLOCK_RULES), keeps its own leaderboard and pays coins.
+ */
+const DIFFICULTY_KEYS = deepFreeze(['SUPER_EASY', 'EASY', 'NORMAL', 'HARD', 'INSANE', 'DEMON_GOD', 'ULTRA_DEMON']);
 
 /** The Training Ground replays any level as practice: same orbs and scoring, nothing banked. */
 const TRAINING_MODE_KEY = 'TRAINING';
@@ -3647,11 +4141,14 @@ const TRAINING_MODE_KEY = 'TRAINING';
 const TIME_ATTACK_MODE_KEY = 'TIME_ATTACK';
 const GRIDSHOT_MODE_KEY = 'GRIDSHOT';
 
-/** Everything the menu can start, in card order (keys 1 to 7). */
-const MODE_KEYS = deepFreeze(['EASY', 'MEDIUM', 'HARD', 'DEMON', TRAINING_MODE_KEY, TIME_ATTACK_MODE_KEY, GRIDSHOT_MODE_KEY]);
+/** Everything the menu can start, in order (keys 1 to 9, then 0). */
+const MODE_KEYS = deepFreeze(DIFFICULTY_KEYS.concat([TRAINING_MODE_KEY, TIME_ATTACK_MODE_KEY, GRIDSHOT_MODE_KEY]));
+
+/** Levels from saves made before the journey: Medium became Normal and Demon became Demon God. */
+const LEGACY_LEVEL_KEYS = deepFreeze({ MEDIUM: 'NORMAL', DEMON: 'DEMON_GOD' });
 
 /** Keys from older saves that map onto a current mode (Adaptive became the Training Ground). */
-const LEGACY_MODE_KEYS = deepFreeze({ ADAPTIVE: TRAINING_MODE_KEY });
+const LEGACY_MODE_KEYS = deepFreeze(Object.assign({ ADAPTIVE: TRAINING_MODE_KEY }, LEGACY_LEVEL_KEYS));
 
 /**
  * What a round counts for: a RANKED level banks coins and posts to the
@@ -3695,148 +4192,225 @@ const GRIDSHOT_RULES = deepFreeze({
 });
 
 /**
- * Easy and Medium are forgiving; Hard and Demon keep small, drifting,
- * short-lived orbs, and Hard sits just under Demon. Harder levels pay more
- * per hit and multiply the coins a finished round banks (`coinMultiplier`);
- * the miss and explode penalties are the same everywhere. `hitboxScale`
- * widens the hit sphere past the drawn glass (1 = exact), `hueCenter`/
- * `hueSpread` restrict orb colors (null = the whole color wheel), and
- * `theme` selects the arena palette.
+ * The seven levels of the journey. Sizes and speeds are in screen pixels
+ * (per second, and per second squared for gravity). Every level starts
+ * from LEVEL_BASE and changes what makes it itself:
+ *   1 First Steps: huge still orbs that never run out.
+ *   2 The Shrinking Ring: big still orbs; each ring closes over 5 s.
+ *   3 Constant Motion: orbs slide slowly side to side.
+ *   4 The Bouncing Arena: orbs drop from the top and bounce like basketballs.
+ *   5 Chaotic Reflection: fast orbs ricochet off all four edges and leave
+ *     trails; rings close in 2 s.
+ *   6 The Ghost Matrix: small fast orbs vanish for a moment every half second.
+ *   7 Absolute Pandemonium: tiny orbs split in two when not hit within 1 s;
+ *     a miss shakes the screen and costs 300.
+ * Harder levels pay more per hit and multiply the coins a round banks
+ * (`coinMultiplier`). `hitboxScale` widens the hit sphere past the drawn
+ * glass (1 = exact), `hueCenter`/`hueSpread` restrict orb colors (null =
+ * the whole color wheel) and `theme` picks the arena palette.
  */
+const LEVEL_BASE = deepFreeze({
+  movementType: MOVEMENT_TYPES.STATIC,
+  heading: HEADINGS.ANY,
+  speedMin: 0,
+  speedMax: 0,
+  driftAccelerationMin: 0,
+  driftAccelerationMax: 0,
+  driftFrequencyMinHz: 0,
+  driftFrequencyMaxHz: 0,
+  // Gravity for GRAVITY_BOUNCE, and where new orbs appear ('TOP' drops them from above).
+  gravityPx: 0,
+  spawnBand: 'ANY',
+  // A fading trail behind each moving orb.
+  trail: false,
+  // { periodMs, hiddenMs, fadeMs }: every period the orb fades out, stays invisible, then fades back in.
+  cloak: null,
+  // { childScale, childLifespanMs, spreadDegrees }: an orb not hit before its ring closes splits in two.
+  split: null,
+  // Extra screen shake when a shot hits nothing (0: just the usual kick).
+  missShake: 0,
+  expirePenalty: 100,
+  whiffPenalty: 50,
+  hitboxScale: 1.06,
+  isEndless: false,
+  startingShields: 0,
+  magazineCapacity: 16,
+  reloadDurationMs: 900,
+  hueCenter: null,
+  hueSpread: null,
+  theme: 'RANGE',
+  roundType: ROUND_TYPES.RANKED,
+  adaptive: null
+});
+
 const DIFFICULTY_CONFIG = deepFreeze({
-  EASY: {
+  SUPER_EASY: Object.assign({}, LEVEL_BASE, {
+    key: 'SUPER_EASY',
+    number: 1,
+    label: 'Super Easy',
+    title: 'First Steps',
+    summary: 'Huge orbs that stay put and never run out. Take your time and get used to your mouse.',
+    radiusMin: 72,
+    radiusMax: 92,
+    lifespanMs: Infinity,
+    spawnIntervalMs: 420,
+    maxConcurrentTargets: 3,
+    baseHitScore: 80,
+    expirePenalty: 0,
+    whiffPenalty: 25,
+    coinMultiplier: 1,
+    hitboxScale: 1.15,
+    magazineCapacity: 24,
+    reloadDurationMs: 760,
+    accentHue: 140
+  }),
+  EASY: Object.assign({}, LEVEL_BASE, {
     key: 'EASY',
+    number: 2,
     label: 'Easy',
-    radiusMin: 40,
-    radiusMax: 50,
-    lifespanMs: 4000,
-    movementType: MOVEMENT_TYPES.STATIC,
-    speedMin: 0,
-    speedMax: 0,
-    driftAccelerationMin: 0,
-    driftAccelerationMax: 0,
-    driftFrequencyMinHz: 0,
-    driftFrequencyMaxHz: 0,
-    spawnIntervalMs: 1250,
+    title: 'The Shrinking Ring',
+    summary: 'Big still orbs, each with a ring that closes in 5 s. Hit them before the ring does.',
+    radiusMin: 44,
+    radiusMax: 56,
+    lifespanMs: 5000,
+    spawnIntervalMs: 1050,
     maxConcurrentTargets: 3,
     baseHitScore: 100,
-    expirePenalty: 100,
-    whiffPenalty: 50,
     coinMultiplier: 1,
     hitboxScale: 1.12,
-    isEndless: false,
-    startingShields: 0,
     magazineCapacity: 20,
     reloadDurationMs: 820,
-    accentHue: 152,
-    hueCenter: null,
-    hueSpread: null,
-    theme: 'RANGE',
-    roundType: ROUND_TYPES.RANKED,
-    adaptive: null
-  },
-  MEDIUM: {
-    key: 'MEDIUM',
-    label: 'Medium',
+    accentHue: 50
+  }),
+  NORMAL: Object.assign({}, LEVEL_BASE, {
+    key: 'NORMAL',
+    number: 3,
+    label: 'Normal',
+    title: 'Constant Motion',
+    summary: 'Orbs slide slowly side to side across the wall. Aim a little ahead of them.',
     radiusMin: 30,
     radiusMax: 38,
-    lifespanMs: 2600,
+    lifespanMs: 3400,
     movementType: MOVEMENT_TYPES.LINEAR_BOUNCE,
-    speedMin: 45,
-    speedMax: 90,
-    driftAccelerationMin: 0,
-    driftAccelerationMax: 0,
-    driftFrequencyMinHz: 0,
-    driftFrequencyMaxHz: 0,
-    spawnIntervalMs: 950,
+    heading: HEADINGS.HORIZONTAL,
+    speedMin: 70,
+    speedMax: 120,
+    spawnIntervalMs: 900,
     maxConcurrentTargets: 4,
     baseHitScore: 150,
-    expirePenalty: 100,
-    whiffPenalty: 50,
     coinMultiplier: 2,
     hitboxScale: 1.08,
-    isEndless: false,
-    startingShields: 0,
     magazineCapacity: 17,
     reloadDurationMs: 880,
-    accentHue: 40,
-    hueCenter: null,
-    hueSpread: null,
-    theme: 'RANGE',
-    roundType: ROUND_TYPES.RANKED,
-    adaptive: null
-  },
-  HARD: {
+    accentHue: 30
+  }),
+  HARD: Object.assign({}, LEVEL_BASE, {
     key: 'HARD',
+    number: 4,
     label: 'Hard',
-    radiusMin: 22,
-    radiusMax: 29,
-    lifespanMs: 1650,
-    movementType: MOVEMENT_TYPES.SINE_DRIFT,
-    speedMin: 100,
-    speedMax: 155,
-    driftAccelerationMin: 180,
-    driftAccelerationMax: 300,
-    driftFrequencyMinHz: 0.8,
-    driftFrequencyMaxHz: 1.7,
-    spawnIntervalMs: 740,
+    title: 'The Bouncing Arena',
+    summary: 'Orbs drop from the top and bounce across the arena like basketballs.',
+    radiusMin: 26,
+    radiusMax: 32,
+    lifespanMs: 3200,
+    movementType: MOVEMENT_TYPES.GRAVITY_BOUNCE,
+    heading: HEADINGS.HORIZONTAL,
+    speedMin: 90,
+    speedMax: 170,
+    gravityPx: 1500,
+    spawnBand: 'TOP',
+    spawnIntervalMs: 850,
     maxConcurrentTargets: 4,
     baseHitScore: 220,
-    expirePenalty: 100,
-    whiffPenalty: 50,
     coinMultiplier: 8,
-    hitboxScale: 1.04,
-    isEndless: false,
-    startingShields: 0,
-    magazineCapacity: 16,
-    reloadDurationMs: 900,
-    accentHue: 22,
-    hueCenter: null,
-    hueSpread: null,
-    theme: 'RANGE',
-    roundType: ROUND_TYPES.RANKED,
-    adaptive: null
-  },
-  DEMON: {
-    key: 'DEMON',
-    label: 'Demon',
+    accentHue: 0
+  }),
+  INSANE: Object.assign({}, LEVEL_BASE, {
+    key: 'INSANE',
+    number: 5,
+    label: 'Insane',
+    title: 'Chaotic Reflection',
+    summary: 'Fast orbs ricochet off every edge and leave trails. Rings close in 2 s.',
+    radiusMin: 22,
+    radiusMax: 28,
+    lifespanMs: 2000,
+    movementType: MOVEMENT_TYPES.LINEAR_BOUNCE,
+    heading: HEADINGS.PLANAR,
+    speedMin: 320,
+    speedMax: 440,
+    trail: true,
+    spawnIntervalMs: 700,
+    maxConcurrentTargets: 4,
+    baseHitScore: 260,
+    coinMultiplier: 30,
+    accentHue: 285
+  }),
+  DEMON_GOD: Object.assign({}, LEVEL_BASE, {
+    key: 'DEMON_GOD',
+    number: 6,
+    label: 'Demon God',
+    title: 'The Ghost Matrix',
+    summary: 'Small, fast orbs vanish for a moment every half second. Follow their path and fire blind.',
     radiusMin: 18,
     radiusMax: 24,
-    lifespanMs: 1400,
-    movementType: MOVEMENT_TYPES.SINE_DRIFT,
-    speedMin: 125,
-    speedMax: 190,
-    driftAccelerationMin: 270,
-    driftAccelerationMax: 430,
-    driftFrequencyMinHz: 1.0,
-    driftFrequencyMaxHz: 2.2,
+    lifespanMs: 2200,
+    movementType: MOVEMENT_TYPES.LINEAR_BOUNCE,
+    heading: HEADINGS.PLANAR,
+    speedMin: 240,
+    speedMax: 330,
+    cloak: { periodMs: 500, hiddenMs: 150, fadeMs: 50 },
     spawnIntervalMs: 680,
-    maxConcurrentTargets: 5,
+    maxConcurrentTargets: 4,
     baseHitScore: 300,
-    expirePenalty: 100,
-    whiffPenalty: 50,
     coinMultiplier: 100,
-    hitboxScale: 1.03,
-    isEndless: false,
-    startingShields: 0,
+    hitboxScale: 1.05,
     magazineCapacity: 15,
     reloadDurationMs: 940,
     accentHue: 2,
     hueCenter: 5,
     hueSpread: 45,
-    theme: 'DEMON',
-    roundType: ROUND_TYPES.RANKED,
-    adaptive: null
-  }
+    theme: 'DEMON'
+  }),
+  ULTRA_DEMON: Object.assign({}, LEVEL_BASE, {
+    key: 'ULTRA_DEMON',
+    number: 7,
+    label: 'Ultra Demon',
+    title: 'Absolute Pandemonium',
+    summary: 'Tiny orbs split in two if you take longer than 1 s. A miss shakes the screen and costs 300.',
+    radiusMin: 11,
+    radiusMax: 14,
+    lifespanMs: 1000,
+    movementType: MOVEMENT_TYPES.LINEAR_BOUNCE,
+    heading: HEADINGS.PLANAR,
+    speedMin: 360,
+    speedMax: 480,
+    split: { childScale: 0.78, childLifespanMs: 1400, spreadDegrees: 38 },
+    missShake: 16,
+    whiffPenalty: 300,
+    spawnIntervalMs: 560,
+    maxConcurrentTargets: 5,
+    baseHitScore: 420,
+    coinMultiplier: 200,
+    hitboxScale: 1.12,
+    magazineCapacity: 15,
+    reloadDurationMs: 940,
+    accentHue: 350,
+    hueCenter: 355,
+    hueSpread: 30,
+    theme: 'DEMON'
+  })
 });
 
-/** Maps a stored or requested level key to one of the four ranked levels, or null. */
+/** Maps a stored or requested level key (current, or from before the journey) to one of the seven levels, or null. */
 function resolveDifficultyKey(candidate) {
   if (typeof candidate !== 'string') {
     return null;
   }
   const upper = candidate.toUpperCase();
-  return DIFFICULTY_KEYS.indexOf(upper) !== -1 ? upper : null;
+  if (DIFFICULTY_KEYS.indexOf(upper) !== -1) {
+    return upper;
+  }
+  return Object.prototype.hasOwnProperty.call(LEGACY_LEVEL_KEYS, upper) ? LEGACY_LEVEL_KEYS[upper] : null;
 }
 
 /** Maps a stored or requested menu mode (a level, a special mode, or a legacy key) to a current key, or null. */
@@ -3889,7 +4463,7 @@ const GRIDSHOT_CONFIG = deepFreeze({
 });
 
 /**
- * The config a round runs on. The four levels run as they are. The
+ * The config a round runs on. The seven levels run as they are. The
  * Training Ground and Time Attack copy the chosen level's orbs (Training
  * keeps its scoring, Time Attack swaps the point penalties for time ones),
  * and Gridshot uses its own fixed grid of orbs. Only ranked levels bank coins.
@@ -3902,7 +4476,7 @@ function createRoundConfig(modeKey, levelKey, gridNodes) {
     const nodes = GRIDSHOT_RULES.nodeOptions.indexOf(gridNodes) !== -1 ? gridNodes : GRIDSHOT_RULES.nodeOptions[0];
     return deepFreeze(Object.assign({}, GRIDSHOT_CONFIG, { label: 'Gridshot · ' + nodes + ' nodes', gridNodes: nodes }));
   }
-  const level = DIFFICULTY_CONFIG[levelKey] || DIFFICULTY_CONFIG.MEDIUM;
+  const level = DIFFICULTY_CONFIG[levelKey] || DIFFICULTY_CONFIG.SUPER_EASY;
   if (modeKey === TIME_ATTACK_MODE_KEY) {
     return deepFreeze(Object.assign({}, level, {
       label: 'Time Attack · ' + level.label,
@@ -3934,49 +4508,63 @@ function isValidRoundSeconds(seconds) {
 }
 
 /**
- * Level unlocks. A new player starts with Easy only. Finishing a standard
- * round with a fair score opens the next level: Easy → Medium → Hard →
- * Demon. Each target is set for a 60 s round and scales with the round
- * length; rounds shorter than 30 s do not count. The targets come from
- * simulated players of four skill levels: in a 60 s round a first try
- * scores about 2,000 to 10,000, a beginner about 23,000, a player who has
- * practised a little 34,000 to 44,000 and a casual regular over 50,000. So
- * a few rounds of practice open each level, a first try does not. The
- * leaderboard server applies the same numbers (UNLOCK_RULES in the server
- * code at the end of this file), so change both together.
+ * Beating a level. A new player starts with Level 1 only. A standard round
+ * of 30 s or more that reaches the level's target beats it: that opens the
+ * next level, and beating Level 7 earns the golden crown. Each target is set
+ * for a 60 s round and scales with the round length. The targets come from
+ * simulated players of different skill levels (a first try does not reach
+ * them; a few rounds of practice do). The leaderboard server applies the
+ * same numbers (UNLOCK_RULES in the server code at the end of this file),
+ * so change both together.
  */
 const UNLOCK_RULES = deepFreeze({
   minimumRoundSeconds: 30,
-  steps: [
-    { level: 'EASY', unlocks: 'MEDIUM', scorePerMinute: 30000 },
-    { level: 'MEDIUM', unlocks: 'HARD', scorePerMinute: 35000 },
-    { level: 'HARD', unlocks: 'DEMON', scorePerMinute: 30000 }
-  ]
+  scorePerMinute: {
+    SUPER_EASY: 12000,
+    EASY: 30000,
+    NORMAL: 35000,
+    HARD: 30000,
+    INSANE: 30000,
+    DEMON_GOD: 30000,
+    ULTRA_DEMON: 20000
+  }
 });
 
 const LevelUnlocks = {
-  /** The step a level's rounds count toward (null for Demon, the last level). */
+  /**
+   * What beating a level earns: the next level (null after Level 7, which
+   * earns the crown instead) and the target per minute.
+   * @returns {{level: string, unlocks: string|null, crown: boolean, scorePerMinute: number}|null}
+   */
   stepFrom(levelKey) {
-    return UNLOCK_RULES.steps.find((step) => step.level === levelKey) || null;
+    const index = DIFFICULTY_KEYS.indexOf(levelKey);
+    if (index === -1) {
+      return null;
+    }
+    const next = index + 1 < DIFFICULTY_KEYS.length ? DIFFICULTY_KEYS[index + 1] : null;
+    return { level: levelKey, unlocks: next, crown: next === null, scorePerMinute: UNLOCK_RULES.scorePerMinute[levelKey] };
   },
 
-  /** The step that opens a level (null for Easy, which is always open). */
+  /** The step that opens a level (null for Level 1, which is always open). */
   stepOpening(levelKey) {
-    return UNLOCK_RULES.steps.find((step) => step.unlocks === levelKey) || null;
+    const index = DIFFICULTY_KEYS.indexOf(levelKey);
+    return index > 0 ? LevelUnlocks.stepFrom(DIFFICULTY_KEYS[index - 1]) : null;
   },
 
-  /** The score a round of this length needs on the step's level. */
+  /** The score a round of this length needs to beat the step's level. */
   targetScore(step, roundSeconds) {
     return Math.ceil(step.scorePerMinute * roundSeconds / 60);
   },
 
+  /** True when a finished standard round of this length beats the level. */
+  beats(levelKey, score, roundSeconds) {
+    const step = LevelUnlocks.stepFrom(levelKey);
+    return step !== null && roundSeconds >= UNLOCK_RULES.minimumRoundSeconds && score >= LevelUnlocks.targetScore(step, roundSeconds);
+  },
+
   /** The level a finished standard round opens, or null. */
   levelEarnedBy(levelKey, score, roundSeconds) {
-    const step = LevelUnlocks.stepFrom(levelKey);
-    if (step === null || roundSeconds < UNLOCK_RULES.minimumRoundSeconds) {
-      return null;
-    }
-    return score >= LevelUnlocks.targetScore(step, roundSeconds) ? step.unlocks : null;
+    return LevelUnlocks.beats(levelKey, score, roundSeconds) ? LevelUnlocks.stepFrom(levelKey).unlocks : null;
   },
 
   /** What opens a locked level, for the round length now chosen in the menu ("score 30,000 on Easy in a 60 s round"). */
@@ -3985,11 +4573,54 @@ const LevelUnlocks = {
     if (step === null) {
       return '';
     }
-    const fromLabel = DIFFICULTY_CONFIG[step.level].label;
+    return LevelUnlocks.describeTarget(step.level, roundSeconds);
+  },
+
+  /** What beats a level ("score 30,000 on Easy in a 60 s round"). */
+  describeTarget(levelKey, roundSeconds) {
+    const step = LevelUnlocks.stepFrom(levelKey);
+    const label = DIFFICULTY_CONFIG[levelKey].label;
     if (roundSeconds < UNLOCK_RULES.minimumRoundSeconds) {
-      return 'play ' + fromLabel + ' in a round of ' + UNLOCK_RULES.minimumRoundSeconds + ' s or more';
+      return 'play ' + label + ' in a round of ' + UNLOCK_RULES.minimumRoundSeconds + ' s or more';
     }
-    return 'score ' + Formatters.formatInteger(LevelUnlocks.targetScore(step, roundSeconds)) + ' on ' + fromLabel + ' in a ' + roundSeconds + ' s round';
+    return 'score ' + Formatters.formatInteger(LevelUnlocks.targetScore(step, roundSeconds)) + ' on ' + label + ' in a ' + roundSeconds + ' s round';
+  }
+};
+
+/**
+ * Experience. Every orb broken in any mode earns XP for its accuracy: 2 for
+ * a hit on the edge up to 8 near the middle, 10 for a bullseye. XP adds up
+ * for the life of the account, is never spent and ranks the XP leaderboard.
+ * Player levels follow it: level 2 at 100 XP, then each level needs 100 XP
+ * more than the one before (level 10 at 4,500, level 20 at 19,000).
+ */
+const XP_RULES = deepFreeze({ bullseyeXp: 10, edgeXp: 2, centerXp: 8, levelStepXp: 100 });
+
+/** The leaderboard tab that ranks players by lifetime XP. */
+const XP_BOARD_KEY = 'XP';
+
+const Experience = {
+  /** XP for one broken orb: precision 0 (edge) to 1 (dead center). */
+  forHit(precision, isBullseye) {
+    if (isBullseye) {
+      return XP_RULES.bullseyeXp;
+    }
+    return XP_RULES.edgeXp + Math.round((XP_RULES.centerXp - XP_RULES.edgeXp) * MathUtils.clamp(precision, 0, 1));
+  },
+
+  /** Total XP needed to reach a player level (level 1 needs none). */
+  xpForLevel(level) {
+    return XP_RULES.levelStepXp * (level - 1) * level / 2;
+  },
+
+  /** The player level for an XP total, and the XP into and needed for the next one. */
+  progress(xp) {
+    let level = Math.max(1, Math.floor((1 + Math.sqrt(1 + 8 * Math.max(0, xp) / XP_RULES.levelStepXp)) / 2));
+    while (Experience.xpForLevel(level + 1) <= xp) {
+      level += 1;
+    }
+    const floor = Experience.xpForLevel(level);
+    return { level: level, intoLevel: xp - floor, levelSpan: Experience.xpForLevel(level + 1) - floor };
   }
 };
 
@@ -4038,6 +4669,8 @@ const GAME_RULES = deepFreeze({
   attractIdleBeforeDemoMs: 2400,
   attractShotIntervalMs: 1900,
   pointsPerCoin: 10,
+  // Beating a level for the first time (opening the next one, or the crown) pays this bonus.
+  milestoneBonusCoins: 500,
   maximumCoinBalance: 999999999,
   demonEmberIntervalMs: 70,
   demonEmberMaximum: 48,
@@ -6616,6 +7249,32 @@ class SoundFXEngine {
     });
   }
 
+  /** Ultra Demon split: two quick chirps sliding apart, one up and one down. */
+  playSplit(panValue = 0) {
+    return this.runVoice('split', (context, startTime) => {
+      const ownedNodes = [];
+      const voiceOutput = this.createVoiceOutput(panValue * 0.6, ownedNodes);
+      let longest = null;
+      [[880, 1760], [880, 440]].forEach((sweep) => {
+        const chirp = context.createOscillator();
+        chirp.type = 'triangle';
+        chirp.frequency.setValueAtTime(sweep[0], startTime);
+        chirp.frequency.exponentialRampToValueAtTime(sweep[1], startTime + 0.11);
+        const envelope = context.createGain();
+        envelope.gain.setValueAtTime(0.0001, startTime);
+        envelope.gain.exponentialRampToValueAtTime(0.12, startTime + 0.006);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.13);
+        chirp.connect(envelope);
+        envelope.connect(voiceOutput);
+        ownedNodes.push(chirp, envelope);
+        chirp.start(startTime);
+        chirp.stop(startTime + 0.14);
+        longest = chirp;
+      });
+      this.retireVoiceWhenEnded(longest, ownedNodes);
+    });
+  }
+
   /* ---------------------------------------------------------------------
      playComboStreak — pentatonic-stepping major arpeggio
      --------------------------------------------------------------------- */
@@ -6723,111 +7382,40 @@ class SoundFXEngine {
   }
 
   /* ---------------------------------------------------------------------
-     playGameOver — detuned sawtooth drone falling under an LFO wobble
+     End of round: the victory fanfare and the comic fail
      --------------------------------------------------------------------- */
 
-  playGameOver() {
-    return this.runVoice('gameOver', (context, startTime) => {
-      const ownedNodes = [];
-      const voiceOutput = this.createVoiceOutput(0, ownedNodes);
-      const durationSeconds = 3.3;
-      const stopTime = startTime + durationSeconds + 0.05;
-
-      // Output envelope: quick swell, hold, then a long linear fade.
-      const outputEnvelope = context.createGain();
-      outputEnvelope.gain.setValueAtTime(0, startTime);
-      outputEnvelope.gain.linearRampToValueAtTime(0.5, startTime + 0.09);
-      outputEnvelope.gain.setValueAtTime(0.5, startTime + 0.9);
-      outputEnvelope.gain.linearRampToValueAtTime(0, startTime + durationSeconds);
-      outputEnvelope.connect(voiceOutput);
-      ownedNodes.push(outputEnvelope);
-
-      // Amplitude wobble: an LFO adds ±0.42 onto a 0.58 base gain.
-      const wobbleGain = context.createGain();
-      wobbleGain.gain.setValueAtTime(0.58, startTime);
-      wobbleGain.connect(outputEnvelope);
-      ownedNodes.push(wobbleGain);
-
-      const amplitudeLfo = context.createOscillator();
-      amplitudeLfo.type = 'sine';
-      amplitudeLfo.frequency.setValueAtTime(6.2, startTime);
-      amplitudeLfo.frequency.linearRampToValueAtTime(1.8, startTime + durationSeconds);
-      const lfoDepth = context.createGain();
-      lfoDepth.gain.setValueAtTime(0.42, startTime);
-      amplitudeLfo.connect(lfoDepth);
-      lfoDepth.connect(wobbleGain.gain);
-      ownedNodes.push(amplitudeLfo, lfoDepth);
-
-      // Darkening low-pass sweep.
-      const darkFilter = context.createBiquadFilter();
-      darkFilter.type = 'lowpass';
-      darkFilter.Q.setValueAtTime(4, startTime);
-      darkFilter.frequency.setValueAtTime(2400, startTime);
-      darkFilter.frequency.exponentialRampToValueAtTime(160, startTime + durationSeconds);
-      darkFilter.connect(wobbleGain);
-      ownedNodes.push(darkFilter);
-
-      // Detuned sawtooth stack gliding down two octaves (G3 → G1).
-      const detuneSpreadCents = [-17, -7, 0, 6, 15];
-      for (let voiceIndex = 0; voiceIndex < detuneSpreadCents.length; voiceIndex += 1) {
-        const sawOscillator = context.createOscillator();
-        sawOscillator.type = 'sawtooth';
-        sawOscillator.detune.setValueAtTime(detuneSpreadCents[voiceIndex], startTime);
-        sawOscillator.frequency.setValueAtTime(196, startTime);
-        sawOscillator.frequency.exponentialRampToValueAtTime(49, startTime + durationSeconds);
-        const sawGain = context.createGain();
-        sawGain.gain.setValueAtTime(0.16, startTime);
-        sawOscillator.connect(sawGain);
-        sawGain.connect(darkFilter);
-        ownedNodes.push(sawOscillator, sawGain);
-        sawOscillator.start(startTime);
-        sawOscillator.stop(stopTime);
-      }
-
-      // Sub-octave sawtooth for weight.
-      const subOscillator = context.createOscillator();
-      subOscillator.type = 'sawtooth';
-      subOscillator.frequency.setValueAtTime(98, startTime);
-      subOscillator.frequency.exponentialRampToValueAtTime(24.5, startTime + durationSeconds);
-      const subGain = context.createGain();
-      subGain.gain.setValueAtTime(0.2, startTime);
-      subOscillator.connect(subGain);
-      subGain.connect(darkFilter);
-      ownedNodes.push(subOscillator, subGain);
-
-      amplitudeLfo.start(startTime);
-      subOscillator.start(startTime);
-      amplitudeLfo.stop(stopTime);
-      subOscillator.stop(stopTime);
-
-      this.retireVoiceWhenEnded(subOscillator, ownedNodes);
-    });
-  }
-
-  /* ---------------------------------------------------------------------
-     playVictory — a bright fanfare for a round that ends on a positive score:
-     a quick C-major run up to the octave, a held major chord with a little
-     vibrato, and two sparkles on top
-     --------------------------------------------------------------------- */
-
+  /**
+   * Any score of 1 point or more: a quick run up the C major scale, then a
+   * brassy I–IV–V–I chord progression (C, F, G, C) landing on a held,
+   * shimmering C major chord over a low root, with sparkles on top.
+   */
   playVictory() {
     return this.runVoice('victory', (context, startTime) => {
       const ownedNodes = [];
       const voiceOutput = this.createVoiceOutput(0, ownedNodes);
+      // Brass section: sawtooth through a lowpass, warm rather than buzzy.
+      const brass = context.createBiquadFilter();
+      brass.type = 'lowpass';
+      brass.frequency.setValueAtTime(2200, startTime);
+      brass.Q.setValueAtTime(0.9, startTime);
+      brass.connect(voiceOutput);
+      ownedNodes.push(brass);
       // The voice is retired when its longest note ends.
       let longestSource = null;
       let longestEnd = 0;
-      const tone = (type, frequency, at, peak, decaySeconds, vibratoHz) => {
+      const tone = (type, frequency, at, peak, decaySeconds, vibratoHz, destination) => {
         const oscillator = context.createOscillator();
         oscillator.type = type;
         oscillator.frequency.setValueAtTime(frequency, startTime + at);
         const envelope = context.createGain();
         envelope.gain.setValueAtTime(0.0001, startTime);
         envelope.gain.setValueAtTime(0.0001, startTime + at);
-        envelope.gain.exponentialRampToValueAtTime(peak, startTime + at + 0.012);
+        envelope.gain.exponentialRampToValueAtTime(peak, startTime + at + 0.018);
+        envelope.gain.setValueAtTime(peak, startTime + at + decaySeconds * 0.55);
         envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + at + decaySeconds);
         oscillator.connect(envelope);
-        envelope.connect(voiceOutput);
+        envelope.connect(destination || voiceOutput);
         ownedNodes.push(oscillator, envelope);
         if (vibratoHz > 0) {
           const vibrato = context.createOscillator();
@@ -6848,53 +7436,112 @@ class SoundFXEngine {
         }
       };
 
-      // The run: C5 E5 G5, then C6.
-      const run = [523.25, 659.25, 783.99, 1046.5];
-      for (let index = 0; index < run.length; index += 1) {
-        const at = index * 0.085;
-        tone('triangle', run[index], at, 0.26, 0.22, 0);
-        tone('square', run[index], at, 0.045, 0.16, 0);
+      // The run up the scale: C5 D5 E5 F5 G5 A5 B5 C6.
+      const scale = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.5];
+      for (let index = 0; index < scale.length; index += 1) {
+        tone('triangle', scale[index], index * 0.045, 0.18, 0.16, 0);
       }
-      // The held chord: C5 E5 G5 C6.
-      const chordAt = 0.36;
-      const chord = [523.25, 659.25, 783.99, 1046.5];
-      for (let index = 0; index < chord.length; index += 1) {
-        tone('triangle', chord[index], chordAt, 0.13, 1.05, 5.5);
+      // I–IV–V–I: C, F, G, then C held with vibrato.
+      const progression = [
+        { at: 0.4, notes: [261.63, 329.63, 392, 523.25], length: 0.2 },
+        { at: 0.62, notes: [349.23, 440, 523.25, 698.46], length: 0.2 },
+        { at: 0.84, notes: [392, 493.88, 587.33, 783.99], length: 0.22 },
+        { at: 1.08, notes: [523.25, 659.25, 783.99, 1046.5], length: 1.35 }
+      ];
+      for (let chordIndex = 0; chordIndex < progression.length; chordIndex += 1) {
+        const chord = progression[chordIndex];
+        const isFinal = chordIndex === progression.length - 1;
+        for (let noteIndex = 0; noteIndex < chord.notes.length; noteIndex += 1) {
+          tone('sawtooth', chord.notes[noteIndex], chord.at, 0.045, chord.length + 0.08, isFinal ? 5.5 : 0, brass);
+          tone('triangle', chord.notes[noteIndex] * 2, chord.at, isFinal ? 0.045 : 0.03, chord.length, isFinal ? 5.5 : 0);
+        }
+        tone('sine', chord.notes[0] / 2, chord.at, 0.15, chord.length + 0.1, 0);
       }
-      tone('sine', 261.63, chordAt, 0.12, 0.9, 0);
-      // Sparkles.
-      tone('sine', 2093, chordAt + 0.1, 0.06, 0.35, 0);
-      tone('sine', 2637, chordAt + 0.22, 0.05, 0.4, 0);
+      // Sparkles over the last chord.
+      tone('sine', 2093, 1.16, 0.05, 0.4, 0);
+      tone('sine', 2637, 1.3, 0.045, 0.45, 0);
+      tone('sine', 3136, 1.44, 0.04, 0.5, 0);
 
       this.retireVoiceWhenEnded(longestSource, ownedNodes);
     });
   }
 
-  /** A round that ends on exactly zero: a soft two-note "done", neither a win nor a loss. */
-  playRoundOverNeutral() {
-    return this.runVoice('roundOverNeutral', (context, startTime) => {
+  /**
+   * A score of 0 or less: a comic trombone "wah, wah, waaah" (B♭3, A3, then
+   * A♭3 sliding down a minor third to F3 with a growing wobble, through a
+   * plunger-mute filter that opens and closes on every note), then a low,
+   * muffled bass thump.
+   */
+  playFail() {
+    return this.runVoice('fail', (context, startTime) => {
       const ownedNodes = [];
       const voiceOutput = this.createVoiceOutput(0, ownedNodes);
-      let lastSource = null;
-      const notes = [{ frequency: 392, at: 0 }, { frequency: 523.25, at: 0.13 }];
+      const mute = context.createBiquadFilter();
+      mute.type = 'lowpass';
+      mute.Q.setValueAtTime(5, startTime);
+      mute.connect(voiceOutput);
+      const horn = context.createOscillator();
+      horn.type = 'sawtooth';
+      const level = context.createGain();
+      level.gain.setValueAtTime(0.0001, startTime);
+      horn.connect(level);
+      level.connect(mute);
+      const wobble = context.createOscillator();
+      wobble.frequency.setValueAtTime(5.5, startTime);
+      const wobbleDepth = context.createGain();
+      wobbleDepth.gain.setValueAtTime(0, startTime);
+      wobble.connect(wobbleDepth);
+      wobbleDepth.connect(horn.frequency);
+      ownedNodes.push(mute, horn, level, wobble, wobbleDepth);
+
+      const notes = [
+        { at: 0, length: 0.26, from: 233.08, to: 226 },
+        { at: 0.32, length: 0.26, from: 220, to: 213 },
+        { at: 0.64, length: 1.0, from: 207.65, to: 174.61 }
+      ];
       for (let index = 0; index < notes.length; index += 1) {
         const note = notes[index];
-        const oscillator = context.createOscillator();
-        oscillator.type = 'triangle';
-        oscillator.frequency.setValueAtTime(note.frequency, startTime + note.at);
-        const envelope = context.createGain();
-        envelope.gain.setValueAtTime(0.0001, startTime);
-        envelope.gain.setValueAtTime(0.0001, startTime + note.at);
-        envelope.gain.exponentialRampToValueAtTime(0.18, startTime + note.at + 0.015);
-        envelope.gain.exponentialRampToValueAtTime(0.0001, startTime + note.at + 0.45);
-        oscillator.connect(envelope);
-        envelope.connect(voiceOutput);
-        ownedNodes.push(oscillator, envelope);
-        oscillator.start(startTime + note.at);
-        oscillator.stop(startTime + note.at + 0.47);
-        lastSource = oscillator;
+        const begin = startTime + note.at;
+        const end = begin + note.length;
+        horn.frequency.setValueAtTime(note.from, begin);
+        horn.frequency.linearRampToValueAtTime(note.to, end);
+        level.gain.setValueAtTime(0.0001, begin);
+        level.gain.exponentialRampToValueAtTime(0.22, begin + 0.03);
+        level.gain.setValueAtTime(0.22, end - 0.09);
+        level.gain.exponentialRampToValueAtTime(0.0001, end);
+        // The mute opens and closes: "wah".
+        mute.frequency.setValueAtTime(320, begin);
+        mute.frequency.exponentialRampToValueAtTime(1500, begin + Math.min(0.14, note.length * 0.4));
+        mute.frequency.exponentialRampToValueAtTime(380, end);
       }
-      this.retireVoiceWhenEnded(lastSource, ownedNodes);
+      wobbleDepth.gain.setValueAtTime(0, startTime + 0.64);
+      wobbleDepth.gain.linearRampToValueAtTime(7, startTime + 1.5);
+      horn.start(startTime);
+      horn.stop(startTime + 1.7);
+      wobble.start(startTime);
+      wobble.stop(startTime + 1.7);
+
+      // The thump: a low sine dropping in pitch, muffled.
+      const thumpAt = startTime + 1.58;
+      const thump = context.createOscillator();
+      thump.type = 'sine';
+      thump.frequency.setValueAtTime(92, thumpAt);
+      thump.frequency.exponentialRampToValueAtTime(38, thumpAt + 0.4);
+      const thumpLevel = context.createGain();
+      thumpLevel.gain.setValueAtTime(0.0001, startTime);
+      thumpLevel.gain.setValueAtTime(0.0001, thumpAt);
+      thumpLevel.gain.exponentialRampToValueAtTime(0.5, thumpAt + 0.015);
+      thumpLevel.gain.exponentialRampToValueAtTime(0.0001, thumpAt + 0.45);
+      const thumpMuffle = context.createBiquadFilter();
+      thumpMuffle.type = 'lowpass';
+      thumpMuffle.frequency.setValueAtTime(220, startTime);
+      thump.connect(thumpLevel);
+      thumpLevel.connect(thumpMuffle);
+      thumpMuffle.connect(voiceOutput);
+      ownedNodes.push(thump, thumpLevel, thumpMuffle);
+      thump.start(thumpAt);
+      thump.stop(thumpAt + 0.5);
+      this.retireVoiceWhenEnded(thump, ownedNodes);
     });
   }
 
@@ -7587,8 +8234,9 @@ class Target {
    * @param {{
    *   id: string, birthTimestamp: number, lifespanMs: number, radius: number,
    *   position: Vector3D, velocity: Vector3D, hue: number, movementType: string,
-   *   cruiseSpeed: number, drift: object, isDecorative?: boolean
-   * }} spec radius, speeds and drift in world units (meters, m/s, m/s²)
+   *   cruiseSpeed: number, drift: object, isDecorative?: boolean,
+   *   gravity?: number, cloak?: object, split?: object, trail?: boolean, generation?: number
+   * }} spec radius, speeds, drift and gravity in world units (meters, m/s, m/s²)
    */
   constructor(spec) {
     this.id = spec.id;
@@ -7611,8 +8259,18 @@ class Target {
     this.visualScale = 0;
     this.movementType = spec.movementType;
     this.cruiseSpeed = spec.cruiseSpeed;
-    this.maximumSpeed = Math.max(spec.cruiseSpeed * 1.65, 0.0001);
+    this.gravity = typeof spec.gravity === 'number' ? spec.gravity : 0;
+    // Falling orbs speed up well past their launch speed, so only drifting ones are capped.
+    this.maximumSpeed = this.movementType === MOVEMENT_TYPES.GRAVITY_BOUNCE ? Infinity : Math.max(spec.cruiseSpeed * 1.65, 0.0001);
     this.drift = spec.drift;
+    this.cloak = spec.cloak || null;
+    this.cloakAmount = 1;
+    // Orbs that split do so once: their halves (generation 1) expire like any orb.
+    this.split = spec.split || null;
+    this.generation = typeof spec.generation === 'number' ? spec.generation : 0;
+    // Trail: the last few positions, newest first, for the fading line drawn behind the orb.
+    this.trail = spec.trail ? [] : null;
+    this.trailClockMs = 0;
 
     this.ageMs = 0;
     this.remainingFraction = 1;
@@ -7639,6 +8297,31 @@ class Target {
     this.applyForces(deltaSeconds);
     this.checkBoundaries(bounds);
     this.evaluateLifespan(gameClockMs, deltaSeconds);
+    if (this.trail !== null) {
+      this.recordTrail(deltaSeconds);
+    }
+  }
+
+  /** Keeps a position every 18 ms, 12 deep (about a fifth of a second of path). */
+  recordTrail(deltaSeconds) {
+    this.trailClockMs += deltaSeconds * 1000;
+    if (this.trailClockMs < 18 && this.trail.length > 0) {
+      return;
+    }
+    this.trailClockMs = 0;
+    const point = this.trail.length >= 12 ? this.trail.pop() : new Vector3D();
+    point.copyFrom(this.position);
+    this.trail.unshift(point);
+  }
+
+  /** True when the orb should split in two instead of exploding. */
+  get splitsOnExpiry() {
+    return this.split !== null && this.generation === 0 && !this.isDecorative;
+  }
+
+  /** Faded out by its cloak (it can still be hit). */
+  get isCloaked() {
+    return this.cloakAmount < 0.05;
   }
 
   /** Accumulates forces and integrates with semi-implicit Euler in 3D. */
@@ -7650,6 +8333,10 @@ class Target {
         return;
       }
       case MOVEMENT_TYPES.LINEAR_BOUNCE: {
+        break;
+      }
+      case MOVEMENT_TYPES.GRAVITY_BOUNCE: {
+        this.acceleration.y -= this.gravity;
         break;
       }
       case MOVEMENT_TYPES.SINE_DRIFT: {
@@ -7728,7 +8415,10 @@ class Target {
       this.velocity.y = 0;
     } else if (this.position.y < minimumY) {
       this.position.y = minimumY;
-      this.velocity.y = Math.abs(this.velocity.y);
+      // A falling orb bounces back up to 90% of the arena height every time, like a basketball.
+      this.velocity.y = this.movementType === MOVEMENT_TYPES.GRAVITY_BOUNCE
+        ? Math.sqrt(2 * this.gravity * (maximumY - minimumY) * 0.9)
+        : Math.abs(this.velocity.y);
       collided = true;
     } else if (this.position.y > maximumY) {
       this.position.y = maximumY;
@@ -7804,12 +8494,35 @@ class Target {
       const flicker = 0.5 + 0.5 * Math.sin(this.flickerPhase);
       lifeAlpha = 1 - this.urgency * 0.3 * flicker;
     }
-    this.alpha = MathUtils.clamp(spawnAlpha * lifeAlpha, 0, 1);
+    this.cloakAmount = this.cloak !== null ? Target.cloakVisibility(this.cloak, this.ageMs - this.spawnAnimationMs) : 1;
+    this.alpha = MathUtils.clamp(spawnAlpha * lifeAlpha * this.cloakAmount, 0, 1);
 
     if (this.ageMs >= this.lifespanMs) {
       this.hasExpired = true;
       this.isAlive = false;
     }
+  }
+
+  /**
+   * Cloak opacity at a point of the cycle: visible, a quick fade out, fully
+   * invisible for `hiddenMs`, then a quick fade back in, every `periodMs`.
+   */
+  static cloakVisibility(cloak, cycleMs) {
+    if (cycleMs <= 0) {
+      return 1;
+    }
+    const phase = cycleMs % cloak.periodMs;
+    const visibleMs = cloak.periodMs - cloak.hiddenMs - 2 * cloak.fadeMs;
+    if (phase < visibleMs) {
+      return 1;
+    }
+    if (phase < visibleMs + cloak.fadeMs) {
+      return 1 - (phase - visibleMs) / cloak.fadeMs;
+    }
+    if (phase < visibleMs + cloak.fadeMs + cloak.hiddenMs) {
+      return 0;
+    }
+    return (phase - visibleMs - cloak.fadeMs - cloak.hiddenMs) / cloak.fadeMs;
   }
 
   captureRenderState(interpolationAlpha) {
@@ -7937,7 +8650,7 @@ class TargetSpawner {
    * Rejection-samples a screen position inside the safe zone that clears the
    * gun zone and keeps a pixel margin from every orb already on screen.
    */
-  findSpawnPosition(depth, radiusWorld, existingTargets, renderer) {
+  findSpawnPosition(depth, radiusWorld, existingTargets, renderer, band) {
     const bounds = this.bounds;
     const halfHeight = depth * bounds.tanHalfFovY;
     const halfWidth = halfHeight * bounds.aspect;
@@ -7945,8 +8658,10 @@ class TargetSpawner {
     const radiusNdcY = radiusWorld / halfHeight;
     const minimumX = bounds.ndcLeft + radiusNdcX;
     const maximumX = bounds.ndcRight - radiusNdcX;
-    const minimumY = bounds.ndcBottom + radiusNdcY;
     const maximumY = bounds.ndcTop - radiusNdcY;
+    // 'TOP' keeps new orbs in the top quarter, so falling ones drop from up high.
+    const lowestY = bounds.ndcBottom + radiusNdcY;
+    const minimumY = band === 'TOP' ? Math.max(lowestY, maximumY - (maximumY - lowestY) * 0.25) : lowestY;
     const radiusPx = radiusWorld / renderer.worldUnitsPerPixel(depth);
 
     let best = null;
@@ -8002,18 +8717,28 @@ class TargetSpawner {
     const metersPerPixel = renderer.worldUnitsPerPixel(depth);
     const radiusPx = MathUtils.randomRange(spawnParameters.radiusMin, spawnParameters.radiusMax);
     const radiusWorld = radiusPx * metersPerPixel;
-    const position = this.findSpawnPosition(depth, radiusWorld, existingTargets, renderer);
+    const position = this.findSpawnPosition(depth, radiusWorld, existingTargets, renderer, spawnParameters.spawnBand);
     const hue = this.takeNextHue(spawnParameters.hueCenter, spawnParameters.hueSpread);
     const movementType = spawnParameters.movementType;
+    const heading = spawnParameters.heading || HEADINGS.ANY;
 
     const velocity = new Vector3D(0, 0, 0);
     let cruiseSpeed = 0;
     if (movementType !== MOVEMENT_TYPES.STATIC) {
       cruiseSpeed = MathUtils.randomRange(spawnParameters.speedMin, spawnParameters.speedMax) * metersPerPixel;
-      const headingAngle = Math.random() * TAU;
-      const depthShare = ARENA_RULES.depthVelocityShare * MathUtils.randomSign() * MathUtils.randomRange(0.4, 1);
-      const planarShare = Math.sqrt(Math.max(0, 1 - depthShare * depthShare));
-      velocity.set(Math.cos(headingAngle) * planarShare, Math.sin(headingAngle) * planarShare, depthShare).mult(cruiseSpeed);
+      if (heading === HEADINGS.HORIZONTAL) {
+        // Side to side only (falling orbs get their vertical speed from gravity).
+        velocity.set(MathUtils.randomSign() * cruiseSpeed, 0, 0);
+      } else if (heading === HEADINGS.PLANAR) {
+        // Diagonally across the screen plane, never too close to straight up, down or sideways.
+        const angle = MathUtils.randomRange(25, 65) * DEG_TO_RAD;
+        velocity.set(Math.cos(angle) * MathUtils.randomSign(), Math.sin(angle) * MathUtils.randomSign(), 0).mult(cruiseSpeed);
+      } else {
+        const headingAngle = Math.random() * TAU;
+        const depthShare = ARENA_RULES.depthVelocityShare * MathUtils.randomSign() * MathUtils.randomRange(0.4, 1);
+        const planarShare = Math.sqrt(Math.max(0, 1 - depthShare * depthShare));
+        velocity.set(Math.cos(headingAngle) * planarShare, Math.sin(headingAngle) * planarShare, depthShare).mult(cruiseSpeed);
+      }
     }
 
     let drift = {
@@ -8047,7 +8772,46 @@ class TargetSpawner {
       cruiseSpeed: cruiseSpeed,
       drift: drift,
       isDecorative: Boolean(options.isDecorative),
-      hitboxScale: options.isDecorative ? 1 : spawnParameters.hitboxScale
+      hitboxScale: options.isDecorative ? 1 : spawnParameters.hitboxScale,
+      gravity: (spawnParameters.gravityPx || 0) * metersPerPixel,
+      cloak: options.isDecorative ? null : spawnParameters.cloak || null,
+      split: options.isDecorative ? null : spawnParameters.split || null,
+      trail: !options.isDecorative && Boolean(spawnParameters.trail)
+    });
+  }
+
+  /**
+   * One half of a split orb: smaller, from the parent's position, heading off
+   * at an angle to the parent's path, a little faster. Halves never split again.
+   */
+  createSplitHalf(parent, side, gameClockMs) {
+    const split = parent.split;
+    const angle = side * split.spreadDegrees * DEG_TO_RAD;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const velocity = new Vector3D(
+      (parent.velocity.x * cos - parent.velocity.y * sin) * 1.12,
+      (parent.velocity.x * sin + parent.velocity.y * cos) * 1.12,
+      parent.velocity.z
+    );
+    return new Target({
+      id: IdentifierFactory.createTargetId(),
+      birthTimestamp: gameClockMs,
+      lifespanMs: split.childLifespanMs,
+      radius: parent.baseRadius * split.childScale,
+      position: parent.position,
+      velocity: velocity,
+      hue: parent.baseHue + side * 18,
+      movementType: parent.movementType,
+      cruiseSpeed: parent.cruiseSpeed * 1.12,
+      drift: parent.drift,
+      hitboxScale: parent.hitRadiusScale,
+      gravity: parent.gravity,
+      cloak: parent.cloak,
+      split: split,
+      trail: parent.trail !== null,
+      generation: parent.generation + 1,
+      spawnAnimationMs: 70
     });
   }
 
@@ -10847,11 +11611,12 @@ const DEFAULT_SETTINGS = deepFreeze({
   reloadEnabled: true,
   laserEnabled: true,
   roundSeconds: 60,
-  difficulty: 'MEDIUM',
-  trainingLevel: 'MEDIUM',
-  timeAttackLevel: 'MEDIUM',
+  difficulty: 'SUPER_EASY',
+  trainingLevel: 'SUPER_EASY',
+  timeAttackLevel: 'SUPER_EASY',
   gridshotNodes: 9,
-  boardTab: 'MEDIUM',
+  // The XP board (lifetime XP), or one level's board.
+  boardTab: 'XP',
   boardScope: 'GLOBAL',
   // Arcade bests from before accounts (each account keeps its own now); the first account takes them over.
   personalBests: {}
@@ -10918,7 +11683,7 @@ class SettingsStore {
     if (GRIDSHOT_RULES.nodeOptions.indexOf(candidate.gridshotNodes) !== -1) {
       validated.gridshotNodes = candidate.gridshotNodes;
     }
-    const boardTab = resolveDifficultyKey(candidate.boardTab);
+    const boardTab = candidate.boardTab === XP_BOARD_KEY ? XP_BOARD_KEY : resolveDifficultyKey(candidate.boardTab);
     if (boardTab !== null) {
       validated.boardTab = boardTab;
     }
@@ -11009,7 +11774,8 @@ class LeaderboardManager {
     if (candidate === null || typeof candidate !== 'object') {
       return null;
     }
-    // Only the four ranked levels keep boards (runs from the old Adaptive mode are dropped).
+    // Only the seven levels keep boards (old Medium and Demon runs move to Normal and Demon God;
+    // runs from the old Adaptive mode are dropped).
     const mode = resolveDifficultyKey(candidate.mode);
     if (mode === null) {
       return null;
@@ -11446,6 +12212,14 @@ function validatePersonalBests(candidate) {
       validated[keys[index]] = Math.min(1e9, Math.round(best * 100) / 100);
     }
   }
+  // Time Attack bests from before the journey move with their level (Medium to Normal, Demon to Demon God).
+  Object.keys(LEGACY_LEVEL_KEYS).forEach((oldLevel) => {
+    const best = Number(candidate['TIME_ATTACK_' + oldLevel]);
+    const key = 'TIME_ATTACK_' + LEGACY_LEVEL_KEYS[oldLevel];
+    if (Number.isFinite(best) && best > 0 && !(validated[key] >= best)) {
+      validated[key] = Math.min(1e9, Math.round(best * 100) / 100);
+    }
+  });
   return validated;
 }
 
@@ -11464,7 +12238,7 @@ class PlayerProfile {
   }
 
   static createDefaultState() {
-    return { unlocked: ['EASY'], personalBests: {} };
+    return { unlocked: [DIFFICULTY_KEYS[0]], personalBests: {}, xp: 0, crown: false };
   }
 
   validate(candidate) {
@@ -11473,9 +12247,19 @@ class PlayerProfile {
       return validated;
     }
     if (Array.isArray(candidate.unlocked)) {
-      validated.unlocked = DIFFICULTY_KEYS.filter((levelKey) => levelKey === 'EASY' || candidate.unlocked.indexOf(levelKey) !== -1);
+      const levels = candidate.unlocked.map(resolveDifficultyKey).filter((levelKey) => levelKey !== null);
+      if (candidate.version === 2) {
+        validated.unlocked = DIFFICULTY_KEYS.filter((levelKey, index) => index === 0 || levels.indexOf(levelKey) !== -1);
+      } else {
+        // Saved before the journey: open every level up to the highest one this player had.
+        const highest = Math.max(0, ...levels.map((levelKey) => DIFFICULTY_KEYS.indexOf(levelKey)));
+        validated.unlocked = DIFFICULTY_KEYS.slice(0, highest + 1);
+      }
     }
     validated.personalBests = validatePersonalBests(candidate.personalBests);
+    const xp = Number(candidate.xp);
+    validated.xp = Number.isFinite(xp) && xp > 0 ? Math.min(1e12, Math.floor(xp)) : 0;
+    validated.crown = candidate.crown === true;
     return validated;
   }
 
@@ -11495,11 +12279,18 @@ class PlayerProfile {
     if (this.storageKey === null) {
       return false;
     }
-    return this.storage.write(this.storageKey, JSON.stringify({ version: 1, unlocked: this.state.unlocked, personalBests: this.state.personalBests }));
+    const state = this.state;
+    return this.storage.write(this.storageKey, JSON.stringify({
+      version: 2,
+      unlocked: state.unlocked,
+      personalBests: state.personalBests,
+      xp: state.xp,
+      crown: state.crown
+    }));
   }
 
   isUnlocked(levelKey) {
-    return levelKey === 'EASY' || this.state.unlocked.indexOf(levelKey) !== -1;
+    return levelKey === DIFFICULTY_KEYS[0] || this.state.unlocked.indexOf(levelKey) !== -1;
   }
 
   /** @returns {boolean} true when the level was locked until now */
@@ -11515,7 +12306,48 @@ class PlayerProfile {
 
   /** The leaderboard server's list replaces this device's for accounts kept there. */
   setUnlocked(levels) {
-    this.state.unlocked = DIFFICULTY_KEYS.filter((key) => key === 'EASY' || levels.indexOf(key) !== -1);
+    this.state.unlocked = DIFFICULTY_KEYS.filter((key, index) => index === 0 || levels.indexOf(key) !== -1);
+    this.save();
+  }
+
+  get xp() {
+    return this.state.xp;
+  }
+
+  /** Adds a round's XP; returns the new total. */
+  addXp(amount) {
+    this.load();
+    this.state.xp = Math.min(1e12, this.state.xp + Math.max(0, Math.floor(amount)));
+    this.save();
+    return this.state.xp;
+  }
+
+  /** The server's total replaces this device's for accounts kept there. */
+  setXp(xp) {
+    const total = Number(xp);
+    if (Number.isFinite(total) && total >= 0) {
+      this.state.xp = Math.floor(total);
+      this.save();
+    }
+  }
+
+  get hasCrown() {
+    return this.state.crown;
+  }
+
+  /** @returns {boolean} true when the crown is new */
+  awardCrown() {
+    this.load();
+    if (this.state.crown) {
+      return false;
+    }
+    this.state.crown = true;
+    this.save();
+    return true;
+  }
+
+  setCrown(hasCrown) {
+    this.state.crown = Boolean(hasCrown);
     this.save();
   }
 
@@ -11562,8 +12394,10 @@ class AccountService {
     this.device = new DeviceAccounts(storage);
     /** The signed-in player, { id, username, isOnline }, or null. */
     this.current = null;
-    /** The levels the server has unlocked for an online account. */
+    /** The levels the server has unlocked for an online account, its lifetime XP and its crown. */
     this.serverUnlocked = null;
+    this.serverXp = 0;
+    this.serverCrown = false;
     this.token = null;
   }
 
@@ -11624,7 +12458,9 @@ class AccountService {
     }
     this.token = token;
     this.current = { id: answer.user.id, username: answer.user.username, isOnline: true };
-    this.serverUnlocked = Array.isArray(answer.unlocked) ? answer.unlocked : ['EASY'];
+    this.serverUnlocked = Array.isArray(answer.unlocked) ? answer.unlocked : [DIFFICULTY_KEYS[0]];
+    this.serverXp = Number(answer.xp) || 0;
+    this.serverCrown = answer.crown === true;
     this.storage.write(STORAGE_KEYS.session, JSON.stringify({ token: token, id: answer.user.id, username: answer.user.username, origin: window.location.origin }));
     this.device.rememberUsername(answer.user.username);
     return this.current;
@@ -11686,6 +12522,8 @@ class AccountService {
     }
     this.current = null;
     this.serverUnlocked = null;
+    this.serverXp = 0;
+    this.serverCrown = false;
     this.token = null;
   }
 }
@@ -11833,9 +12671,28 @@ class GlobalLeaderboardClient {
     return this.requestJson('POST', '/api/logout', {}, token);
   }
 
-  /** A level's top players (each by their best run), best first (0 Easy, 1 Medium, 2 Hard, 3 Demon). */
+  /** A level's top players (each by their best run), best first (0 Super Easy to 6 Ultra Demon). */
   fetchTop(difficultyIndex, limit) {
     return this.requestJson('GET', '/api/leaderboard?difficulty=' + difficultyIndex + '&limit=' + limit);
+  }
+
+  /** Players by lifetime XP (the top `limit`), or with a username, that player's own place on the XP board. */
+  fetchXpBoard(limit, username) {
+    return this.requestJson('GET', '/api/leaderboard?board=xp&limit=' + limit + (username ? '&player=' + encodeURIComponent(username) : ''));
+  }
+
+  /**
+   * Adds a round's XP to the signed-in account; resolves { xp, crown }.
+   * Signed like scores, with the round id in place of the accuracy: callsign|xp|id|passphrase.
+   */
+  postXp(round, token) {
+    return this.requestJson('POST', '/api/xp', {
+      id: round.id,
+      callsign: round.callsign,
+      xp: round.xp,
+      durationSeconds: round.durationSeconds,
+      signature: GlobalLeaderboardClient.sign(round.callsign, round.xp, round.id, this.passphrase)
+    }, token);
   }
 
   /** One player's runs on a level, best first. */
@@ -11919,7 +12776,7 @@ class InventoryStore {
 
   /**
    * Coins a finished ranked round banks: the score divided by 10 and rounded
-   * down, times the level's multiplier (Easy 1, Medium 2, Hard 8, Demon 100),
+   * down, times the level's multiplier (Super Easy and Easy 1, Normal 2, Hard 8, Insane 30, Demon God 100, Ultra Demon 200),
    * then rounded down to whole coins. Negative scores bank nothing.
    */
   static coinsForScore(score, coinMultiplier = 1) {
@@ -12095,6 +12952,16 @@ class InventoryStore {
     return { earned: earned, balance: this.state.wallet, persisted: persisted };
   }
 
+  /** Adds bonus coins (a milestone) to the wallet. @returns {{earned: number, balance: number, persisted: boolean}} */
+  addBonusCoins(amount) {
+    this.load();
+    const earned = Math.max(0, Math.floor(amount));
+    this.state.wallet = Math.min(GAME_RULES.maximumCoinBalance, this.state.wallet + earned);
+    this.state.lifetimeCoins = Math.min(GAME_RULES.maximumCoinBalance, this.state.lifetimeCoins + earned);
+    const persisted = this.save();
+    return { earned: earned, balance: this.state.wallet, persisted: persisted };
+  }
+
   /**
    * Buys an item and equips it in its slot ('weaponSkin' or 'soundPack').
    * @returns {{ok: boolean, reason: string, shortfall: number, balance: number, persisted: boolean}}
@@ -12171,7 +13038,7 @@ class InventoryStore {
 
 class DifficultyEngine {
   constructor() {
-    this.config = DIFFICULTY_CONFIG.MEDIUM;
+    this.config = DIFFICULTY_CONFIG.SUPER_EASY;
     this.multipliers = { size: 1, velocity: 1, lifespan: 1 };
     this.level = 1;
     this.peakLevel = 1;
@@ -12196,13 +13063,19 @@ class DifficultyEngine {
       maxConcurrentTargets: 1,
       hitboxScale: 1,
       hueCenter: null,
-      hueSpread: null
+      hueSpread: null,
+      heading: HEADINGS.ANY,
+      gravityPx: 0,
+      spawnBand: 'ANY',
+      trail: false,
+      cloak: null,
+      split: null
     };
   }
 
   /** @param {object|string} config a round config (see createRoundConfig) or a level key */
   configure(config) {
-    this.config = config !== null && typeof config === 'object' ? config : (DIFFICULTY_CONFIG[config] || DIFFICULTY_CONFIG.MEDIUM);
+    this.config = config !== null && typeof config === 'object' ? config : (DIFFICULTY_CONFIG[config] || DIFFICULTY_CONFIG.SUPER_EASY);
     this.multipliers.size = 1;
     this.multipliers.velocity = 1;
     this.multipliers.lifespan = 1;
@@ -12356,6 +13229,12 @@ class DifficultyEngine {
     parameters.hitboxScale = config.hitboxScale;
     parameters.hueCenter = config.hueCenter;
     parameters.hueSpread = config.hueSpread;
+    parameters.heading = config.heading || HEADINGS.ANY;
+    parameters.gravityPx = config.gravityPx || 0;
+    parameters.spawnBand = config.spawnBand || 'ANY';
+    parameters.trail = Boolean(config.trail);
+    parameters.cloak = config.cloak || null;
+    parameters.split = config.split || null;
 
     if (this.isAdaptive) {
       const tuning = config.adaptive;
@@ -12375,7 +13254,7 @@ class DifficultyEngine {
 
 class SessionStats {
   constructor() {
-    this.reset(DIFFICULTY_CONFIG.MEDIUM, 60000);
+    this.reset(DIFFICULTY_CONFIG.SUPER_EASY, 60000);
   }
 
   /**
@@ -12383,6 +13262,9 @@ class SessionStats {
    * @param {number} roundDurationMs the round length (for Time Attack, the 60 s ceiling of its clock)
    */
   reset(config, roundDurationMs) {
+    // XP earned this round, and how much of it is already added to the account (a quit banks it early).
+    this.xpEarned = 0;
+    this.xpBanked = 0;
     this.modeKey = config.key;
     // The level this round played (Training and Time Attack copy one), or null for Gridshot.
     this.levelKey = Object.prototype.hasOwnProperty.call(DIFFICULTY_CONFIG, config.key) ? config.key : null;
@@ -12906,6 +13788,70 @@ class ToastManager {
 }
 
 /* -------------------------------------------------------------------------
+   LevelFaces — the journey's level icons, drawn as small SVG faces: a green
+   grin, a relaxed yellow smile, a straight-faced orange, an angry red with
+   furrowed brows, a wide-eyed purple face in flames, a glowing skull and
+   crossbones, and a horned devil with sharp teeth.
+   ------------------------------------------------------------------------- */
+
+const LevelFaces = {
+  shapes: {
+    SUPER_EASY: '<circle cx="32" cy="32" r="28" fill="#2fd16a" stroke="#0b5d2a" stroke-width="3"/>'
+      + '<ellipse cx="22" cy="23" rx="4" ry="5.5" fill="#0b2e18"/><ellipse cx="42" cy="23" rx="4" ry="5.5" fill="#0b2e18"/>'
+      + '<path d="M13 33 Q32 37 51 33 Q49 55 32 55 Q15 55 13 33 Z" fill="#0b2e18"/>'
+      + '<path d="M21 46 Q32 40 43 46 Q39 54 32 54 Q25 54 21 46 Z" fill="#ff6b8b"/>',
+    EASY: '<circle cx="32" cy="32" r="28" fill="#ffd23f" stroke="#8a6500" stroke-width="3"/>'
+      + '<path d="M16 27 Q22 20 28 27 M36 27 Q42 20 48 27" fill="none" stroke="#5a4100" stroke-width="3.6" stroke-linecap="round"/>'
+      + '<circle cx="16" cy="36" r="4" fill="#ff8a6b" opacity="0.55"/><circle cx="48" cy="36" r="4" fill="#ff8a6b" opacity="0.55"/>'
+      + '<path d="M21 39 Q32 49 43 39" fill="none" stroke="#5a4100" stroke-width="3.6" stroke-linecap="round"/>',
+    NORMAL: '<circle cx="32" cy="32" r="28" fill="#ff9234" stroke="#8a3d00" stroke-width="3"/>'
+      + '<circle cx="22" cy="27" r="4" fill="#3d1a00"/><circle cx="42" cy="27" r="4" fill="#3d1a00"/>'
+      + '<path d="M21 43 H43" stroke="#3d1a00" stroke-width="4" stroke-linecap="round"/>',
+    HARD: '<circle cx="32" cy="32" r="28" fill="#ef3b3b" stroke="#7a0d0d" stroke-width="3"/>'
+      + '<path d="M13 19 L28 26 M51 19 L36 26" stroke="#3a0505" stroke-width="4.5" stroke-linecap="round"/>'
+      + '<circle cx="22" cy="31" r="3.8" fill="#3a0505"/><circle cx="42" cy="31" r="3.8" fill="#3a0505"/>'
+      + '<path d="M20 48 Q32 39 44 48" fill="none" stroke="#3a0505" stroke-width="4" stroke-linecap="round"/>',
+    INSANE: '<path d="M8 42 C3 28 12 24 10 9 C18 15 21 21 23 19 C22 11 29 6 32 1 C35 9 41 11 41 18 C45 14 49 11 54 9 C52 23 61 28 56 42 Z" fill="#ff7a1a"/>'
+      + '<path d="M15 42 C12 32 18 29 17 20 C22 25 24 28 26 26 C26 19 30 15 32 11 C34 17 38 20 38 25 C41 22 44 21 47 19 C46 29 53 32 49 42 Z" fill="#ffd23f"/>'
+      + '<circle cx="32" cy="39" r="21" fill="#8b46ff" stroke="#3b1580" stroke-width="3"/>'
+      + '<circle cx="24" cy="36" r="7" fill="#fff"/><circle cx="40" cy="36" r="7" fill="#fff"/>'
+      + '<circle cx="24" cy="36" r="2.6" fill="#1d0640"/><circle cx="40" cy="36" r="2.6" fill="#1d0640"/>'
+      + '<ellipse cx="32" cy="50" rx="5" ry="4" fill="#1d0640"/>',
+    DEMON_GOD: '<path d="M9 53 L55 15 M9 15 L55 53" stroke="#e8fbff" stroke-width="6" stroke-linecap="round"/>'
+      + '<circle cx="8" cy="54" r="4" fill="#e8fbff"/><circle cx="56" cy="14" r="4" fill="#e8fbff"/><circle cx="8" cy="14" r="4" fill="#e8fbff"/><circle cx="56" cy="54" r="4" fill="#e8fbff"/>'
+      + '<path d="M32 7 C18 7 12 17 12 28 C12 36 16 40 20 42 L20 50 L44 50 L44 42 C48 40 52 36 52 28 C52 17 46 7 32 7 Z" fill="#f4fbff" stroke="#38f5ff" stroke-width="2.5"/>'
+      + '<ellipse cx="24" cy="28" rx="5.5" ry="6.5" fill="#0b1220"/><ellipse cx="40" cy="28" rx="5.5" ry="6.5" fill="#0b1220"/>'
+      + '<circle cx="24" cy="29" r="1.8" fill="#38f5ff"/><circle cx="40" cy="29" r="1.8" fill="#38f5ff"/>'
+      + '<path d="M32 34 L29 40 H35 Z" fill="#0b1220"/>'
+      + '<path d="M25 44 V50 M30 44 V50 M34 44 V50 M39 44 V50" stroke="#0b1220" stroke-width="2"/>',
+    ULTRA_DEMON: '<path d="M14 24 C6 14 7 5 13 1 C13 9 17 15 25 17 Z" fill="#ff3b1f"/><path d="M50 24 C58 14 57 5 51 1 C51 9 47 15 39 17 Z" fill="#ff3b1f"/>'
+      + '<path d="M32 12 C16 12 9 24 9 35 C9 49 19 59 32 59 C45 59 55 49 55 35 C55 24 48 12 32 12 Z" fill="#a1071b" stroke="#ff2a2a" stroke-width="2.5"/>'
+      + '<path d="M15 26 L29 32 M49 26 L35 32" stroke="#2a0006" stroke-width="4.5" stroke-linecap="round"/>'
+      + '<path d="M17 31 L29 35 L19 38 Z" fill="#ffd400"/><path d="M47 31 L35 35 L45 38 Z" fill="#ffd400"/>'
+      + '<path d="M16 43 Q32 50 48 43 L45 49 Q32 58 19 49 Z" fill="#1a0004"/>'
+      + '<path d="M18 44 L21 49 L24 45 L27 50 L30 46 L32 51 L34 46 L37 50 L40 45 L43 49 L46 44 Z" fill="#fff"/>'
+  },
+
+  markup(levelKey) {
+    const shape = LevelFaces.shapes[levelKey];
+    return shape ? '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">' + shape + '</svg>' : '';
+  },
+
+  /** An image of a face, for drawing on canvases (the share card and the milestone badge). */
+  dataUrl(levelKey) {
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">' + (LevelFaces.shapes[levelKey] || '') + '</svg>');
+  },
+
+  /** Fills every [data-face] element under a root with its face. */
+  fill(root) {
+    const holders = root.querySelectorAll('[data-face]');
+    for (let index = 0; index < holders.length; index += 1) {
+      holders[index].innerHTML = LevelFaces.markup(holders[index].getAttribute('data-face'));
+    }
+  }
+};
+
+/* -------------------------------------------------------------------------
    UIController — menu, pause and result screens
    ------------------------------------------------------------------------- */
 
@@ -12939,6 +13885,14 @@ class UIController {
       overCoinsNext: requireElement(documentRef, 'over-coins-next'),
       overArmory: requireElement(documentRef, 'over-armory'),
       modeGrid: requireElement(documentRef, 'mode-grid'),
+      journey: requireElement(documentRef, 'journey'),
+      journeyDetail: requireElement(documentRef, 'journey-detail'),
+      journeyDetailFace: requireElement(documentRef, 'journey-detail-face'),
+      journeyDetailEyebrow: requireElement(documentRef, 'journey-detail-eyebrow'),
+      journeyDetailTitle: requireElement(documentRef, 'journey-detail-title'),
+      journeyDetailSummary: requireElement(documentRef, 'journey-detail-summary'),
+      journeyDetailGoal: requireElement(documentRef, 'journey-detail-goal'),
+      modeExtrasHint: requireElement(documentRef, 'mode-extras-hint'),
       levelField: requireElement(documentRef, 'level-field'),
       levelLabel: requireElement(documentRef, 'label-level'),
       levelOptions: requireElement(documentRef, 'level-options'),
@@ -12980,11 +13934,25 @@ class UIController {
       overBoardList: requireElement(documentRef, 'over-board-list'),
       overBoardEmpty: requireElement(documentRef, 'over-board-empty'),
       overPlayAgain: requireElement(documentRef, 'over-play-again'),
+      overNext: requireElement(documentRef, 'over-next'),
+      overXp: requireElement(documentRef, 'over-xp'),
+      overXpEarned: requireElement(documentRef, 'over-xp-earned'),
+      overXpLevel: requireElement(documentRef, 'over-xp-level'),
+      overXpFill: requireElement(documentRef, 'over-xp-fill'),
+      overXpMeta: requireElement(documentRef, 'over-xp-meta'),
+      milestone: requireElement(documentRef, 'milestone'),
+      milestoneFace: requireElement(documentRef, 'milestone-face'),
+      milestoneEyebrow: requireElement(documentRef, 'milestone-eyebrow'),
+      milestoneTitle: requireElement(documentRef, 'milestone-title'),
+      milestoneReward: requireElement(documentRef, 'milestone-reward'),
+      milestoneNext: requireElement(documentRef, 'milestone-next'),
+      milestoneClose: requireElement(documentRef, 'milestone-close'),
       overShare: requireElement(documentRef, 'over-share'),
       overShareNotice: requireElement(documentRef, 'over-share-notice'),
       overMenu: requireElement(documentRef, 'over-menu')
     };
     const queryAll = (root, selector) => Array.prototype.slice.call(root.querySelectorAll(selector));
+    LevelFaces.fill(documentRef);
     this.modeCards = queryAll(this.elements.modeGrid, '[data-difficulty]');
     this.levelButtons = queryAll(this.elements.levelOptions, '[data-level]');
     this.gridButtons = queryAll(this.elements.gridOptions, '[data-grid-nodes]');
@@ -13042,6 +14010,9 @@ class UIController {
     elements.pauseQuit.addEventListener('click', () => callbacks.onQuitToMenu());
 
     elements.overPlayAgain.addEventListener('click', () => callbacks.onPlayAgain());
+    elements.overNext.addEventListener('click', () => callbacks.onNextLevel());
+    elements.milestoneNext.addEventListener('click', () => callbacks.onNextLevel());
+    elements.milestoneClose.addEventListener('click', () => this.hideMilestone(true));
     elements.overMenu.addEventListener('click', () => callbacks.onBackToMenu());
     elements.overShare.addEventListener('click', () => callbacks.onShareScore());
     elements.overArmory.addEventListener('click', () => callbacks.onOpenArmory('FINISHES'));
@@ -13098,7 +14069,8 @@ class UIController {
 
   /** The level being played (Demon re-tints the HUD accents through CSS). */
   setActiveMode(modeKey) {
-    this.elements.app.setAttribute('data-mode', modeKey);
+    const level = DIFFICULTY_CONFIG[modeKey];
+    this.elements.app.setAttribute('data-mode', level && level.theme === 'DEMON' ? 'DEMON' : modeKey);
   }
 
   /** The signed-in player in the menu, and where the account lives. */
@@ -13111,18 +14083,29 @@ class UIController {
    * Greys out the levels still to be earned, on the level cards and the level pickers.
    * @param {Object<string, string>} locks for each level: '' when open, else what opens it
    */
-  setLevelLocks(locks) {
+  setLevelLocks(locks, beaten) {
+    const beatenLevels = beaten || {};
+    let furthestOpen = 0;
     for (let index = 0; index < this.modeCards.length; index += 1) {
       const card = this.modeCards[index];
-      const lockText = locks[card.getAttribute('data-difficulty')] || '';
+      const modeKey = card.getAttribute('data-difficulty');
+      const lockText = locks[modeKey] || '';
       card.setAttribute('data-locked', lockText !== '' ? 'true' : 'false');
       card.setAttribute('aria-disabled', lockText !== '' ? 'true' : 'false');
+      card.setAttribute('data-beaten', beatenLevels[modeKey] ? 'true' : 'false');
+      const levelIndex = DIFFICULTY_KEYS.indexOf(modeKey);
+      if (levelIndex !== -1 && lockText === '') {
+        furthestOpen = Math.max(furthestOpen, levelIndex);
+      }
       const lockLine = card.querySelector('.mode-card__lock');
       if (lockLine !== null) {
         lockLine.hidden = lockText === '';
         lockLine.textContent = lockText !== '' ? 'Locked: ' + lockText : '';
       }
     }
+    // The path lights up from Level 1 to the furthest open level.
+    this.elements.journey.style.setProperty('--journey-progress', Math.round(furthestOpen / (DIFFICULTY_KEYS.length - 1) * 100) + '%');
+    this.elements.modeExtrasHint.hidden = !locks[TRAINING_MODE_KEY];
     for (let index = 0; index < this.levelButtons.length; index += 1) {
       const button = this.levelButtons[index];
       const lockText = locks[button.getAttribute('data-level')] || '';
@@ -13130,6 +14113,23 @@ class UIController {
       button.setAttribute('aria-disabled', lockText !== '' ? 'true' : 'false');
       button.title = lockText !== '' ? 'Locked: ' + lockText : '';
     }
+  }
+
+  /**
+   * The journey panel under the faces: the chosen level's name, what it is
+   * like, and what beating it takes (or what opens it).
+   * @param {{levelKey: string, eyebrow: string, title: string, summary: string, goal: string, isLocked: boolean, isBeaten: boolean}} detail
+   */
+  setJourneyDetail(detail) {
+    const elements = this.elements;
+    elements.journeyDetailFace.innerHTML = LevelFaces.markup(detail.levelKey);
+    elements.journeyDetailFace.setAttribute('data-face', detail.levelKey);
+    elements.journeyDetailEyebrow.textContent = detail.eyebrow;
+    elements.journeyDetailTitle.textContent = detail.title;
+    elements.journeyDetailSummary.textContent = detail.summary;
+    elements.journeyDetailGoal.textContent = detail.goal;
+    elements.journeyDetail.setAttribute('data-locked', detail.isLocked ? 'true' : 'false');
+    elements.journeyDetail.setAttribute('data-beaten', detail.isBeaten ? 'true' : 'false');
   }
 
   /**
@@ -13587,7 +14587,63 @@ class UIController {
   focusResultAction() {
     const isFinePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: fine)').matches;
     if (isFinePointer) {
-      this.elements.overPlayAgain.focus({ preventScroll: true });
+      const elements = this.elements;
+      const target = !elements.milestone.hidden ? elements.milestoneNext.hidden ? elements.milestoneClose : elements.milestoneNext
+        : !elements.overNext.hidden ? elements.overNext : elements.overPlayAgain;
+      target.focus({ preventScroll: true });
+    }
+  }
+
+  /** XP a round earned, the player level it adds up to, and the progress to the next level. */
+  showXpAward(xpEarned, xpTotal) {
+    const elements = this.elements;
+    const progress = Experience.progress(xpTotal);
+    elements.overXp.hidden = false;
+    elements.overXpEarned.textContent = '+' + Formatters.formatInteger(xpEarned) + ' XP';
+    elements.overXpLevel.textContent = 'Player level ' + progress.level;
+    elements.overXpMeta.textContent = Formatters.formatInteger(progress.intoLevel) + ' / ' + Formatters.formatInteger(progress.levelSpan) + ' XP to level ' + (progress.level + 1)
+      + ' · ' + Formatters.formatInteger(xpTotal) + ' XP in all';
+    elements.overXpFill.style.width = '0%';
+    window.requestAnimationFrame(() => {
+      elements.overXpFill.style.width = Math.round(progress.intoLevel / progress.levelSpan * 100) + '%';
+    });
+  }
+
+  /** The Next Level button: the level it starts, or null to hide it. */
+  setNextLevel(levelKey) {
+    const button = this.elements.overNext;
+    button.hidden = levelKey === null;
+    if (levelKey !== null) {
+      button.firstChild.textContent = 'Level ' + DIFFICULTY_CONFIG[levelKey].number + ': ' + DIFFICULTY_CONFIG[levelKey].label + ' ';
+    }
+  }
+
+  /**
+   * The full-screen badge for a level beaten for the first time.
+   * @param {{faceKey: string, eyebrow: string, title: string, reward: string, nextLevelKey: string|null}} milestone
+   */
+  showMilestone(milestone) {
+    const elements = this.elements;
+    elements.milestoneFace.setAttribute('data-face', milestone.faceKey);
+    elements.milestoneFace.innerHTML = LevelFaces.markup(milestone.faceKey);
+    elements.milestoneEyebrow.textContent = milestone.eyebrow;
+    elements.milestoneTitle.textContent = milestone.title;
+    elements.milestoneReward.textContent = milestone.reward;
+    elements.milestoneNext.hidden = milestone.nextLevelKey === null;
+    if (milestone.nextLevelKey !== null) {
+      elements.milestoneNext.firstChild.textContent = 'Play Level ' + DIFFICULTY_CONFIG[milestone.nextLevelKey].number + ' ';
+    }
+    elements.milestone.hidden = false;
+  }
+
+  get isMilestoneOpen() {
+    return !this.elements.milestone.hidden;
+  }
+
+  hideMilestone(returnFocus) {
+    this.elements.milestone.hidden = true;
+    if (returnFocus) {
+      this.focusResultAction();
     }
   }
 
@@ -13603,7 +14659,7 @@ class UIController {
     }
   }
 
-  /** "Medium unlocked!" (or how close the run came). */
+  /** "Level 3 (Normal) unlocked!" (or how close the run came). */
   showUnlock(text) {
     this.elements.overUnlock.hidden = text === '';
     this.elements.overUnlock.textContent = text;
@@ -13650,12 +14706,14 @@ class LeaderboardPanel {
       scroll: requireElement(documentRef, 'menu-board-scroll'),
       storage: requireElement(documentRef, 'menu-board-storage'),
       clear: requireElement(documentRef, 'menu-board-clear'),
+      headScore: requireElement(documentRef, 'board-head-score'),
+      headMeta: requireElement(documentRef, 'board-head-meta'),
       serverHelp: requireElement(documentRef, 'board-server-help'),
       serverDownload: requireElement(documentRef, 'board-server-download')
     };
     this.scopeButtons = Array.prototype.slice.call(this.elements.scope.querySelectorAll('[data-board-scope]'));
     this.tabButtons = Array.prototype.slice.call(this.elements.tabs.querySelectorAll('[data-board-mode]'));
-    this.currentTab = 'MEDIUM';
+    this.currentTab = XP_BOARD_KEY;
     this.clearArmedMode = null;
     this.clearArmTimerId = 0;
   }
@@ -13705,6 +14763,12 @@ class LeaderboardPanel {
     this.elements.panel.setAttribute('aria-busy', isBusy ? 'true' : 'false');
   }
 
+  /** The table's last two column headers ("Score" and "Acc · Streak", or "XP" and "Level"). */
+  setColumns(scoreLabel, metaLabel) {
+    this.elements.headScore.textContent = scoreLabel;
+    this.elements.headMeta.textContent = metaLabel;
+  }
+
   /** The link to the instructions for the leaderboard server that ships in this file (shown while the global board is offline). */
   setServerHelp(isVisible) {
     this.elements.serverHelp.hidden = !isVisible;
@@ -13712,7 +14776,7 @@ class LeaderboardPanel {
 
   /**
    * @param {{
-   *   rows: {rank: number, callsign: string, score: number, accuracyPercent: number, streak: number, isHighlight: boolean}[],
+   *   rows: {rank: number, callsign: string, score: number, metaText: string, metaTitle?: string, crown?: boolean, isHighlight: boolean}[],
    *   caption: string, emptyText: string, statusText: string, canClear: boolean, keepScroll?: boolean
    * }} view keepScroll: redrawing the same list, so the reader's scroll position stays
    */
@@ -13731,12 +14795,11 @@ class LeaderboardPanel {
       if (rowData.isHighlight) {
         row.setAttribute('data-highlight', 'true');
       }
-      const accuracyText = rowData.accuracyPercent.toFixed(1) + '%';
       const cells = [
         ['board-table__rank', '#' + String(rowData.rank).padStart(2, '0')],
         ['board-table__name', rowData.callsign],
         ['board-table__score board-table__num', Formatters.formatInteger(rowData.score)],
-        ['board-table__meta board-table__num', accuracyText + ' · ' + rowData.streak]
+        ['board-table__meta board-table__num', rowData.metaText]
       ];
       for (let cellIndex = 0; cellIndex < cells.length; cellIndex += 1) {
         const cell = documentRef.createElement('td');
@@ -13744,8 +14807,17 @@ class LeaderboardPanel {
         cell.textContent = cells[cellIndex][1];
         row.appendChild(cell);
       }
-      row.cells[1].title = rowData.callsign;
-      row.cells[3].title = 'Accuracy ' + rowData.accuracyPercent.toFixed(2) + '%, peak streak ' + rowData.streak;
+      row.cells[1].title = rowData.callsign + (rowData.crown ? ' · golden crown: beat Level 7' : '');
+      if (rowData.crown) {
+        const crown = documentRef.createElement('span');
+        crown.className = 'board-table__crown';
+        crown.textContent = '\u{1F451}';
+        crown.setAttribute('aria-label', 'golden crown');
+        row.cells[1].appendChild(crown);
+      }
+      if (rowData.metaTitle) {
+        row.cells[3].title = rowData.metaTitle;
+      }
       elements.body.appendChild(row);
     }
     elements.empty.textContent = view.emptyText;
@@ -14722,7 +15794,7 @@ class ArmoryView {
     const shortfall = skin.price - this.state.coins;
     if (shortfall > 0) {
       this.callbacks.onDenied(skin.id);
-      this.showNotice('You need ' + Formatters.formatInteger(shortfall) + ' more coins. Standard rounds bank ⌊score ÷ ' + GAME_RULES.pointsPerCoin + '⌋ coins times the level bonus, up to ×100 on Demon.', 'miss');
+      this.showNotice('You need ' + Formatters.formatInteger(shortfall) + ' more coins. Standard rounds bank ⌊score ÷ ' + GAME_RULES.pointsPerCoin + '⌋ coins times the level bonus, up to ×200 on Ultra Demon.', 'miss');
       return;
     }
     if (this.confirmSkinId !== skin.id) {
@@ -18011,6 +19083,7 @@ class AimTrainerGame {
       onRestart: () => this.restartRound(),
       onQuitToMenu: () => this.quitToMenu(),
       onPlayAgain: () => this.restartRound(),
+      onNextLevel: () => this.playNextLevel(),
       onBackToMenu: () => this.quitToMenu(),
       onShareScore: () => this.shareScore(),
       onOpenArmory: (tab) => this.openArmory(tab),
@@ -18052,6 +19125,8 @@ class AimTrainerGame {
     // The menu mode (a level, the Training Ground, Time Attack or Gridshot), the level the
     // Training Ground and Time Attack each play, and the Gridshot grid size.
     this.selectedDifficulty = resolveModeKey(this.bootData.difficulty) || this.settings.get('difficulty');
+    // The level shown in the journey panel (the selected level, or the last one picked while an extra mode is selected).
+    this.journeyLevel = DIFFICULTY_KEYS.indexOf(this.selectedDifficulty) !== -1 ? this.selectedDifficulty : DIFFICULTY_KEYS[0];
     this.trainingLevel = resolveDifficultyKey(this.bootData.trainingLevel) || this.settings.get('trainingLevel');
     this.timeAttackLevel = resolveDifficultyKey(this.bootData.timeAttackLevel) || this.settings.get('timeAttackLevel');
     this.gridNodes = GRIDSHOT_RULES.nodeOptions.indexOf(this.bootData.gridNodes) !== -1 ? this.bootData.gridNodes : this.settings.get('gridshotNodes');
@@ -18061,7 +19136,7 @@ class AimTrainerGame {
     // The menu leaderboard: which scope (the top 500 players, or my runs) and which level it shows.
     this.boardView = {
       scope: this.settings.get('boardScope'),
-      levelKey: resolveDifficultyKey(this.bootData.boardTab) || this.settings.get('boardTab'),
+      levelKey: this.bootData.boardTab === XP_BOARD_KEY ? XP_BOARD_KEY : resolveDifficultyKey(this.bootData.boardTab) || this.settings.get('boardTab'),
       requestId: 0,
       shownKey: '',
       // Set when a run is saved: the next time the menu board is on screen, it scrolls to the player's row.
@@ -18307,6 +19382,9 @@ class AimTrainerGame {
       if (toState === GAME_STATES.MENU || toState === GAME_STATES.ARMORY || toState === GAME_STATES.GAMEOVER) {
         this.resetOverlay();
       }
+      if (fromState === GAME_STATES.GAMEOVER) {
+        this.ui.hideMilestone(false);
+      }
       if (fromState === GAME_STATES.ARMORY) {
         this.armoryView.setShown(false);
       }
@@ -18398,6 +19476,18 @@ class AimTrainerGame {
         this.ui.showSaveNotice(summary.saveNotice, null);
       }
       this.ui.showUnlock(this.describeUnlock(summary));
+      this.ui.showXpAward(summary.xpEarned, summary.xpTotal);
+      this.ui.setNextLevel(summary.nextLevelKey);
+      if (summary.unlockedLevel !== null || summary.crownEarned) {
+        const shown = summary.crownEarned ? DIFFICULTY_KEYS[DIFFICULTY_KEYS.length - 1] : summary.unlockedLevel;
+        this.ui.showMilestone({
+          faceKey: shown,
+          eyebrow: summary.crownEarned ? 'Level 7 beaten · golden crown' : 'Level ' + DIFFICULTY_CONFIG[shown].number + ' unlocked',
+          title: summary.crownEarned ? 'Absolute legend' : DIFFICULTY_CONFIG[shown].title,
+          reward: '+' + Formatters.formatInteger(summary.milestoneBonus) + ' bonus coins',
+          nextLevelKey: summary.nextLevelKey
+        });
+      }
       if (summary.coinAward) {
         this.ui.showCoinAward(summary.coinAward);
       } else if (summary.personalBest) {
@@ -18684,12 +19774,13 @@ class AimTrainerGame {
    * Picks the nearest orb hit by a ray. Returns the hit distance and writes
    * the orb into `result.target`; distance is −1 when nothing is hit.
    */
-  pickTarget(origin, direction, targetList, result) {
+  /** The nearest orb along a ray. With skipFaded, orbs more than half faded by their cloak are passed over. */
+  pickTarget(origin, direction, targetList, result, skipFaded) {
     result.target = null;
     result.distance = -1;
     for (let index = 0; index < targetList.length; index += 1) {
       const target = targetList[index];
-      if (!target.isAlive) {
+      if (!target.isAlive || (skipFaded && target.cloakAmount < 0.5)) {
         continue;
       }
       const distance = target.intersectRay(origin, direction);
@@ -18745,6 +19836,10 @@ class AimTrainerGame {
       target.update(stepSeconds, this.gameClockMs, bounds);
       if (target.hasExpired) {
         this.targets.splice(targetIndex, 1);
+        if (target.splitsOnExpiry) {
+          this.splitTarget(target);
+          continue;
+        }
         this.handleTargetExpired(target);
         if (!this.fsm.is(GAME_STATES.PLAYING)) {
           return;
@@ -18784,6 +19879,10 @@ class AimTrainerGame {
 
   startFromMenu() {
     if (!this.renderer.isSupported || !this.fsm.is(GAME_STATES.MENU)) {
+      return;
+    }
+    if (!this.isModeOpen(this.selectedDifficulty)) {
+      this.explainLock(this.selectedDifficulty, false);
       return;
     }
     const levelKey = this.levelKeyFor(this.selectedDifficulty);
@@ -18846,10 +19945,12 @@ class AimTrainerGame {
       this.toasts.show('Time Attack', { tone: 'brass', subtext: DIFFICULTY_CONFIG[config.key].label + ' orbs · ' + (TIME_ATTACK_RULES.startMs / 1000) + ' s on the clock · hits add time', durationMs: 1800 });
     } else if (config.roundType === ROUND_TYPES.GRIDSHOT) {
       this.toasts.show('Gridshot', { tone: 'hit', subtext: config.gridNodes + ' nodes · 3 orbs · as many hits per second as you can', durationMs: 1800 });
-    } else if (config.theme === 'DEMON') {
-      this.toasts.show('Demon level', { tone: 'miss', subtext: 'tiny · erratic · ×' + config.coinMultiplier + ' coins', durationMs: 1700 });
-    } else if (config.key === 'HARD') {
-      this.toasts.show('Hard level', { tone: 'brass', subtext: 'small · fast drift · ×' + config.coinMultiplier + ' coins', durationMs: 1700 });
+    } else {
+      this.toasts.show('Level ' + config.number + ': ' + config.title, {
+        tone: config.theme === 'DEMON' ? 'miss' : 'brass',
+        subtext: config.label + ' · ×' + config.coinMultiplier + ' coins',
+        durationMs: 1800
+      });
     }
   }
 
@@ -18867,12 +19968,19 @@ class AimTrainerGame {
 
   restartRound() {
     if (this.fsm.is(GAME_STATES.PAUSED) || this.fsm.is(GAME_STATES.GAMEOVER)) {
+      if (this.fsm.is(GAME_STATES.PAUSED)) {
+        this.bankSessionXp();
+      }
       this.audio.playUiConfirm();
       this.fsm.transition(GAME_STATES.PLAYING, { restart: true });
     }
   }
 
   quitToMenu() {
+    if (this.fsm.is(GAME_STATES.PAUSED) || this.fsm.is(GAME_STATES.PLAYING)) {
+      // Orbs broken before quitting still count for XP.
+      this.bankSessionXp();
+    }
     if (this.fsm.is(GAME_STATES.PAUSED) || this.fsm.is(GAME_STATES.GAMEOVER) || this.fsm.is(GAME_STATES.PLAYING)) {
       this.fsm.transition(GAME_STATES.MENU);
     }
@@ -18892,28 +20000,101 @@ class AimTrainerGame {
     summary.coinAward = isArcade ? null : this.bankRoundCoins(summary);
     summary.personalBest = isArcade ? this.recordPersonalBest(summary) : null;
     summary.unlockedLevel = this.checkUnlock(summary);
+    summary.crownEarned = this.checkCrown(summary);
+    summary.milestoneBonus = summary.unlockedLevel !== null || summary.crownEarned ? this.payMilestoneBonus(summary) : 0;
+    const xp = this.bankSessionXp();
+    summary.xpEarned = this.session.xpEarned;
+    summary.xpTotal = xp.total;
+    summary.nextLevelKey = this.nextLevelAfter(summary);
     // Standard rounds with a positive score go on the leaderboard under the signed-in player.
     summary.saveNotice = summary.roundType === ROUND_TYPES.RANKED && summary.score > 0 ? this.saveRun(summary) : '';
     this.lastSummary = summary;
-    // Any positive score is a win, even 1 point; only a negative score gets the sad drone.
+    // A win is any score of 1 point or more: the fanfare. 0 or less is a loss: the comic fail.
     if (summary.score > 0) {
       this.audio.playVictory();
-    } else if (summary.score < 0) {
-      this.audio.playGameOver();
     } else {
-      this.audio.playRoundOverNeutral();
+      this.audio.playFail();
     }
     window.clearTimeout(this.coinSoundTimerId);
-    if (summary.roundType === ROUND_TYPES.RANKED && summary.coinAward.earned > 0) {
-      const coinsEarned = summary.coinAward.earned;
+    if (summary.roundType === ROUND_TYPES.RANKED && summary.coinAward.earned + summary.milestoneBonus > 0) {
+      const coinsEarned = summary.coinAward.earned + summary.milestoneBonus;
       this.coinSoundTimerId = window.setTimeout(() => this.audio.playCoinsBanked(coinsEarned), 1250);
     }
     this.fsm.transition(GAME_STATES.GAMEOVER, { summary: summary });
   }
 
   /**
+   * Adds the XP of the current round not yet added to the account (all of it
+   * at the end of a round; a quit or restart banks what was earned so far).
+   * Online accounts post it to the leaderboard server too.
+   * @returns {{earned: number, total: number}}
+   */
+  bankSessionXp() {
+    const session = this.session;
+    const earned = Math.max(0, session.xpEarned - session.xpBanked);
+    session.xpBanked = session.xpEarned;
+    const total = earned > 0 ? this.profile.addXp(earned) : this.profile.xp;
+    const account = this.accounts.current;
+    if (earned > 0 && account !== null && account.isOnline) {
+      const roundSeconds = Math.max(1, Math.round(session.elapsedLiveMs / 1000));
+      this.globalBoard.postXp({ id: IdentifierFactory.createEntryId(), callsign: account.username, xp: earned, durationSeconds: roundSeconds }, this.accounts.token)
+        .then((answer) => {
+          if (this.accounts.current !== null && this.accounts.current.id === account.id && answer && typeof answer.xp === 'number') {
+            this.profile.setXp(answer.xp);
+            this.profile.setCrown(answer.crown === true);
+          }
+        })
+        .catch(() => {});
+    }
+    return { earned: earned, total: total };
+  }
+
+  /** Beating Level 7 earns the golden crown, once. */
+  checkCrown(summary) {
+    const lastLevel = DIFFICULTY_KEYS[DIFFICULTY_KEYS.length - 1];
+    if (summary.roundType !== ROUND_TYPES.RANKED || summary.levelKey !== lastLevel) {
+      return false;
+    }
+    return LevelUnlocks.beats(lastLevel, summary.score, Math.round(summary.roundDurationMs / 1000)) && this.profile.awardCrown();
+  }
+
+  /** The bonus for beating a level for the first time, banked with the round's coins. */
+  payMilestoneBonus(summary) {
+    const bonus = this.inventory.addBonusCoins(GAME_RULES.milestoneBonusCoins);
+    if (summary.coinAward) {
+      summary.coinAward.balance = bonus.balance;
+    }
+    return bonus.earned;
+  }
+
+  /** The level the result screen's Next Level button starts: the next level of the journey, once it is open. */
+  nextLevelAfter(summary) {
+    if (summary.roundType !== ROUND_TYPES.RANKED || summary.levelKey === null) {
+      return null;
+    }
+    const step = LevelUnlocks.stepFrom(summary.levelKey);
+    return step !== null && step.unlocks !== null && this.isLevelUnlocked(step.unlocks) ? step.unlocks : null;
+  }
+
+  /** Next Level (result screen or milestone badge): starts the next level of the journey. */
+  playNextLevel() {
+    const summary = this.lastSummary;
+    if (!this.fsm.is(GAME_STATES.GAMEOVER) || summary === null || !summary.nextLevelKey || !this.isLevelUnlocked(summary.nextLevelKey)) {
+      return;
+    }
+    const levelKey = summary.nextLevelKey;
+    this.selectedDifficulty = levelKey;
+    this.journeyLevel = levelKey;
+    this.settings.set('difficulty', levelKey);
+    this.ui.setSelectedDifficulty(levelKey);
+    this.ui.hideMilestone(false);
+    this.audio.playUiConfirm();
+    this.fsm.transition(GAME_STATES.PLAYING, { restart: true });
+  }
+
+  /**
    * Converts a finished standard round's score to coins — ⌊score ÷ 10⌋ times
-   * the level's multiplier (Easy 1, Medium 2, Hard 8, Demon 100) — and banks
+   * the level's multiplier (×1 on Levels 1 and 2 up to ×200 on Level 7) — and banks
    * them in the inventory; Training Ground rounds bank nothing. Also reports
    * the next finish to save up for.
    */
@@ -19218,6 +20399,7 @@ class AimTrainerGame {
     const points = Math.max(1, Math.round(config.baseHitScore * speedFactor * precisionFactor * streakMultiplier * this.difficulty.scoreMultiplier));
 
     this.session.recordHit(points, reactionMs, isBullseye);
+    this.session.xpEarned += Experience.forHit(precision, isBullseye);
     if (isBullseye) {
       this.session.addBullseyeBonus(GAME_RULES.bullseyeBonusPoints);
     }
@@ -19286,6 +20468,10 @@ class AimTrainerGame {
     const brokenStreak = this.session.recordWhiff(penalty);
     this.effects.spawnImpactMark(screenX, screenY);
     this.audio.playErrorTone(this.computePan(screenX));
+    if (config.missShake > 0 && !this.isCameraLocked) {
+      this.shake.trigger(config.missShake);
+      this.damageVignetteElapsedMs = 0;
+    }
     let penaltyText = penalty > 0 ? '−' + penalty : '';
     if (config.roundType === ROUND_TYPES.TIME_ATTACK) {
       const lostMs = -this.session.addTime(-TIME_ATTACK_RULES.missPenaltyMs);
@@ -19302,6 +20488,20 @@ class AimTrainerGame {
     if (brokenStreak >= GAME_RULES.streakMilestoneInterval) {
       this.toasts.show('Streak broken', { tone: 'miss', subtext: brokenStreak + ' hits', durationMs: 1100 });
     }
+  }
+
+  /** Ultra Demon: an orb not hit in time splits into two smaller, faster halves instead of exploding. */
+  splitTarget(target) {
+    for (const side of [-1, 1]) {
+      const half = this.spawner.createSplitHalf(target, side, this.gameClockMs);
+      half.evaluateLifespan(this.gameClockMs, 0);
+      this.targets.push(half);
+      this.session.targetsSpawned += 1;
+    }
+    const screen = this.scratchScreen;
+    const pan = this.projectTarget(target, screen) ? this.computePan(screen.x) : 0;
+    this.effects.emitExpireShatter(target.position, target.baseHue, target.baseRadius * 0.6);
+    this.audio.playSplit(pan);
   }
 
   handleTargetExpired(target) {
@@ -19442,12 +20642,18 @@ class AimTrainerGame {
      Settings and menu actions
      ===================================================================== */
 
-  /** Picks a menu mode (keys 1 to 7): one of the four levels, the Training Ground, Time Attack or Gridshot. */
+  /** Picks a menu mode (keys 1 to 9 and 0): one of the seven levels, the Training Ground, Time Attack or Gridshot. */
   selectDifficulty(difficultyKey) {
     if (MODE_KEYS.indexOf(difficultyKey) === -1) {
       return;
     }
-    if (DIFFICULTY_KEYS.indexOf(difficultyKey) !== -1 && !this.isLevelUnlocked(difficultyKey)) {
+    const isLevel = DIFFICULTY_KEYS.indexOf(difficultyKey) !== -1;
+    if (isLevel) {
+      // The journey panel shows the level picked, even a locked one (with what opens it).
+      this.journeyLevel = difficultyKey;
+      this.ui.setJourneyDetail(this.describeJourneyLevel(difficultyKey, this.settings.get('roundSeconds')));
+    }
+    if (!this.isModeOpen(difficultyKey)) {
       this.explainLock(difficultyKey, false);
       return;
     }
@@ -19732,8 +20938,9 @@ class AimTrainerGame {
   }
 
   /** Shows a level's board. */
+  /** XP_BOARD_KEY (players by lifetime XP) or a level's board. */
   changeBoardTab(levelKey) {
-    if (DIFFICULTY_KEYS.indexOf(levelKey) === -1) {
+    if (levelKey !== XP_BOARD_KEY && DIFFICULTY_KEYS.indexOf(levelKey) === -1) {
       return;
     }
     this.boardView.levelKey = levelKey;
@@ -19752,44 +20959,73 @@ class AimTrainerGame {
   }
 
   /**
-   * Redraws the menu leaderboard. Played from the leaderboard server, it shows
-   * the world's top 500 players (or my runs there); otherwise the players and
-   * runs saved on this device.
+   * Redraws the menu leaderboard: players by lifetime XP, or one level's
+   * players by their best run (each with a golden crown once they have
+   * beaten Level 7). Played from the leaderboard server, it shows the
+   * world's top 500 (or my runs there); otherwise this device's players.
    */
   refreshBoard() {
     const view = this.boardView;
     const panel = this.boardPanel;
-    const levelKey = view.levelKey;
-    const label = DIFFICULTY_CONFIG[levelKey].label;
+    const tab = view.levelKey;
+    const isXpBoard = tab === XP_BOARD_KEY;
+    const label = isXpBoard ? 'XP' : DIFFICULTY_CONFIG[tab].label;
     const account = this.accounts.current;
-    const viewKey = view.scope + ':' + levelKey + ':' + (account !== null ? account.id : '');
+    const viewKey = view.scope + ':' + tab + ':' + (account !== null ? account.id : '');
     const keepScroll = viewKey === view.shownKey;
     view.shownKey = viewKey;
     panel.setScope(view.scope);
-    panel.setTab(levelKey);
+    panel.setTab(tab);
+    panel.setColumns(isXpBoard ? 'XP' : 'Score', isXpBoard ? 'Level' : 'Acc · Streak');
     panel.setServerHelp(view.scope === BOARD_SCOPES.GLOBAL && this.globalBoard.status === 'offline');
     view.requestId += 1;
     const requestId = view.requestId;
     const isTopBoard = view.scope === BOARD_SCOPES.GLOBAL;
     const playersText = (count) => Formatters.formatInteger(count) + (count === 1 ? ' player' : ' players');
     const runsText = (count) => Formatters.formatInteger(count) + (count === 1 ? ' run' : ' runs');
+    const xpRow = (rank, name, xp, crown, isHighlight) => ({
+      rank: rank,
+      callsign: name,
+      score: xp,
+      metaText: 'Lv ' + Experience.progress(xp).level,
+      crown: crown,
+      isHighlight: isHighlight
+    });
+    const runRow = (rank, name, score, accuracyPercent, streak, crown, isHighlight) => ({
+      rank: rank,
+      callsign: name,
+      score: score,
+      metaText: accuracyPercent.toFixed(1) + '% · ' + streak,
+      metaTitle: 'Accuracy ' + accuracyPercent.toFixed(2) + '%, peak streak ' + streak,
+      crown: crown,
+      isHighlight: isHighlight
+    });
 
     if (!this.globalBoard.isOnline) {
       panel.setBusy(false);
+      const crowns = this.deviceCrowns();
+      if (isXpBoard) {
+        const players = this.deviceXpBoard();
+        const myRank = account !== null ? players.findIndex((player) => player.userId === account.id) + 1 : 0;
+        const shown = isTopBoard ? players : players.filter((player) => account !== null && player.userId === account.id);
+        panel.render({
+          rows: shown.map((player) => xpRow(players.indexOf(player) + 1, player.name, player.xp, player.crown, account !== null && player.userId === account.id)),
+          caption: isTopBoard ? 'Top 500 players by XP on this device' : 'My XP',
+          emptyText: 'No XP yet. Break orbs in any mode to earn it.',
+          statusText: isTopBoard ? playersText(players.length) + ' on this device' + (myRank > 0 ? ' · you are #' + myRank : '') : 'Your lifetime XP on this device',
+          canClear: false,
+          keepScroll: keepScroll
+        });
+        return;
+      }
       if (isTopBoard) {
-        const players = this.leaderboard.topPlayers(levelKey, 'device');
+        const players = this.leaderboard.topPlayers(tab, 'device');
         const myRank = account !== null ? players.findIndex((entry) => entry.userId === account.id) + 1 : 0;
         panel.render({
-          rows: players.map((entry, index) => ({
-            rank: index + 1,
-            callsign: entry.name,
-            score: entry.score,
-            accuracyPercent: entry.accuracy * 100,
-            streak: entry.bestStreak,
-            isHighlight: account !== null && entry.userId === account.id
-          })),
+          rows: players.map((entry, index) => runRow(index + 1, entry.name, entry.score, entry.accuracy * 100, entry.bestStreak,
+            crowns[entry.userId] === true, account !== null && entry.userId === account.id)),
           caption: 'Top 500 players on this device, ' + label,
-          emptyText: 'No ' + label + ' scores on this device yet. Finish a standard round to be the first.',
+          emptyText: 'No ' + label + ' scores on this device yet. Finish a ' + label + ' round to be the first.',
           statusText: playersText(players.length) + ' on this device' + (myRank > 0 ? ' · you are #' + myRank : ''),
           canClear: false,
           keepScroll: keepScroll
@@ -19797,18 +21033,12 @@ class AimTrainerGame {
         this.revealNewRun();
         return;
       }
-      const runs = account !== null ? this.leaderboard.playerRuns(levelKey, account.id) : [];
+      const runs = account !== null ? this.leaderboard.playerRuns(tab, account.id) : [];
       panel.render({
-        rows: runs.map((entry, index) => ({
-          rank: index + 1,
-          callsign: entry.name,
-          score: entry.score,
-          accuracyPercent: entry.accuracy * 100,
-          streak: entry.bestStreak,
-          isHighlight: entry.id === this.lastLocalEntryId
-        })),
+        rows: runs.map((entry, index) => runRow(index + 1, entry.name, entry.score, entry.accuracy * 100, entry.bestStreak,
+          crowns[entry.userId] === true, entry.id === this.lastLocalEntryId)),
         caption: 'My ' + label + ' runs',
-        emptyText: 'No ' + label + ' runs yet. Finish a standard round to save one.',
+        emptyText: 'No ' + label + ' runs yet. Finish a ' + label + ' round to save one.',
         statusText: runsText(runs.length) + ' saved' + (this.leaderboard.isPersistent ? ' in this browser' : ' · storage blocked, this session only'),
         canClear: runs.length > 0 && account !== null && !account.isOnline,
         keepScroll: keepScroll
@@ -19823,10 +21053,17 @@ class AimTrainerGame {
       return;
     }
     panel.setBusy(true);
-    const difficulty = DIFFICULTY_KEYS.indexOf(levelKey);
-    const request = isTopBoard
-      ? this.globalBoard.fetchTop(difficulty, GAME_RULES.leaderboardSize)
-      : this.globalBoard.fetchPlayerRuns(difficulty, account.username, GAME_RULES.leaderboardSize);
+    let request = null;
+    if (isXpBoard) {
+      request = isTopBoard
+        ? this.globalBoard.fetchXpBoard(GAME_RULES.leaderboardSize)
+        : this.globalBoard.fetchXpBoard(1, account.username);
+    } else {
+      const difficulty = DIFFICULTY_KEYS.indexOf(tab);
+      request = isTopBoard
+        ? this.globalBoard.fetchTop(difficulty, GAME_RULES.leaderboardSize)
+        : this.globalBoard.fetchPlayerRuns(difficulty, account.username, GAME_RULES.leaderboardSize);
+    }
     request.then((page) => {
       if (requestId !== view.requestId) {
         return;
@@ -19836,19 +21073,24 @@ class AimTrainerGame {
       const total = Number(page.total) || entries.length;
       const isMine = (entry) => String(entry.callsign).toLowerCase() === account.username.toLowerCase();
       const mine = entries.find(isMine);
+      if (isXpBoard) {
+        panel.render({
+          rows: entries.map((entry) => xpRow(entry.rank, String(entry.callsign), Number(entry.xp) || 0, entry.crown === true, isMine(entry))),
+          caption: isTopBoard ? 'Top 500 players by XP' : 'My XP',
+          emptyText: 'No XP on the leaderboard yet. Break orbs in any mode to earn it.',
+          statusText: isTopBoard ? 'Live · ' + playersText(total) + (mine ? ' · you are #' + mine.rank : '') : 'Live · you are #' + (mine ? mine.rank : '–') + ' of ' + playersText(total),
+          canClear: false,
+          keepScroll: keepScroll
+        });
+        return;
+      }
       panel.render({
-        rows: entries.map((entry) => ({
-          rank: entry.rank,
-          callsign: String(entry.callsign),
-          score: entry.score,
-          accuracyPercent: Number(entry.accuracy),
-          streak: entry.maxStreak,
-          isHighlight: isTopBoard ? isMine(entry) : entry.id === this.lastGlobalEntryId
-        })),
+        rows: entries.map((entry) => runRow(entry.rank, String(entry.callsign), entry.score, Number(entry.accuracy), entry.maxStreak,
+          entry.crown === true, isTopBoard ? isMine(entry) : entry.id === this.lastGlobalEntryId)),
         caption: isTopBoard ? 'Top 500 players, ' + label : 'My ' + label + ' runs',
         emptyText: isTopBoard
-          ? 'No ' + label + ' scores on the leaderboard yet. Finish a standard round to be the first.'
-          : 'No ' + label + ' runs yet. Finish a standard round to save one.',
+          ? 'No ' + label + ' scores on the leaderboard yet. Finish a ' + label + ' round to be the first.'
+          : 'No ' + label + ' runs yet. Finish a ' + label + ' round to save one.',
         statusText: isTopBoard
           ? 'Live · ' + playersText(total) + (mine ? ' · you are #' + mine.rank : '')
           : 'Live · ' + runsText(total),
@@ -19870,6 +21112,33 @@ class AimTrainerGame {
         keepScroll: false
       });
     });
+  }
+
+  /** This device's players by lifetime XP, most first: [{ userId, name, xp, crown }]. */
+  deviceXpBoard() {
+    const players = [];
+    const accounts = this.accounts.device.state.accounts;
+    for (let index = 0; index < accounts.length; index += 1) {
+      const profile = new PlayerProfile(this.storage, accounts[index].id);
+      if (profile.xp > 0) {
+        players.push({ userId: accounts[index].id, name: accounts[index].username, xp: profile.xp, crown: profile.hasCrown });
+      }
+    }
+    return players.sort((first, second) => second.xp - first.xp || first.name.localeCompare(second.name)).slice(0, GAME_RULES.leaderboardSize);
+  }
+
+  /** Which of this device's players have the crown, by account id. */
+  deviceCrowns() {
+    const crowns = {};
+    const accounts = this.accounts.device.state.accounts;
+    for (let index = 0; index < accounts.length; index += 1) {
+      crowns[accounts[index].id] = new PlayerProfile(this.storage, accounts[index].id).hasCrown;
+    }
+    const account = this.accounts.current;
+    if (account !== null) {
+      crowns[account.id] = this.profile.hasCrown;
+    }
+    return crowns;
   }
 
   /** After a run is saved, scrolls the menu board to the player's row once the board is on screen. */
@@ -19955,6 +21224,7 @@ class AimTrainerGame {
       this.lastGlobalEntryId = answer.id;
       if (Array.isArray(answer.unlocked)) {
         this.profile.setUnlocked(answer.unlocked);
+        this.profile.setCrown(answer.crown === true);
         this.refreshLevelLocks();
       }
       if (this.lastSummary === summary && this.fsm.is(GAME_STATES.GAMEOVER)) {
@@ -20050,7 +21320,10 @@ class AimTrainerGame {
       this.storage.write(STORAGE_KEYS.legacyClaimed, account.id);
     }
     if (account.isOnline && this.accounts.serverUnlocked !== null) {
+      // The server keeps an online account's progress: its levels, lifetime XP and crown.
       this.profile.setUnlocked(this.accounts.serverUnlocked);
+      this.profile.setXp(this.accounts.serverXp);
+      this.profile.setCrown(this.accounts.serverCrown);
     }
     this.lastLocalEntryId = null;
     this.lastGlobalEntryId = null;
@@ -20086,11 +21359,67 @@ class AimTrainerGame {
   refreshLevelLocks() {
     const roundSeconds = this.settings.get('roundSeconds');
     const locks = {};
+    const beaten = {};
     for (let index = 0; index < DIFFICULTY_KEYS.length; index += 1) {
       const levelKey = DIFFICULTY_KEYS[index];
       locks[levelKey] = this.isLevelUnlocked(levelKey) ? '' : LevelUnlocks.describe(levelKey, roundSeconds);
+      beaten[levelKey] = this.isLevelBeaten(levelKey);
     }
-    this.ui.setLevelLocks(locks);
+    const extrasLock = this.areExtrasOpen() ? '' : 'beat Level 1';
+    [TRAINING_MODE_KEY, TIME_ATTACK_MODE_KEY, GRIDSHOT_MODE_KEY].forEach((modeKey) => {
+      locks[modeKey] = extrasLock;
+    });
+    this.ui.setLevelLocks(locks, beaten);
+    this.ui.setJourneyDetail(this.describeJourneyLevel(this.journeyLevel, roundSeconds));
+  }
+
+  /** Beaten: the next level is open (for Level 7, the crown is won). */
+  isLevelBeaten(levelKey) {
+    const step = LevelUnlocks.stepFrom(levelKey);
+    if (step === null) {
+      return false;
+    }
+    return step.crown ? this.profile.hasCrown : this.isLevelUnlocked(step.unlocks);
+  }
+
+  /** The extra modes (Training Ground, Time Attack, Gridshot) open once Level 1 is beaten. */
+  areExtrasOpen() {
+    return this.isLevelBeaten(DIFFICULTY_KEYS[0]);
+  }
+
+  isModeOpen(modeKey) {
+    if (DIFFICULTY_KEYS.indexOf(modeKey) !== -1) {
+      return this.isLevelUnlocked(modeKey);
+    }
+    return this.areExtrasOpen();
+  }
+
+  /** The journey panel's text for a level: what it is like, and what beating it takes or what opens it. */
+  describeJourneyLevel(levelKey, roundSeconds) {
+    const config = DIFFICULTY_CONFIG[levelKey];
+    const step = LevelUnlocks.stepFrom(levelKey);
+    const isLocked = !this.isLevelUnlocked(levelKey);
+    const isBeaten = !isLocked && this.isLevelBeaten(levelKey);
+    const ring = Number.isFinite(config.lifespanMs) ? 'ring ' + (config.lifespanMs / 1000).toFixed(1).replace(/\.0$/, '') + ' s' : 'no ring';
+    let goal = '';
+    if (isLocked) {
+      goal = 'Locked: ' + LevelUnlocks.describe(levelKey, roundSeconds) + '.';
+    } else if (isBeaten) {
+      const account = this.accounts.current;
+      const runs = account !== null ? this.leaderboard.playerRuns(levelKey, account.id, 1) : [];
+      goal = (step.crown ? '\u{1F451} Beaten: golden crown earned' : '\u2713 Beaten') + (runs.length > 0 ? ' · your best ' + Formatters.formatInteger(runs[0].score) : '') + '.';
+    } else {
+      goal = 'Beat it: ' + LevelUnlocks.describeTarget(levelKey, roundSeconds) + (step.crown ? ' to earn the golden crown.' : ' to open Level ' + (config.number + 1) + '.');
+    }
+    return {
+      levelKey: levelKey,
+      eyebrow: 'Level ' + config.number + ' · ' + config.label + ' · ×' + config.coinMultiplier + ' coins',
+      title: config.title,
+      summary: config.summary + ' Orbs ' + config.radiusMin + '–' + config.radiusMax + ' px · ' + ring + '.',
+      goal: goal,
+      isLocked: isLocked,
+      isBeaten: isBeaten
+    };
   }
 
   /**
@@ -20099,7 +21428,7 @@ class AimTrainerGame {
    * are set to play.
    */
   ensureUnlockedSelection() {
-    const highestOpen = DIFFICULTY_KEYS.filter((levelKey) => this.isLevelUnlocked(levelKey)).pop() || 'EASY';
+    const highestOpen = DIFFICULTY_KEYS.filter((levelKey) => this.isLevelUnlocked(levelKey)).pop() || DIFFICULTY_KEYS[0];
     if (!this.isLevelUnlocked(this.trainingLevel)) {
       this.trainingLevel = highestOpen;
       this.settings.set('trainingLevel', highestOpen);
@@ -20108,24 +21437,27 @@ class AimTrainerGame {
       this.timeAttackLevel = highestOpen;
       this.settings.set('timeAttackLevel', highestOpen);
     }
-    if (DIFFICULTY_KEYS.indexOf(this.selectedDifficulty) !== -1 && !this.isLevelUnlocked(this.selectedDifficulty)) {
+    if (!this.isModeOpen(this.selectedDifficulty)) {
       this.selectedDifficulty = highestOpen;
       this.settings.set('difficulty', highestOpen);
     }
+    this.journeyLevel = DIFFICULTY_KEYS.indexOf(this.selectedDifficulty) !== -1 ? this.selectedDifficulty : highestOpen;
     this.ui.setSelectedDifficulty(this.selectedDifficulty);
     this.ui.setLevel(this.levelKeyFor(this.selectedDifficulty) || this.trainingLevel);
-    const boardLevel = this.levelKeyFor(this.selectedDifficulty);
-    if (boardLevel !== null) {
-      this.boardView.levelKey = boardLevel;
-      this.settings.set('boardTab', boardLevel);
-    }
+    // Signing in opens the board on lifetime XP.
+    this.boardView.levelKey = XP_BOARD_KEY;
+    this.settings.set('boardTab', XP_BOARD_KEY);
     this.refreshLevelLocks();
   }
 
   /** A locked level was picked: a denied buzz and what opens it. */
   explainLock(levelKey, fromLevelPicker) {
     this.audio.playDenied();
-    this.ui.showLockNote(levelKey, DIFFICULTY_CONFIG[levelKey].label + ' is locked. To unlock it, '
+    if (DIFFICULTY_KEYS.indexOf(levelKey) === -1) {
+      this.ui.showLockNote(levelKey, 'Beat Level 1 (' + DIFFICULTY_CONFIG[DIFFICULTY_KEYS[0]].title + ') to open the extra modes.', false);
+      return;
+    }
+    this.ui.showLockNote(levelKey, 'Level ' + DIFFICULTY_CONFIG[levelKey].number + ' (' + DIFFICULTY_CONFIG[levelKey].label + ') is locked. To unlock it, '
       + LevelUnlocks.describe(levelKey, this.settings.get('roundSeconds')) + '.', fromLevelPicker);
   }
 
@@ -20141,21 +21473,26 @@ class AimTrainerGame {
     return earned !== null && this.profile.unlock(earned) ? earned : null;
   }
 
-  /** The result screen's unlock line: a new level, or how far this run was from the next one. */
+  /** The result screen's unlock line: a new level (or the crown), or how far this run was from beating the level. */
   describeUnlock(summary) {
+    const bonusText = summary.milestoneBonus > 0 ? ' +' + Formatters.formatInteger(summary.milestoneBonus) + ' bonus coins.' : '';
+    if (summary.crownEarned) {
+      return 'Level 7 beaten: the golden crown is yours!' + bonusText;
+    }
     if (summary.unlockedLevel) {
-      return DIFFICULTY_CONFIG[summary.unlockedLevel].label + ' unlocked! Pick it in the menu.';
+      const opened = DIFFICULTY_CONFIG[summary.unlockedLevel];
+      return 'Level ' + opened.number + ' (' + opened.label + ') unlocked!' + bonusText;
     }
     const step = LevelUnlocks.stepFrom(summary.levelKey);
-    if (summary.roundType !== ROUND_TYPES.RANKED || step === null || this.isLevelUnlocked(step.unlocks)) {
+    if (summary.roundType !== ROUND_TYPES.RANKED || step === null || this.isLevelBeaten(summary.levelKey)) {
       return '';
     }
     const roundSeconds = Math.round(summary.roundDurationMs / 1000);
-    const nextLabel = DIFFICULTY_CONFIG[step.unlocks].label;
+    const prize = step.crown ? 'The golden crown' : 'Level ' + DIFFICULTY_CONFIG[step.unlocks].number + ' (' + DIFFICULTY_CONFIG[step.unlocks].label + ')';
     if (roundSeconds < UNLOCK_RULES.minimumRoundSeconds) {
-      return nextLabel + ' unlocks from rounds of ' + UNLOCK_RULES.minimumRoundSeconds + ' s or more.';
+      return prize + ' unlocks from rounds of ' + UNLOCK_RULES.minimumRoundSeconds + ' s or more.';
     }
-    return nextLabel + ' unlocks at ' + Formatters.formatInteger(LevelUnlocks.targetScore(step, roundSeconds)) + ' points in a '
+    return prize + ' unlocks at ' + Formatters.formatInteger(LevelUnlocks.targetScore(step, roundSeconds)) + ' points in a '
       + roundSeconds + ' s ' + DIFFICULTY_CONFIG[summary.levelKey].label + ' round. This run: ' + Formatters.formatInteger(summary.score) + '.';
   }
 
@@ -20298,10 +21635,12 @@ class AimTrainerGame {
         break;
       }
       case GAME_STATES.MENU: {
-        const digitMatch = /^(?:Digit|Numpad)([1-7])$/.exec(code);
+        // 1 to 7 pick the journey's levels; 8, 9 and 0 the extra modes.
+        const digitMatch = /^(?:Digit|Numpad)([0-9])$/.exec(code);
         if (digitMatch !== null) {
           event.preventDefault();
-          this.selectDifficulty(MODE_KEYS[Number(digitMatch[1]) - 1]);
+          const digit = Number(digitMatch[1]);
+          this.selectDifficulty(MODE_KEYS[digit === 0 ? 9 : digit - 1]);
         } else if (code === 'Enter' && !isControlFocused && !event.repeat) {
           event.preventDefault();
           this.startFromMenu();
@@ -20321,7 +21660,15 @@ class AimTrainerGame {
         break;
       }
       case GAME_STATES.GAMEOVER: {
-        if (code === 'Enter' && !isControlFocused && !event.repeat) {
+        if (code === 'KeyN' && !event.repeat) {
+          event.preventDefault();
+          this.playNextLevel();
+        } else if (code === 'Escape' && this.ui.isMilestoneOpen) {
+          event.preventDefault();
+          this.ui.hideMilestone(true);
+        } else if (this.ui.isMilestoneOpen) {
+          // The badge is up: only N, Escape and its own buttons do anything.
+        } else if (code === 'Enter' && !isControlFocused && !event.repeat) {
           event.preventDefault();
           this.restartRound();
         } else if (code === 'KeyB' && !event.repeat) {
@@ -20523,7 +21870,7 @@ class AimTrainerGame {
     const renderer = this.renderer;
     const start = this.gun.getLaserEmitterWorld(this.laserStart);
     const direction = this.gun.getBarrelDirection(this.laserDirection);
-    const pick = this.pickTarget(start, direction, visibleTargets, this.laserPick || (this.laserPick = {}));
+    const pick = this.pickTarget(start, direction, visibleTargets, this.laserPick || (this.laserPick = {}), true);
     const distance = pick.distance >= 0 ? pick.distance : this.intersectArena(start, direction);
     this.laserHitsTarget = pick.distance >= 0;
     const end = this.laserEnd.copyFrom(start).addScaled(direction, distance);
@@ -20563,6 +21910,7 @@ class AimTrainerGame {
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.save();
     this.shake.apply(context);
+    this.renderTrails(context);
     this.effects.renderOverlay(context);
     this.renderCountdown(context);
     this.renderDamageVignette(context);
@@ -20578,13 +21926,53 @@ class AimTrainerGame {
     context.restore();
   }
 
+  /** Insane: a fading, narrowing line along each orb's recent path, in its own color. */
+  renderTrails(context) {
+    if (!this.fsm.is(GAME_STATES.PLAYING) && !this.fsm.is(GAME_STATES.PAUSED)) {
+      return;
+    }
+    const screen = this.scratchScreen;
+    const previous = this.scratchScreenSecondary || (this.scratchScreenSecondary = { x: 0, y: 0 });
+    context.save();
+    context.lineCap = 'round';
+    for (let index = 0; index < this.targets.length; index += 1) {
+      const target = this.targets[index];
+      const trail = target.trail;
+      if (trail === null || trail.length < 2 || target.alpha <= 0.05) {
+        continue;
+      }
+      if (!this.projectTarget(target, screen)) {
+        continue;
+      }
+      const widthPx = screen.radiusPx * 1.3;
+      previous.x = screen.x;
+      previous.y = screen.y;
+      context.strokeStyle = ColorUtils.hsl(target.baseHue, 100, 66);
+      for (let pointIndex = 0; pointIndex < trail.length; pointIndex += 1) {
+        if (!this.renderer.projectToScreen(trail[pointIndex], screen)) {
+          break;
+        }
+        const fade = 1 - (pointIndex + 1) / (trail.length + 1);
+        context.globalAlpha = 0.5 * fade * target.alpha;
+        context.lineWidth = Math.max(1, widthPx * fade);
+        context.beginPath();
+        context.moveTo(previous.x, previous.y);
+        context.lineTo(screen.x, screen.y);
+        context.stroke();
+        previous.x = screen.x;
+        previous.y = screen.y;
+      }
+    }
+    context.restore();
+  }
+
   isPointerOnTarget() {
     if (!this.renderer.isSupported) {
       return false;
     }
     const pointer = this.input.pointerPosition;
     this.renderer.computeRay(pointer.x, pointer.y, this.rayOrigin, this.rayDirection);
-    const pick = this.pickTarget(this.rayOrigin, this.rayDirection, this.targets, this.hoverPick || (this.hoverPick = {}));
+    const pick = this.pickTarget(this.rayOrigin, this.rayDirection, this.targets, this.hoverPick || (this.hoverPick = {}), true);
     return pick.target !== null;
   }
 
@@ -20741,12 +22129,16 @@ class AimTrainerGame {
             SKIN_RARITIES: SKIN_RARITIES,
             SOUND_PACKS: SOUND_PACKS,
             UNLOCK_RULES: UNLOCK_RULES,
-            ACCOUNT_RULES: ACCOUNT_RULES
+            ACCOUNT_RULES: ACCOUNT_RULES,
+            XP_RULES: XP_RULES,
+            DIFFICULTY_KEYS: DIFFICULTY_KEYS
           },
           functions: {
             createRoundConfig: createRoundConfig,
             timeAttackSpawnDelayMs: timeAttackSpawnDelayMs,
-            LevelUnlocks: LevelUnlocks
+            LevelUnlocks: LevelUnlocks,
+            Experience: Experience,
+            LevelFaces: LevelFaces
           }
         };
       }
@@ -20792,10 +22184,12 @@ class AimTrainerGame {
  *   POST /api/login         {username, password}: a session token
  *   GET  /api/me            the account a session token belongs to, and its unlocked levels
  *   POST /api/logout        ends the session
- *   GET  /api/leaderboard   ?difficulty=0..3&limit=500: the top players, each by their best run
- *                           ?difficulty=0..3&player=NAME: that player's own runs
+ *   GET  /api/leaderboard   ?difficulty=0..6&limit=500: a level's top players, each by their best run
+ *                           ?difficulty=0..6&player=NAME: that player's own runs
+ *                           ?board=xp&limit=500: the top players by lifetime XP (&player=NAME: their place)
  *   POST /api/scores        a signed score from a signed-in player: saved when the
  *                           signature matches, dropped when not
+ *   POST /api/xp            a signed-in player's XP from one round, added to their lifetime XP
  *   GET  /api/health        {"ok":true}
  *
  * SETTINGS (environment variables)
@@ -20812,17 +22206,22 @@ class AimTrainerGame {
  *
  * THE TABLES (SQLite, created on start; see SCHEMA_SQL). Leaderboard: a
  * unique record id, the player's user id, the callsign (their username, at
- * most 12 characters), the difficulty as a tiny integer (0 Easy, 1 Medium,
- * 2 Hard, 3 Demon), the raw score, the accuracy percentage to two decimals,
- * the max streak, the round length in seconds and the finish time. Users:
- * the accounts, with each password scrypt-hashed under its own salt.
- * Sessions: the SHA-256 of each signed-in session token (never the token).
- * Boards rank players by their best run: higher score, then higher
- * accuracy, then the earlier run.
+ * most 12 characters), the level as a tiny integer (0 Super Easy, 1 Easy,
+ * 2 Normal, 3 Hard, 4 Insane, 5 Demon God, 6 Ultra Demon), the raw score,
+ * the accuracy percentage to two decimals, the max streak, the round length
+ * in seconds and the finish time. Users: the accounts, with each password
+ * scrypt-hashed under its own salt, their lifetime XP and whether they hold
+ * the golden crown. Sessions: the SHA-256 of each signed-in session token
+ * (never the token). XpLog: the rounds whose XP was added, so a retried
+ * post never counts twice. Level boards rank players by their best run:
+ * higher score, then higher accuracy, then the earlier run.
  *
- * LEVEL UNLOCKS. Every account starts with Easy. A standard round with a
- * fair score opens the next level (see UNLOCK_RULES, the same numbers as
- * the game's); scores on a level the player has not unlocked are refused.
+ * THE JOURNEY. Every account starts with Level 1. A standard round that
+ * reaches a level's target beats it and opens the next level; beating
+ * Level 7 earns the golden crown (see UNLOCK_RULES, the same numbers as the
+ * game's). Scores on a level the player has not opened are refused. A board
+ * saved by the four-level version moves onto the journey on start: Easy
+ * stays Easy, Medium becomes Normal, Hard stays Hard, Demon becomes Demon God.
  *
  * ANTI-CHEAT. The game joins callsign|score|accuracy|passphrase (accuracy
  * always with two decimals, e.g. "ACE|48210|93.47|<passphrase>") and sends
@@ -20881,21 +22280,20 @@ const LIMITS = Object.freeze({
   registrationsPerAddress: 40
 });
 
-const LEVEL_KEYS = ['EASY', 'MEDIUM', 'HARD', 'DEMON'];
+const LEVEL_KEYS = ['SUPER_EASY', 'EASY', 'NORMAL', 'HARD', 'INSANE', 'DEMON_GOD', 'ULTRA_DEMON'];
 
-// Base points of one hit per level (0 Easy, 1 Medium, 2 Hard, 3 Demon), as in the game.
-const BASE_HIT_POINTS = [100, 150, 220, 300];
+// Base points of one hit per level, as in the game.
+const BASE_HIT_POINTS = [80, 100, 150, 220, 260, 300, 420];
 
-// Level unlocks, the same as UNLOCK_RULES in the game: a round of 30 s or more scoring at least
-// scorePerMinute × seconds ÷ 60 on a level opens the next one.
+// Beating a level, the same as UNLOCK_RULES in the game: a round of 30 s or more scoring at least
+// scorePerMinute × seconds ÷ 60 on a level beats it. That opens the next level; Level 7 earns the crown.
 const UNLOCK_RULES = Object.freeze({
   minimumRoundSeconds: 30,
-  steps: [
-    { level: 'EASY', unlocks: 'MEDIUM', scorePerMinute: 30000 },
-    { level: 'MEDIUM', unlocks: 'HARD', scorePerMinute: 35000 },
-    { level: 'HARD', unlocks: 'DEMON', scorePerMinute: 30000 }
-  ]
+  scorePerMinute: [12000, 30000, 35000, 30000, 30000, 30000, 20000]
 });
+
+// XP, as in the game: at most 10 for one broken orb.
+const MAX_XP_PER_HIT = 10;
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,12}$/;
 const PASSWORD_LENGTH = Object.freeze({ minimum: 6, maximum: 64 });
@@ -20910,14 +22308,14 @@ const SCHEMA_SQL = [
   '  id               VARCHAR(48)  PRIMARY KEY,',  // unique record id, e.g. RUN-mh2k1x9a-4f0qz
   '  user_id          VARCHAR(40)  NOT NULL,',     // the player's account id, e.g. USR-k3j9x0q2m7b1c4d8
   '  callsign         VARCHAR(12)  NOT NULL,',     // the player's username
-  '  difficulty       TINYINT      NOT NULL,',     // 0 Easy, 1 Medium, 2 Hard, 3 Demon
+  '  difficulty       TINYINT      NOT NULL,',     // the level: 0 Super Easy to 6 Ultra Demon
   '  score            INTEGER      NOT NULL,',
   '  accuracy         DECIMAL(5,2) NOT NULL,',     // hit percentage with two decimals, e.g. 93.47
   '  max_streak       INTEGER      NOT NULL,',
   '  duration_seconds SMALLINT     NOT NULL,',     // round length, 10 to 150
   '  finished_at      TIMESTAMP    NOT NULL,',     // when the round ended, UTC ISO 8601
   '  CHECK (length(callsign) BETWEEN 1 AND 12),',
-  '  CHECK (difficulty BETWEEN 0 AND 3),',
+  '  CHECK (difficulty BETWEEN 0 AND 6),',
   '  CHECK (score > 0),',
   '  CHECK (accuracy BETWEEN 0 AND 100),',
   '  CHECK (max_streak >= 0),',
@@ -20932,7 +22330,16 @@ const SCHEMA_SQL = [
   '  username_key  VARCHAR(12)  NOT NULL UNIQUE,', // lower case, so names differing only in case clash
   '  password_hash VARCHAR(128) NOT NULL,',        // scrypt, 64 bytes as hex
   '  password_salt VARCHAR(32)  NOT NULL,',
-  '  created_at    TIMESTAMP    NOT NULL',
+  '  created_at    TIMESTAMP    NOT NULL,',
+  '  xp            INTEGER      NOT NULL DEFAULT 0,', // lifetime XP
+  '  crown         TINYINT      NOT NULL DEFAULT 0',  // 1 once Level 7 is beaten
+  ');',
+  'CREATE INDEX IF NOT EXISTS users_xp ON Users (xp DESC, created_at, id);',
+  'CREATE TABLE IF NOT EXISTS XpLog (',
+  '  id         VARCHAR(48) PRIMARY KEY,',            // the round id the game sent
+  '  user_id    VARCHAR(40) NOT NULL,',
+  '  xp         INTEGER     NOT NULL,',
+  '  created_at TIMESTAMP   NOT NULL',
   ');',
   'CREATE TABLE IF NOT EXISTS Sessions (',
   '  token_hash VARCHAR(64) PRIMARY KEY,',          // SHA-256 of the session token
@@ -20971,13 +22378,35 @@ function findGameFile() {
    --------------------------------------------------------------------------- */
 
 const database = new DatabaseSync(SETTINGS.databaseFile);
+const columnsOf = (table) => database.prepare("SELECT name FROM pragma_table_info('" + table + "')").all().map((row) => row.name);
+// The database layout version (SQLite's user_version): 3 is the seven-level journey with XP.
+const SCHEMA_VERSION = 3;
 // A board saved by the version before accounts holds runs nobody owns: keep them aside and start fresh.
-const savedColumns = database.prepare("SELECT name FROM pragma_table_info('Leaderboard')").all().map((row) => row.name);
+const savedColumns = columnsOf('Leaderboard');
 if (savedColumns.length > 0 && savedColumns.indexOf('user_id') === -1) {
   database.exec('DROP INDEX IF EXISTS leaderboard_ranking; ALTER TABLE Leaderboard RENAME TO Leaderboard_before_accounts;');
   console.log('[hitscan] the scores saved before accounts were moved to the table Leaderboard_before_accounts');
 }
+// A board saved by the four-level version: set it aside, then copy its runs onto the journey's levels.
+const isFourLevelBoard = database.prepare('PRAGMA user_version').get().user_version < SCHEMA_VERSION && columnsOf('Leaderboard').indexOf('user_id') !== -1;
+if (isFourLevelBoard) {
+  database.exec('ALTER TABLE Leaderboard RENAME TO Leaderboard_four_levels; DROP INDEX IF EXISTS leaderboard_ranking; DROP INDEX IF EXISTS leaderboard_player;');
+}
+const savedUserColumns = columnsOf('Users');
+if (savedUserColumns.length > 0 && savedUserColumns.indexOf('xp') === -1) {
+  database.exec('ALTER TABLE Users ADD COLUMN xp INTEGER NOT NULL DEFAULT 0; ALTER TABLE Users ADD COLUMN crown TINYINT NOT NULL DEFAULT 0;');
+}
 database.exec(SCHEMA_SQL);
+if (isFourLevelBoard) {
+  database.exec('BEGIN;'
+    + ' INSERT INTO Leaderboard (id, user_id, callsign, difficulty, score, accuracy, max_streak, duration_seconds, finished_at)'
+    + ' SELECT id, user_id, callsign, CASE difficulty WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 3 ELSE 5 END,'
+    + ' score, accuracy, max_streak, duration_seconds, finished_at FROM Leaderboard_four_levels;'
+    + ' DROP TABLE Leaderboard_four_levels;'
+    + ' COMMIT;');
+  console.log('[hitscan] the four-level board moved onto the seven-level journey (Medium is now Normal, Demon is now Demon God)');
+}
+database.exec('PRAGMA user_version = ' + SCHEMA_VERSION);
 
 const RANKING_ORDER = 'score DESC, accuracy DESC, finished_at ASC, id ASC';
 // Each player's best run on a level: the first row of their runs in ranking order.
@@ -21008,6 +22437,14 @@ const statements = {
     'SELECT 1 AS found FROM Leaderboard WHERE user_id = ? AND difficulty = ? AND duration_seconds >= ? AND score * 60 >= ? * duration_seconds LIMIT 1'
   ),
   insertUser: database.prepare('INSERT INTO Users (id, username, username_key, password_hash, password_salt, created_at) VALUES (?, ?, ?, ?, ?, ?)'),
+  crownedUsers: database.prepare('SELECT id FROM Users WHERE crown = 1'),
+  setCrown: database.prepare('UPDATE Users SET crown = 1 WHERE id = ?'),
+  addXp: database.prepare('UPDATE Users SET xp = MIN(xp + ?, 1000000000000) WHERE id = ?'),
+  findXpLog: database.prepare('SELECT * FROM XpLog WHERE id = ?'),
+  insertXpLog: database.prepare('INSERT INTO XpLog (id, user_id, xp, created_at) VALUES (?, ?, ?, ?)'),
+  topXp: database.prepare('SELECT id, username, xp, crown FROM Users WHERE xp > 0 ORDER BY xp DESC, created_at ASC, id ASC LIMIT ?'),
+  countXpPlayers: database.prepare('SELECT COUNT(*) AS total FROM Users WHERE xp > 0'),
+  countAheadOnXp: database.prepare('SELECT COUNT(*) AS ahead FROM Users WHERE xp > 0 AND (xp > ? OR (xp = ? AND (created_at < ? OR (created_at = ? AND id < ?))))'),
   findUserByKey: database.prepare('SELECT * FROM Users WHERE username_key = ?'),
   findUserById: database.prepare('SELECT * FROM Users WHERE id = ?'),
   insertSession: database.prepare('INSERT INTO Sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)'),
@@ -21031,16 +22468,14 @@ function playerRank(userId, difficulty) {
   return Number(better) + 1;
 }
 
-/** The levels a player has opened: Easy, plus each level whose unlock run they have posted. */
+/** True when a player has posted a run that beats a level. */
+function hasBeaten(userId, difficulty) {
+  return Boolean(statements.qualifyingRun.get(userId, difficulty, UNLOCK_RULES.minimumRoundSeconds, UNLOCK_RULES.scorePerMinute[difficulty]));
+}
+
+/** The levels a player has opened: Level 1, plus every level after one they have beaten. */
 function unlockedLevels(userId) {
-  const unlocked = ['EASY'];
-  for (const step of UNLOCK_RULES.steps) {
-    const found = statements.qualifyingRun.get(userId, LEVEL_KEYS.indexOf(step.level), UNLOCK_RULES.minimumRoundSeconds, step.scorePerMinute);
-    if (found) {
-      unlocked.push(step.unlocks);
-    }
-  }
-  return LEVEL_KEYS.filter((level) => unlocked.indexOf(level) !== -1);
+  return LEVEL_KEYS.filter((level, index) => index === 0 || hasBeaten(userId, index - 1));
 }
 
 /* ---------------------------------------------------------------------------
@@ -21089,7 +22524,12 @@ function authenticate(request) {
 }
 
 function accountAnswer(user, token) {
-  const answer = { user: { id: user.id, username: user.username }, unlocked: unlockedLevels(user.id) };
+  const answer = {
+    user: { id: user.id, username: user.username },
+    unlocked: unlockedLevels(user.id),
+    xp: Number(user.xp) || 0,
+    crown: Number(user.crown) === 1
+  };
   if (token) {
     answer.token = token;
   }
@@ -21133,8 +22573,8 @@ function validationError(body) {
   if (typeof body.callsign !== 'string') {
     return 'missing callsign';
   }
-  if (!Number.isInteger(body.difficulty) || body.difficulty < 0 || body.difficulty > 3) {
-    return 'difficulty must be 0, 1, 2 or 3';
+  if (!Number.isInteger(body.difficulty) || body.difficulty < 0 || body.difficulty >= LEVEL_KEYS.length) {
+    return 'difficulty must be 0 to 6';
   }
   if (!Number.isInteger(body.durationSeconds) || body.durationSeconds < LIMITS.minDurationSeconds || body.durationSeconds > LIMITS.maxDurationSeconds) {
     return 'round length must be 10 to 150 seconds';
@@ -21319,18 +22759,23 @@ async function handleLogin(request, response) {
 }
 
 function handleLeaderboard(url, response) {
-  const difficulty = Number(url.searchParams.get('difficulty'));
   const limit = Number(url.searchParams.get('limit') || LIMITS.boardSize);
   const player = url.searchParams.get('player');
-  if (!Number.isInteger(difficulty) || difficulty < 0 || difficulty > 3) {
-    sendJson(response, 400, { reason: 'difficulty must be 0, 1, 2 or 3' });
-    return;
-  }
   if (!Number.isInteger(limit) || limit < 1 || limit > LIMITS.boardSize) {
     sendJson(response, 400, { reason: 'limit must be 1 to ' + LIMITS.boardSize });
     return;
   }
-  const toEntry = (row, index) => ({
+  if (url.searchParams.get('board') === 'xp') {
+    handleXpBoard(limit, player, response);
+    return;
+  }
+  const difficulty = Number(url.searchParams.get('difficulty'));
+  if (!Number.isInteger(difficulty) || difficulty < 0 || difficulty >= LEVEL_KEYS.length) {
+    sendJson(response, 400, { reason: 'difficulty must be 0 to 6' });
+    return;
+  }
+  const crowned = new Set(statements.crownedUsers.all().map((row) => row.id));
+  const toEntry = (row, index, userId) => ({
     rank: index + 1,
     id: row.id,
     callsign: row.callsign,
@@ -21338,17 +22783,90 @@ function handleLeaderboard(url, response) {
     accuracy: Math.round(Number(row.accuracy) * 100) / 100,
     maxStreak: Number(row.max_streak),
     durationSeconds: Number(row.duration_seconds),
-    finishedAt: row.finished_at
+    finishedAt: row.finished_at,
+    crown: crowned.has(userId || row.user_id)
   });
   if (player !== null) {
     const user = USERNAME_PATTERN.test(player) ? statements.findUserByKey.get(player.toLowerCase()) : null;
     const rows = user ? statements.playerRuns.all(difficulty, user.id, limit) : [];
     const total = user ? Number(statements.countPlayerRuns.get(difficulty, user.id).total) : 0;
-    sendJson(response, 200, { difficulty: difficulty, player: user ? user.username : player, total: total, entries: rows.map(toEntry) });
+    sendJson(response, 200, { difficulty: difficulty, player: user ? user.username : player, total: total, entries: rows.map((row, index) => toEntry(row, index, user.id)) });
     return;
   }
   const rows = statements.topPlayers.all(difficulty, limit);
-  sendJson(response, 200, { difficulty: difficulty, total: Number(statements.countPlayers.get(difficulty).total), entries: rows.map(toEntry) });
+  sendJson(response, 200, { difficulty: difficulty, total: Number(statements.countPlayers.get(difficulty).total), entries: rows.map((row, index) => toEntry(row, index)) });
+}
+
+/** Players by lifetime XP, most first (ties: the older account first); with a player name, just their place. */
+function handleXpBoard(limit, player, response) {
+  const total = Number(statements.countXpPlayers.get().total);
+  const toEntry = (row, rank) => ({ rank: rank, callsign: row.username, xp: Number(row.xp), crown: Number(row.crown) === 1 });
+  if (player !== null) {
+    const user = USERNAME_PATTERN.test(player) ? statements.findUserByKey.get(player.toLowerCase()) : null;
+    if (!user || Number(user.xp) <= 0) {
+      sendJson(response, 200, { board: 'xp', player: user ? user.username : player, total: total, entries: [] });
+      return;
+    }
+    const ahead = Number(statements.countAheadOnXp.get(user.xp, user.xp, user.created_at, user.created_at, user.id).ahead);
+    sendJson(response, 200, { board: 'xp', player: user.username, total: total, entries: [toEntry(user, ahead + 1)] });
+    return;
+  }
+  const rows = statements.topXp.all(limit);
+  sendJson(response, 200, { board: 'xp', total: total, entries: rows.map((row, index) => toEntry(row, index + 1)) });
+}
+
+/**
+ * XP from one round of a signed-in player, signed as username|xp|round id|passphrase.
+ * A round id counts once, however often it is sent.
+ */
+async function handleXp(request, response) {
+  const address = clientAddress(request);
+  if (isRateLimited('xp:' + address, SETTINGS.submissionsPerMinute * 2)) {
+    sendJson(response, 429, { accepted: false, reason: 'too many rounds at once; wait a minute' });
+    return;
+  }
+  const user = authenticate(request);
+  if (user === null) {
+    sendJson(response, 401, { accepted: false, reason: 'sign in to earn XP' });
+    return;
+  }
+  const body = await readJsonBody(request);
+  if (body === null || typeof body !== 'object' || typeof body.id !== 'string' || !RECORD_ID_PATTERN.test(body.id)) {
+    sendJson(response, 400, { accepted: false, reason: 'bad round id' });
+    return;
+  }
+  if (body.callsign !== user.username) {
+    sendJson(response, 400, { accepted: false, reason: 'XP is earned under your own username' });
+    return;
+  }
+  // Time Attack rounds can run past the usual 150 s while hits keep adding time.
+  if (!Number.isInteger(body.durationSeconds) || body.durationSeconds < 1 || body.durationSeconds > 3600) {
+    sendJson(response, 400, { accepted: false, reason: 'bad round length' });
+    return;
+  }
+  const maximumXp = Math.ceil(body.durationSeconds * LIMITS.maxHitsPerSecond) * MAX_XP_PER_HIT;
+  if (!Number.isInteger(body.xp) || body.xp < 1 || body.xp > maximumXp) {
+    sendJson(response, 400, { accepted: false, reason: 'XP out of range for the round' });
+    return;
+  }
+  const signature = typeof body.signature === 'string' && SIGNATURE_PATTERN.test(body.signature) ? Buffer.from(body.signature, 'hex') : null;
+  const expected = Buffer.from(sha256(body.callsign + '|' + body.xp + '|' + body.id + '|' + SETTINGS.passphrase), 'hex');
+  if (signature === null || !crypto.timingSafeEqual(expected, signature)) {
+    console.warn('[hitscan] dropped XP with a bad signature from ' + address + ' (' + body.callsign + ', ' + body.xp + ')');
+    sendJson(response, 403, { accepted: false, reason: 'signature mismatch' });
+    return;
+  }
+  const logged = statements.findXpLog.get(body.id);
+  if (logged && logged.user_id !== user.id) {
+    sendJson(response, 409, { accepted: false, reason: 'that round id is taken' });
+    return;
+  }
+  if (!logged) {
+    statements.insertXpLog.run(body.id, user.id, body.xp, new Date().toISOString());
+    statements.addXp.run(body.xp, user.id);
+  }
+  const updated = statements.findUserById.get(user.id);
+  sendJson(response, logged ? 200 : 201, { accepted: true, xp: Number(updated.xp), crown: Number(updated.crown) === 1 });
 }
 
 async function handleSubmission(request, response) {
@@ -21404,12 +22922,24 @@ async function handleSubmission(request, response) {
   } else {
     statements.insert.run(row.id, row.user_id, row.callsign, row.difficulty, row.score, row.accuracy, row.max_streak, row.duration_seconds, row.finished_at);
   }
+  if (row.difficulty === LEVEL_KEYS.length - 1 && hasBeaten(user.id, row.difficulty)) {
+    statements.setCrown.run(user.id);
+  }
   const rank = playerRank(user.id, row.difficulty);
   const total = Number(statements.countPlayers.get(row.difficulty).total);
   if (!existing) {
     console.log('[hitscan] saved ' + row.callsign + ' ' + row.score + ' on ' + LEVEL_KEYS[row.difficulty] + ' (#' + rank + ' of ' + total + ' players)');
   }
-  sendJson(response, existing ? 200 : 201, { accepted: true, id: row.id, rank: rank, total: total, unlocked: unlockedLevels(user.id) });
+  const holder = statements.findUserById.get(user.id);
+  sendJson(response, existing ? 200 : 201, {
+    accepted: true,
+    id: row.id,
+    rank: rank,
+    total: total,
+    unlocked: unlockedLevels(user.id),
+    crown: Number(holder.crown) === 1,
+    xp: Number(holder.xp)
+  });
 }
 
 /** Runs an async route, answering with its error's status (or 500) if it throws. */
@@ -21462,6 +22992,8 @@ const server = http.createServer((request, response) => {
       handleLeaderboard(url, response);
     } else if (route === 'POST /api/scores') {
       runRoute(handleSubmission, request, response);
+    } else if (route === 'POST /api/xp') {
+      runRoute(handleXp, request, response);
     } else if (route === 'GET /api/health') {
       sendJson(response, 200, { ok: true });
     } else {
