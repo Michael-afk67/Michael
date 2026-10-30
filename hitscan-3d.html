@@ -7,6 +7,11 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Single-file WebGL aim trainer inside a gridded sphere: hand-written 3D renderer with a physically based pistol, procedural weapon finishes bought with coins, Easy to Demon levels, a Training Ground, bullseye and streak bonuses, Time Attack and Gridshot, a custom crosshair, sound packs, procedural Web Audio, a shareable score card and local plus global leaderboards.">
 <meta name="theme-color" content="#06080d">
+<!-- Added to a phone's or tablet's home screen, the game opens full screen without the browser bars. -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hitscan">
 <style>
 /* Layout: a full-bleed WebGL firing sphere with a 2D overlay for the reticle; thin HUD rails pinned to the edges; every menu is one gunmetal console trimmed in cartridge brass, centered over the live range. */
 :root {
@@ -472,6 +477,69 @@ kbd {
 
 .ammo[data-empty="true"] .ammo__rounds {
   color: var(--signal-miss);
+}
+
+/* ------------------------------------------------------------------
+   FIRE button (touch play): fires where the crosshair is aiming
+   ------------------------------------------------------------------ */
+.fire-button {
+  --fire-size: clamp(72px, 15vmin, 104px);
+  position: absolute;
+  right: calc(var(--gutter-right) + 6px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  width: var(--fire-size);
+  height: var(--fire-size);
+  padding: 0;
+  color: var(--steel-bright);
+  background: radial-gradient(circle at 50% 40%, rgba(56, 245, 255, 0.2), rgba(9, 14, 30, 0.62) 70%);
+  border: 2px solid rgba(56, 245, 255, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 18px rgba(56, 245, 255, 0.28), inset 0 0 14px rgba(56, 245, 255, 0.18);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 70ms ease, background-color 70ms ease, box-shadow 70ms ease;
+}
+
+.fire-button[data-side="LEFT"] {
+  right: auto;
+  left: calc(var(--gutter-left) + 6px);
+  /* Above the magazine counter in the bottom-left corner. */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 74px);
+}
+
+.fire-button svg {
+  width: 44%;
+  height: 44%;
+  fill: currentColor;
+}
+
+.fire-button__label {
+  font-family: var(--font-data);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.fire-button[data-pressed="true"] {
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 0 26px rgba(56, 245, 255, 0.6), inset 0 0 22px rgba(56, 245, 255, 0.45);
+  transform: scale(0.93);
+}
+
+.fire-button:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 3px;
 }
 
 .adaptive {
@@ -1510,6 +1578,22 @@ kbd {
 .controls-hint--touch {
   display: none;
   line-height: 1.5;
+}
+
+.touch-settings {
+  display: grid;
+  gap: 12px;
+}
+
+.pause-aim {
+  margin-top: 14px;
+}
+
+/* Aim speed and the FIRE button side only matter on phones and tablets. */
+@media not all and (hover: none) and (pointer: coarse) {
+  .touch-only {
+    display: none;
+  }
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -3287,6 +3371,13 @@ kbd {
   cursor: grabbing;
 }
 
+.armory__inspect {
+  position: absolute;
+  right: var(--gutter-right);
+  bottom: 16px;
+  z-index: 1;
+}
+
 .armory__hint {
   position: absolute;
   left: 50%;
@@ -3472,6 +3563,10 @@ kbd {
     display: none;
   }
 
+  .hud__stats dt {
+    letter-spacing: 0.06em;
+  }
+
   .adaptive {
     grid-template-columns: auto auto;
     font-size: 10px;
@@ -3529,6 +3624,248 @@ kbd {
   }
 }
 
+/* Phones and tablets: bigger tap targets, and the Start button always in reach. */
+@media (hover: none) and (pointer: coarse) {
+  .tab,
+  .scope-toggle button {
+    min-height: 36px;
+  }
+
+  .link-button {
+    padding: 8px 0;
+  }
+
+  .color-swatch {
+    min-height: 38px;
+  }
+
+  .slider input[type="range"] {
+    height: 30px;
+  }
+
+  .actions--start {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    margin: 0 -12px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(10, 13, 20, 0), rgba(10, 13, 20, 0.94) 32%);
+  }
+}
+
+/* One column on a touch screen: the setup's parts sit straight in the menu grid, so the
+   pinned Start bar can stay on screen from the top of the menu to the leaderboard. */
+@media (hover: none) and (pointer: coarse) and (max-width: 880px) {
+  .setup {
+    display: contents;
+  }
+}
+
+/* Phones held sideways: slimmer headings, one HUD row and a side-by-side armory, so each screen fits the short height. */
+@media (max-height: 500px) {
+  .screen {
+    padding-block: 10px;
+  }
+
+  .console {
+    padding: 16px 18px;
+  }
+
+  .wordmark {
+    font-size: clamp(2.4rem, 8vw, 3.4rem);
+  }
+
+  .lede,
+  .screen__subtitle {
+    display: none;
+  }
+
+  .console__grid {
+    margin-top: 14px;
+  }
+
+  .screen__title {
+    font-size: clamp(1.8rem, 5vw, 2.4rem);
+  }
+
+  /* The pause screen keeps Resume in view; the round's numbers stay up in the HUD behind it. */
+  .stat-grid--compact {
+    display: none;
+  }
+
+  .screen__actions {
+    margin-top: 14px;
+  }
+
+  /* HUD: one slim row. Accuracy and hits wait for the pause and result screens. */
+  .hud {
+    padding-top: 6px;
+  }
+
+  .hud__rail {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: "score clock stats";
+    gap: 10px;
+  }
+
+  .hud__block--clock {
+    align-items: center;
+    min-width: 0;
+  }
+
+  .hud__timebar {
+    width: clamp(90px, 16vw, 160px);
+    margin-top: 4px;
+  }
+
+  .hud__block--stats {
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .hud__stats {
+    flex: none;
+    grid-template-columns: repeat(2, auto);
+    gap: 2px 12px;
+  }
+
+  .hud__stats > div:nth-child(1),
+  .hud__stats > div:nth-child(3) {
+    display: none;
+  }
+
+  .hud__stats > div {
+    align-items: flex-end;
+  }
+
+  .hud__value--xl {
+    font-size: 1.5rem;
+  }
+
+  .hud__value--clock {
+    font-size: 1.4rem;
+  }
+
+  .hud__fullscreen {
+    display: none;
+  }
+
+  .hud__buttons {
+    gap: 4px;
+  }
+
+  .hud .icon-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ammo {
+    bottom: 8px;
+  }
+
+  .ammo__pips {
+    display: none;
+  }
+
+  /* Armory: the list on the left and the pistol on the right, as on a big screen. */
+  .screen--armory {
+    background: linear-gradient(90deg, rgba(4, 6, 10, 0.8) 0%, rgba(4, 6, 10, 0.52) 44%, rgba(4, 6, 10, 0) 70%);
+  }
+
+  .armory {
+    grid-template-columns: minmax(0, 58%) minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .armory__stage,
+  .armory__panel {
+    grid-row: auto;
+  }
+
+  .armory__panel {
+    --panel-pad: 14px;
+    align-self: stretch;
+    max-height: none;
+    margin: 8px 0 8px var(--gutter-left);
+  }
+
+  .armory .screen__title {
+    font-size: 1.6rem;
+  }
+
+  .armory .eyebrow,
+  .armory__rate,
+  .skin-detail__copy {
+    display: none;
+  }
+
+  .armory__scroll {
+    gap: 8px;
+  }
+
+  .wallet--large .wallet__amount {
+    font-size: 1.4rem;
+  }
+
+  .skin-detail .actions {
+    gap: 8px;
+  }
+
+  .skin-detail .cta {
+    padding: 8px 14px 7px;
+    font-size: 1.1rem;
+  }
+
+  /* Keep the buy / equip controls in reach while the list scrolls. */
+  .skin-detail {
+    position: sticky;
+    bottom: calc(-1 * var(--panel-pad));
+    z-index: 1;
+    margin: 0 calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad));
+    padding: 10px var(--panel-pad) var(--panel-pad);
+    background: var(--gunmetal);
+    box-shadow: 0 -12px 24px rgba(4, 6, 10, 0.7);
+  }
+
+  .skin-detail__name {
+    margin: 2px 0 6px;
+    font-size: 1.2rem;
+  }
+
+  .armory__hint {
+    bottom: 12px;
+  }
+
+  /* Results: a smaller head, so the buttons come sooner. */
+  .grade {
+    width: 64px;
+    font-size: 2.4rem;
+  }
+
+  .result-score__value {
+    font-size: 2.4rem;
+  }
+
+  /* The milestone badge fits with its buttons in view. */
+  .milestone {
+    padding: 8px;
+  }
+
+  .milestone__badge {
+    gap: 4px;
+    padding: 12px 18px;
+  }
+
+  .milestone__face {
+    width: 72px;
+    height: 72px;
+  }
+
+  .milestone__title {
+    font-size: 28px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -3573,7 +3910,7 @@ kbd {
 </head>
 <body>
 <div class="app" id="app" data-state="MENU">
-  <canvas class="playfield" id="playfield" tabindex="-1" role="img" aria-label="3D firing range inside a gridded sphere. Click or tap the glowing orbs before their rings close."></canvas>
+  <canvas class="playfield" id="playfield" tabindex="-1" role="img" aria-label="3D firing range inside a gridded sphere. Put the crosshair on the glowing orbs and fire before their rings close."></canvas>
   <canvas class="overlay" id="overlay" aria-hidden="true"></canvas>
 
   <header class="hud" id="hud" hidden>
@@ -3608,6 +3945,9 @@ kbd {
           <button class="icon-button hud__fullscreen" id="hud-fullscreen-button" type="button" aria-label="Full screen" title="Full screen" hidden>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 1.5h5v1.8H3.3v3.2H1.5zM9.5 1.5h5v5h-1.8V3.3H9.5zM1.5 9.5h1.8v3.2h3.2v1.8h-5zM12.7 9.5h1.8v5h-5v-1.8h3.2z"/></svg>
           </button>
+          <button class="icon-button" id="hud-inspect-button" type="button" aria-label="Inspect the pistol (F)" title="Inspect the pistol (F)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M6.8 1.6a5.2 5.2 0 1 1 0 10.4 5.2 5.2 0 0 1 0-10.4zm0 1.9a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z"/><path d="M10.4 11.8l1.4-1.4 3.4 3.4-1.4 1.4z"/></svg>
+          </button>
           <button class="icon-button" id="hud-pause-button" type="button" aria-label="Pause (Esc)" title="Pause (Esc)">
             <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="3.4" height="11" rx="0.6"/><rect x="9.6" y="2.5" width="3.4" height="11" rx="0.6"/></svg>
           </button>
@@ -3625,6 +3965,11 @@ kbd {
       <span class="ammo__pips" id="ammo-pips" aria-hidden="true"></span>
       <span class="ammo__status" id="ammo-status">R or right-click to reload</span>
     </span>
+  </button>
+
+  <button class="fire-button" id="fire-button" type="button" data-side="RIGHT" aria-label="Fire where the crosshair is aiming" hidden>
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path fill-rule="evenodd" d="M16 6.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19zm0 2.4a7.1 7.1 0 1 0 0 14.2 7.1 7.1 0 0 0 0-14.2z"/><path d="M14.8 1.5h2.4v7h-2.4zM14.8 23.5h2.4v7h-2.4zM1.5 14.8h7v2.4h-7zM23.5 14.8h7v2.4h-7z"/><circle cx="16" cy="16" r="2.2"/></svg>
+    <span class="fire-button__label">Fire</span>
   </button>
 
   <aside class="adaptive" id="adaptive-panel" aria-label="Adaptive difficulty telemetry" hidden>
@@ -3676,7 +4021,7 @@ kbd {
       <div class="console__brand">
         <p class="eyebrow">Live-fire sphere · WebGL 3D · procedural audio</p>
         <h1 class="wordmark" id="menu-title">HITSCAN<span class="wordmark__reticle" aria-hidden="true"></span></h1>
-        <p class="lede">You stand inside a gridded sphere. Glass orbs appear at different depths; your pistol follows the cursor. Climb seven levels, from First Steps to Absolute Pandemonium: beat each one to open the next. Harder levels pay more coins, which buy weapon finishes, sound packs and more in the Armory.</p>
+        <p class="lede">You stand inside a gridded sphere. Glass orbs appear at different depths; your pistol follows the crosshair. Climb seven levels, from First Steps to Absolute Pandemonium: beat each one to open the next. Harder levels pay more coins, which buy weapon finishes, sound packs and more in the Armory.</p>
         <p class="notice" id="webgl-notice" data-tone="miss" hidden></p>
       </div>
       <div class="console__grid">
@@ -3828,15 +4173,23 @@ kbd {
                 <label class="toggle" for="setting-reload"><input type="checkbox" id="setting-reload" checked><span>Magazine and reloads</span></label>
                 <label class="toggle" for="setting-laser"><input type="checkbox" id="setting-laser" checked><span>Laser sight</span></label>
               </div>
+              <div class="touch-settings touch-only">
+                <label class="slider" for="setting-aim-speed">
+                  <span>Aim speed</span>
+                  <input type="range" id="setting-aim-speed" min="0.5" max="3" step="0.1" value="1.5">
+                  <output id="setting-aim-speed-value" for="setting-aim-speed">1.5×</output>
+                </label>
+                <label class="toggle" for="setting-fire-left"><input type="checkbox" id="setting-fire-left"><span>FIRE button on the left</span></label>
+              </div>
             </div>
           </div>
 
-          <div class="actions">
+          <div class="actions actions--start">
             <button class="cta" id="start-button" type="button">Start round <kbd>Enter</kbd></button>
             <button class="button-secondary" id="fullscreen-button" type="button" hidden>Full screen</button>
           </div>
           <p class="controls-hint controls-hint--keyboard">Click to fire · <kbd>R</kbd> or right-click reloads · <kbd>F</kbd> inspects the pistol · <kbd>L</kbd> laser on/off · <kbd>B</kbd> Armory · <kbd>C</kbd> crosshair · <kbd>Esc</kbd> pauses · <kbd>M</kbd> mutes · <kbd>1</kbd>–<kbd>7</kbd> pick a level · <kbd>8</kbd> <kbd>9</kbd> <kbd>0</kbd> extra modes</p>
-          <p class="controls-hint controls-hint--touch">Tap an orb to fire. Tap the magazine counter in the corner to reload early; it also reloads itself when empty. The laser sight switch is above, and the Armory and Crosshair buttons sit under your coins.</p>
+          <p class="controls-hint controls-hint--touch">Drag anywhere to move the crosshair onto an orb, then tap anywhere or press FIRE. The shot goes where the crosshair aims, not where your finger taps. Tap the magazine counter to reload early. The magnifier next to Pause inspects the pistol.</p>
         </div>
 
         <div class="console__side">
@@ -3923,6 +4276,11 @@ kbd {
       <div class="toggles pause-toggles">
         <label class="toggle" for="pause-laser"><input type="checkbox" id="pause-laser" checked><span>Laser sight</span></label>
       </div>
+      <label class="slider touch-only pause-aim" for="pause-aim-speed">
+        <span>Aim speed</span>
+        <input type="range" id="pause-aim-speed" min="0.5" max="3" step="0.1" value="1.5">
+        <output id="pause-aim-speed-value" for="pause-aim-speed">1.5×</output>
+      </label>
       <dl class="stat-grid stat-grid--compact" id="pause-stats"></dl>
       <div class="actions screen__actions">
         <button class="cta" id="pause-resume" type="button">Resume <kbd>Esc</kbd></button>
@@ -4074,7 +4432,7 @@ kbd {
               <p class="field__label" id="label-crosshair-color">Color <span class="field__value" id="crosshair-color-value">RGB 228, 234, 243</span></p>
               <div class="color-grid" id="crosshair-colors" role="radiogroup" aria-labelledby="label-crosshair-color"></div>
             </div>
-            <label class="toggle" for="crosshair-dynamic"><input type="checkbox" id="crosshair-dynamic"><span>Dynamic movement: the gap opens while the mouse moves fast</span></label>
+            <label class="toggle" for="crosshair-dynamic"><input type="checkbox" id="crosshair-dynamic"><span>Dynamic movement: the gap opens while the crosshair moves fast</span></label>
             <div class="actions">
               <button class="button-secondary" id="crosshair-reset" type="button">Reset to default</button>
               <button class="button-secondary" id="crosshair-back" type="button">Back <kbd>Esc</kbd></button>
@@ -4093,6 +4451,7 @@ kbd {
       </div>
       <div class="armory__stage" id="armory-stage" aria-label="Pistol preview. Drag to turn it.">
         <p class="armory__hint">Drag to turn<span class="armory__hint-keys"> · <kbd>F</kbd> spin</span></p>
+        <button class="button-secondary button-small armory__inspect" id="armory-inspect" type="button">Inspect <kbd>F</kbd></button>
       </div>
     </div>
   </section>
@@ -4300,7 +4659,7 @@ const DIFFICULTY_CONFIG = deepFreeze({
     number: 1,
     label: 'Super Easy',
     title: 'First Steps',
-    summary: 'Huge orbs that stay put and never run out. Take your time and get used to your mouse.',
+    summary: 'Huge orbs that stay put and never run out. Take your time and get used to aiming.',
     radiusMin: 72,
     radiusMax: 92,
     lifespanMs: Infinity,
@@ -4936,7 +5295,7 @@ const SKIN_CATALOG = deepFreeze([
     price: 50000,
     rarity: 'PREMIUM',
     effect: 'MAGMA',
-    description: 'Basalt that glows from inside and smokes at the barrel. Inspect it (F): the barrel tilts up, the body cracks open, ash erupts and lava drips onto the floor, pools and turns to smoke.',
+    description: 'Basalt that glows from inside and smokes at the barrel. Inspect it (F or the Inspect button): the barrel tilts up, the body cracks open, ash erupts and lava drips onto the floor, pools and turns to smoke.',
     swatch: 'radial-gradient(circle at 35% 60%, rgba(255, 200, 80, 0.95) 0 5%, rgba(255, 90, 0, 0.85) 12%, transparent 30%), repeating-linear-gradient(120deg, transparent 0 9px, rgba(255, 80, 0, 0.75) 9px 11px, transparent 11px 20px), linear-gradient(140deg, #24120c, #090504)',
     shardColors: ['#ffb02e', '#ff4a00', '#ffd25a']
   },
@@ -4947,7 +5306,7 @@ const SKIN_CATALOG = deepFreeze([
     price: 75000,
     rarity: 'PREMIUM',
     effect: 'HOLOGRAM',
-    description: 'A see-through shell with a neon-blue wireframe sliding across it. Inspect it (F): it glitches out of existence into green binary code and projects a spinning Ultra Demon above the sight.',
+    description: 'A see-through shell with a neon-blue wireframe sliding across it. Inspect it (F or the Inspect button): it glitches out of existence into green binary code and projects a spinning Ultra Demon above the sight.',
     swatch: 'linear-gradient(90deg, rgba(56, 245, 255, 0.9) 0 1px, transparent 1px) 0 0 / 9px 9px, linear-gradient(0deg, rgba(56, 245, 255, 0.9) 0 1px, transparent 1px) 0 0 / 9px 9px, linear-gradient(140deg, rgba(12, 40, 60, 0.9), rgba(4, 12, 20, 0.95))',
     shardColors: ['#38f5ff', '#7cf9ff', '#2be38a']
   },
@@ -4958,7 +5317,7 @@ const SKIN_CATALOG = deepFreeze([
     price: 100000,
     rarity: 'PREMIUM',
     effect: 'NEBULA',
-    description: 'Turning galaxies, purple stardust and twinkling stars trapped inside the frame. Inspect it (F): a finger spin opens a black hole that sends purple gravity rings across your screen.',
+    description: 'Turning galaxies, purple stardust and twinkling stars trapped inside the frame. Inspect it (F or the Inspect button): a finger spin opens a black hole that sends purple gravity rings across your screen.',
     swatch: 'radial-gradient(circle at 30% 35%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 70%, #fff 0 1px, transparent 2px), radial-gradient(circle at 60% 30%, rgba(255, 110, 220, 0.85), transparent 40%), radial-gradient(circle at 35% 70%, rgba(110, 90, 255, 0.9), transparent 45%), #0a0618',
     shardColors: ['#b46bff', '#ff6bd8', '#6be1ff']
   }
@@ -11466,6 +11825,29 @@ class GunController3D {
    Module 07 · Input telemetry, the reactive crosshair, and screen shake
    ========================================================================= */
 
+/**
+ * Touch and pen aim like a laptop trackpad. Dragging moves the crosshair (it
+ * never jumps to the finger), and a quick tap anywhere fires, as does the FIRE
+ * button. Every shot goes where the crosshair is aiming, never where the finger
+ * touched, so tapping an orb only breaks it when the crosshair is on it.
+ */
+const TOUCH_AIM_RULES = deepFreeze({
+  // A touch this short that moved this little is a tap.
+  tapMaxMs: 300,
+  tapSlopPx: 10,
+  // Crosshair pixels per pixel the finger moves.
+  speedDefault: 1.5,
+  speedMin: 0.5,
+  speedMax: 3
+});
+
+const FIRE_BUTTON_SIDES = deepFreeze({ RIGHT: 'RIGHT', LEFT: 'LEFT' });
+
+/** True on phones and tablets: the main pointer is a finger. */
+function prefersTouchInput() {
+  return typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+}
+
 class InputController {
   /**
    * @param {HTMLCanvasElement} canvas
@@ -11482,17 +11864,21 @@ class InputController {
     this.handlers = handlers;
     this.pointerPosition = new Vector2D(0, 0);
     this.canvasBounds = { left: 0, top: 0, width: 1, height: 1 };
-    this.lastPointerType = 'mouse';
+    this.lastPointerType = prefersTouchInput() ? 'touch' : 'mouse';
     this.isPointerInside = false;
     this.hasPointerMoved = false;
     this.lastMoveTimestamp = 0;
-    this.lastTouchTimestamp = -Infinity;
     this.totalMovementPx = 0;
     // Smoothed pointer speed in CSS px per second (drives the dynamic crosshair).
     this.pointerSpeed = 0;
+    // Fingers on the range, by pointer id, and the one that moves the crosshair.
+    this.touches = new Map();
+    this.aimPointerId = null;
+    this.touchAimSpeed = TOUCH_AIM_RULES.speedDefault;
 
     this.boundGlobalPointerMove = this.handleGlobalPointerMove.bind(this);
     this.boundPointerDown = this.handlePointerDown.bind(this);
+    this.boundPointerUp = this.handlePointerUp.bind(this);
     this.boundPointerEnter = this.handlePointerEnter.bind(this);
     this.boundPointerLeave = this.handlePointerLeave.bind(this);
     this.boundContextMenu = this.handleContextMenu.bind(this);
@@ -11501,6 +11887,8 @@ class InputController {
 
   attach() {
     window.addEventListener('pointermove', this.boundGlobalPointerMove, { passive: true });
+    window.addEventListener('pointerup', this.boundPointerUp, { passive: true });
+    window.addEventListener('pointercancel', this.boundPointerUp, { passive: true });
     this.canvas.addEventListener('pointerdown', this.boundPointerDown, { passive: false });
     this.canvas.addEventListener('pointerenter', this.boundPointerEnter);
     this.canvas.addEventListener('pointerleave', this.boundPointerLeave);
@@ -11511,11 +11899,33 @@ class InputController {
 
   detach() {
     window.removeEventListener('pointermove', this.boundGlobalPointerMove);
+    window.removeEventListener('pointerup', this.boundPointerUp);
+    window.removeEventListener('pointercancel', this.boundPointerUp);
     this.canvas.removeEventListener('pointerdown', this.boundPointerDown);
     this.canvas.removeEventListener('pointerenter', this.boundPointerEnter);
     this.canvas.removeEventListener('pointerleave', this.boundPointerLeave);
     this.canvas.removeEventListener('contextmenu', this.boundContextMenu);
     window.removeEventListener('keydown', this.boundKeyDown);
+  }
+
+  /** Fingers and pens aim with the crosshair; a mouse clicks where it points. */
+  static isTouchPointer(pointerType) {
+    return pointerType === 'touch' || pointerType === 'pen';
+  }
+
+  get usesTouchAim() {
+    return InputController.isTouchPointer(this.lastPointerType);
+  }
+
+  /** Crosshair pixels per pixel the finger moves (clamped to the allowed range). */
+  setTouchAimSpeed(speed) {
+    this.touchAimSpeed = MathUtils.clamp(Number(speed) || TOUCH_AIM_RULES.speedDefault, TOUCH_AIM_RULES.speedMin, TOUCH_AIM_RULES.speedMax);
+  }
+
+  /** Forgets every finger (a new round, a pause): none of them can fire or aim any more. */
+  resetTouches() {
+    this.touches.clear();
+    this.aimPointerId = null;
   }
 
   /** Caches the canvas rectangle; refreshed on resize instead of on every event. */
@@ -11538,18 +11948,32 @@ class InputController {
   }
 
   handleGlobalPointerMove(event) {
+    if (InputController.isTouchPointer(event.pointerType)) {
+      this.handleTouchMove(event);
+      return;
+    }
+    if (this.usesTouchAim && event.movementX === 0 && event.movementY === 0) {
+      // Browsers send still "mouse" moves on their own (on load, after a scroll):
+      // only a mouse that really moves takes over from touch aiming.
+      return;
+    }
     const previousX = this.pointerPosition.x;
     const previousY = this.pointerPosition.y;
     this.toCanvasPoint(event.clientX, event.clientY, this.pointerPosition);
     this.pointerPosition.x = MathUtils.clamp(this.pointerPosition.x, 0, this.canvasBounds.width);
     this.pointerPosition.y = MathUtils.clamp(this.pointerPosition.y, 0, this.canvasBounds.height);
+    this.lastPointerType = event.pointerType || 'mouse';
+    this.trackPointerMotion(previousX, previousY);
+  }
+
+  /** Movement telemetry after the crosshair moved from (previousX, previousY). */
+  trackPointerMotion(previousX, previousY) {
     const distance = Math.hypot(this.pointerPosition.x - previousX, this.pointerPosition.y - previousY);
     this.totalMovementPx += Math.abs(this.pointerPosition.x - previousX) + Math.abs(this.pointerPosition.y - previousY);
     const now = performance.now();
     const elapsedMs = Math.max(4, now - this.lastMoveTimestamp);
     const instantSpeed = elapsedMs > 120 ? 0 : (distance / elapsedMs) * 1000;
     this.pointerSpeed += (instantSpeed - this.pointerSpeed) * 0.5;
-    this.lastPointerType = event.pointerType || 'mouse';
     this.hasPointerMoved = true;
     this.lastMoveTimestamp = now;
     this.handlers.onPointerActivity();
@@ -11566,13 +11990,14 @@ class InputController {
       return;
     }
     event.preventDefault();
+    if (InputController.isTouchPointer(event.pointerType)) {
+      this.beginTouch(event);
+      return;
+    }
     this.toCanvasPoint(event.clientX, event.clientY, this.pointerPosition);
     this.lastPointerType = event.pointerType || 'mouse';
     this.hasPointerMoved = true;
     this.lastMoveTimestamp = performance.now();
-    if (this.lastPointerType === 'touch' || this.lastPointerType === 'pen') {
-      this.lastTouchTimestamp = this.lastMoveTimestamp;
-    }
     this.handlers.onUserGesture();
     this.handlers.onPointerActivity();
     if (isMouse && event.button === 2) {
@@ -11580,6 +12005,99 @@ class InputController {
       return;
     }
     this.handlers.onFire(this.pointerPosition.x, this.pointerPosition.y, this.lastPointerType);
+  }
+
+  /**
+   * A finger lands on the range. It does not move the crosshair to itself or
+   * fire yet: the first finger down steers the crosshair as it drags, and any
+   * finger that lifts again quickly without dragging is a tap, which fires.
+   */
+  beginTouch(event) {
+    this.lastPointerType = event.pointerType;
+    this.handlers.onUserGesture();
+    this.touches.set(event.pointerId, {
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      // Event times, not handling times: a busy frame cannot turn a quick tap into a long press.
+      startMs: event.timeStamp,
+      travelPx: 0,
+      crosshairX: this.pointerPosition.x,
+      crosshairY: this.pointerPosition.y
+    });
+    if (this.aimPointerId === null || !this.touches.has(this.aimPointerId)) {
+      this.aimPointerId = event.pointerId;
+    }
+    try {
+      this.canvas.setPointerCapture(event.pointerId);
+    } catch (error) {
+      // The finger already lifted; its pointerup is on its way.
+    }
+    this.handlers.onPointerActivity();
+  }
+
+  /** The aiming finger moves the crosshair by its own movement, scaled by the aim speed. */
+  handleTouchMove(event) {
+    const touch = this.touches.get(event.pointerId);
+    if (touch === undefined) {
+      return;
+    }
+    const cssScale = (this.canvas.clientWidth || this.canvasBounds.width) / this.canvasBounds.width;
+    const deltaX = (event.clientX - touch.lastX) * cssScale;
+    const deltaY = (event.clientY - touch.lastY) * cssScale;
+    touch.lastX = event.clientX;
+    touch.lastY = event.clientY;
+    touch.travelPx = Math.max(touch.travelPx, Math.hypot(event.clientX - touch.startX, event.clientY - touch.startY));
+    if (this.aimPointerId !== event.pointerId) {
+      // Another finger takes over the aim once it clearly drags (a resting thumb never blocks aiming).
+      if (touch.travelPx > TOUCH_AIM_RULES.tapSlopPx) {
+        this.aimPointerId = event.pointerId;
+      }
+      return;
+    }
+    const previousX = this.pointerPosition.x;
+    const previousY = this.pointerPosition.y;
+    this.pointerPosition.x = MathUtils.clamp(previousX + deltaX * this.touchAimSpeed, 0, this.canvasBounds.width);
+    this.pointerPosition.y = MathUtils.clamp(previousY + deltaY * this.touchAimSpeed, 0, this.canvasBounds.height);
+    this.trackPointerMotion(previousX, previousY);
+  }
+
+  /** A finger lifts: a tap fires where the crosshair is aiming; a drag or a long rest does not. */
+  handlePointerUp(event) {
+    const touch = this.touches.get(event.pointerId);
+    if (touch === undefined) {
+      return;
+    }
+    this.touches.delete(event.pointerId);
+    const wasAiming = this.aimPointerId === event.pointerId;
+    if (wasAiming) {
+      this.aimPointerId = null;
+    }
+    const isTap = event.type === 'pointerup'
+      && event.timeStamp - touch.startMs <= TOUCH_AIM_RULES.tapMaxMs
+      && touch.travelPx <= TOUCH_AIM_RULES.tapSlopPx;
+    if (!isTap) {
+      return;
+    }
+    if (wasAiming) {
+      // A tap's own wobble does not nudge the aim: the shot goes where the crosshair was when the finger landed.
+      this.pointerPosition.x = touch.crosshairX;
+      this.pointerPosition.y = touch.crosshairY;
+    }
+    this.fireAtCrosshair(event.pointerType);
+  }
+
+  /** The on-screen FIRE button: fires at once, where the crosshair is aiming. */
+  pressFireButton(pointerType) {
+    this.lastPointerType = InputController.isTouchPointer(pointerType) ? pointerType : 'touch';
+    this.handlers.onUserGesture();
+    this.fireAtCrosshair(this.lastPointerType);
+  }
+
+  fireAtCrosshair(pointerType) {
+    this.handlers.onPointerActivity();
+    this.handlers.onFire(this.pointerPosition.x, this.pointerPosition.y, pointerType);
   }
 
   handlePointerEnter() {
@@ -11606,10 +12124,10 @@ class InputController {
     this.handlers.onKey(event, isTyping);
   }
 
-  /** Mouse users always see the reticle; touch users see it briefly where they tapped. */
-  shouldShowReticle(nowMs) {
-    if (this.lastPointerType === 'touch' || this.lastPointerType === 'pen') {
-      return nowMs - this.lastTouchTimestamp < 650;
+  /** Touch players always see the crosshair they steer; mouse users once the mouse is on the range. */
+  shouldShowReticle() {
+    if (this.usesTouchAim) {
+      return true;
     }
     return this.isPointerInside || this.hasPointerMoved;
   }
@@ -12037,6 +12555,9 @@ const DEFAULT_SETTINGS = deepFreeze({
   screenShake: true,
   reloadEnabled: true,
   laserEnabled: true,
+  // Touch aiming: crosshair pixels per pixel the finger drags, and which side the FIRE button sits on.
+  touchAimSpeed: TOUCH_AIM_RULES.speedDefault,
+  fireButtonSide: FIRE_BUTTON_SIDES.RIGHT,
   roundSeconds: 60,
   difficulty: 'SUPER_EASY',
   trainingLevel: 'SUPER_EASY',
@@ -12091,6 +12612,12 @@ class SettingsStore {
     }
     if (typeof candidate.laserEnabled === 'boolean') {
       validated.laserEnabled = candidate.laserEnabled;
+    }
+    if (typeof candidate.touchAimSpeed === 'number' && Number.isFinite(candidate.touchAimSpeed)) {
+      validated.touchAimSpeed = MathUtils.clamp(candidate.touchAimSpeed, TOUCH_AIM_RULES.speedMin, TOUCH_AIM_RULES.speedMax);
+    }
+    if (candidate.fireButtonSide === FIRE_BUTTON_SIDES.LEFT || candidate.fireButtonSide === FIRE_BUTTON_SIDES.RIGHT) {
+      validated.fireButtonSide = candidate.fireButtonSide;
     }
     if (isValidRoundSeconds(candidate.roundSeconds)) {
       validated.roundSeconds = candidate.roundSeconds;
@@ -13994,6 +14521,7 @@ class HUDController {
       soundOffIcon: requireElement(documentRef, 'hud-sound-off-icon'),
       pauseButton: requireElement(documentRef, 'hud-pause-button'),
       ammoRoot: requireElement(documentRef, 'ammo'),
+      fireRoot: requireElement(documentRef, 'fire-button'),
       ammoRounds: requireElement(documentRef, 'ammo-rounds'),
       ammoCapacity: requireElement(documentRef, 'ammo-capacity'),
       ammoPips: requireElement(documentRef, 'ammo-pips'),
@@ -14085,6 +14613,14 @@ class HUDController {
     this.elements.root.hidden = !isVisible;
     this.elements.ammoRoot.hidden = !(isVisible && this.showsAmmo);
     this.elements.adaptiveRoot.hidden = !(isVisible && this.showsAdaptive);
+    if (!isVisible) {
+      this.elements.fireRoot.hidden = true;
+    }
+  }
+
+  /** The FIRE button's corner: 'RIGHT' (the default) or 'LEFT'. */
+  setFireButtonSide(side) {
+    this.elements.fireRoot.setAttribute('data-side', side);
   }
 
   setMuted(isMuted) {
@@ -14123,6 +14659,9 @@ class HUDController {
       this.writeTransform('timebarFill', elements.timebarFill, 'scaleX(' + (Math.round(fraction * 500) / 500).toFixed(3) + ')');
     }
 
+    if (elements.fireRoot.hidden === snapshot.showsFireButton) {
+      elements.fireRoot.hidden = !snapshot.showsFireButton;
+    }
     this.writeText('accuracy', elements.accuracy, snapshot.hasShots ? Formatters.formatPercent(snapshot.accuracy, 1) : '—');
     this.writeText('streak', elements.streak, String(snapshot.streak));
     this.writeText('hits', elements.hits, String(snapshot.hits));
@@ -14727,6 +15266,11 @@ class UIController {
       reloadInput: requireElement(documentRef, 'setting-reload'),
       laserInput: requireElement(documentRef, 'setting-laser'),
       pauseLaserInput: requireElement(documentRef, 'pause-laser'),
+      aimSpeedInput: requireElement(documentRef, 'setting-aim-speed'),
+      aimSpeedOutput: requireElement(documentRef, 'setting-aim-speed-value'),
+      pauseAimSpeedInput: requireElement(documentRef, 'pause-aim-speed'),
+      pauseAimSpeedOutput: requireElement(documentRef, 'pause-aim-speed-value'),
+      fireLeftInput: requireElement(documentRef, 'setting-fire-left'),
       webglNotice: requireElement(documentRef, 'webgl-notice'),
       startButton: requireElement(documentRef, 'start-button'),
       pauseNote: requireElement(documentRef, 'pause-note'),
@@ -14815,6 +15359,9 @@ class UIController {
     elements.reloadInput.addEventListener('change', () => callbacks.onReloadToggle(elements.reloadInput.checked));
     elements.laserInput.addEventListener('change', () => callbacks.onLaserToggle(elements.laserInput.checked));
     elements.pauseLaserInput.addEventListener('change', () => callbacks.onLaserToggle(elements.pauseLaserInput.checked));
+    elements.aimSpeedInput.addEventListener('input', () => callbacks.onAimSpeedChange(Number(elements.aimSpeedInput.value)));
+    elements.pauseAimSpeedInput.addEventListener('input', () => callbacks.onAimSpeedChange(Number(elements.pauseAimSpeedInput.value)));
+    elements.fireLeftInput.addEventListener('change', () => callbacks.onFireSideChange(elements.fireLeftInput.checked ? FIRE_BUTTON_SIDES.LEFT : FIRE_BUTTON_SIDES.RIGHT));
     elements.startButton.addEventListener('click', () => callbacks.onStart());
 
     elements.pauseResume.addEventListener('click', () => callbacks.onResume());
@@ -15193,12 +15740,25 @@ class UIController {
     this.elements.shakeInput.checked = values.screenShake;
     this.elements.reloadInput.checked = values.reloadEnabled;
     this.setLaserEnabled(values.laserEnabled);
+    this.setAimSpeed(values.touchAimSpeed);
+    this.elements.fireLeftInput.checked = values.fireButtonSide === FIRE_BUTTON_SIDES.LEFT;
   }
 
   /** Keeps the menu and pause-screen laser switches in sync. */
   setLaserEnabled(enabled) {
     this.elements.laserInput.checked = Boolean(enabled);
     this.elements.pauseLaserInput.checked = Boolean(enabled);
+  }
+
+  /** Keeps the menu and pause-screen aim speed sliders in sync. */
+  setAimSpeed(speed) {
+    const text = speed.toFixed(1) + '×';
+    [[this.elements.aimSpeedInput, this.elements.aimSpeedOutput], [this.elements.pauseAimSpeedInput, this.elements.pauseAimSpeedOutput]].forEach(([input, output]) => {
+      if (Number(input.value) !== speed) {
+        input.value = String(speed);
+      }
+      output.textContent = text;
+    });
   }
 
   /** Explains why the 3D range cannot start and disables the start button. */
@@ -15665,7 +16225,7 @@ class LeaderboardPanel {
     }
     this.clearArmedMode = levelKey;
     this.elements.clear.setAttribute('data-armed', 'true');
-    this.elements.clear.textContent = 'Click again to clear my ' + DIFFICULTY_CONFIG[levelKey].label + ' scores';
+    this.elements.clear.textContent = 'Press again to clear my ' + DIFFICULTY_CONFIG[levelKey].label + ' scores';
     window.clearTimeout(this.clearArmTimerId);
     this.clearArmTimerId = window.setTimeout(() => this.disarmClear(), 3200);
   }
@@ -20086,6 +20646,8 @@ class AimTrainerGame {
       onShakeToggle: (enabled) => this.toggleScreenShake(enabled),
       onReloadToggle: (enabled) => this.settings.set('reloadEnabled', enabled),
       onLaserToggle: (enabled) => this.setLaserEnabled(enabled, false),
+      onAimSpeedChange: (speed) => this.setTouchAimSpeed(speed),
+      onFireSideChange: (side) => this.setFireButtonSide(side),
       onResume: () => this.resumeGame(),
       onRestart: () => this.restartRound(),
       onQuitToMenu: () => this.quitToMenu(),
@@ -20154,6 +20716,7 @@ class AimTrainerGame {
     this.lastGlobalEntryId = null;
     this.isSharing = false;
     this.laserEnabled = this.settings.get('laserEnabled');
+    this.input.setTouchAimSpeed(this.settings.get('touchAimSpeed'));
     this.playPhase = PLAY_PHASES.COUNTDOWN;
     this.countdownElapsedMs = 0;
     this.countdownLastStep = -1;
@@ -20214,6 +20777,7 @@ class AimTrainerGame {
       hitsPerSecond: 0,
       rounds: 0,
       isTouchInput: false,
+      showsFireButton: false,
       isReloading: false,
       reloadProgress: 0,
       adaptiveLevel: 1,
@@ -20259,10 +20823,17 @@ class AimTrainerGame {
     this.refreshLevelLocks();
     this.globalBoard.onStatusChange(() => this.refreshBoard());
     this.hud.setMuted(this.settings.get('isMuted'));
+    this.hud.setFireButtonSide(this.settings.get('fireButtonSide'));
 
     requireElement(this.documentRef, 'hud-pause-button').addEventListener('click', () => this.pauseGame());
     requireElement(this.documentRef, 'hud-sound-button').addEventListener('click', () => this.toggleMute());
+    requireElement(this.documentRef, 'hud-inspect-button').addEventListener('click', () => this.inspectWeapon());
     this.ammoElement.addEventListener('click', () => this.startReload());
+    this.bindFireButton(requireElement(this.documentRef, 'fire-button'));
+    const armoryInspect = requireElement(this.documentRef, 'armory-inspect');
+    // The stage under the button turns the pistol on a drag; pressing the button is not a drag.
+    armoryInspect.addEventListener('pointerdown', (event) => event.stopPropagation());
+    armoryInspect.addEventListener('click', () => this.inspectShowcase());
 
     this.documentRef.addEventListener('fullscreenchange', () => this.refreshFullscreenButtons());
     this.documentRef.addEventListener('webkitfullscreenchange', () => this.refreshFullscreenButtons());
@@ -20387,11 +20958,35 @@ class AimTrainerGame {
     this.overlayCanvas.width = width;
   }
 
+  /** The FIRE button fires the moment a finger lands on it, where the crosshair is aiming. */
+  bindFireButton(button) {
+    const release = () => button.removeAttribute('data-pressed');
+    button.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      button.setAttribute('data-pressed', 'true');
+      this.input.pressFireButton(event.pointerType);
+    });
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointercancel', release);
+    button.addEventListener('pointerleave', release);
+    button.addEventListener('contextmenu', (event) => event.preventDefault());
+    // A keyboard or switch press arrives as a click with no pointer behind it.
+    button.addEventListener('click', (event) => {
+      if (event.detail === 0) {
+        this.input.pressFireButton('touch');
+      }
+    });
+  }
+
   registerStateHandlers() {
     const fsm = this.fsm;
     fsm.onTransition((fromState, toState) => {
       if (toState === GAME_STATES.MENU || toState === GAME_STATES.ARMORY || toState === GAME_STATES.GAMEOVER) {
         this.resetOverlay();
+      }
+      if (fromState === GAME_STATES.PLAYING || toState === GAME_STATES.PLAYING) {
+        // A finger that was down across a pause or a round change can neither aim nor fire afterwards.
+        this.input.resetTouches();
       }
       if (fromState === GAME_STATES.GAMEOVER) {
         this.ui.hideMilestone(false);
@@ -22002,6 +22597,20 @@ class AimTrainerGame {
     }
   }
 
+  /** Touch aiming: how far the crosshair moves per pixel the finger drags. */
+  setTouchAimSpeed(speed) {
+    this.input.setTouchAimSpeed(speed);
+    this.settings.set('touchAimSpeed', this.input.touchAimSpeed);
+    this.ui.setAimSpeed(this.input.touchAimSpeed);
+  }
+
+  /** Puts the FIRE button in the bottom-right corner (the default) or the bottom-left one. */
+  setFireButtonSide(side) {
+    const resolved = side === FIRE_BUTTON_SIDES.LEFT ? FIRE_BUTTON_SIDES.LEFT : FIRE_BUTTON_SIDES.RIGHT;
+    this.settings.set('fireButtonSide', resolved);
+    this.hud.setFireButtonSide(resolved);
+  }
+
   /** CS-style inspect (F): the pistol turns to show both flanks of the equipped finish. */
   inspectWeapon() {
     if (!this.renderer.isSupported) {
@@ -23038,7 +23647,7 @@ class AimTrainerGame {
     this.effects.renderOverlay(context);
     this.renderCountdown(context);
     this.renderDamageVignette(context);
-    if (state === GAME_STATES.PLAYING && this.input.shouldShowReticle(performance.now())) {
+    if (state === GAME_STATES.PLAYING && this.input.shouldShowReticle()) {
       const status = this.reticleStatus;
       const pointer = this.input.pointerPosition;
       status.isOnTarget = this.isPointerOnTarget();
@@ -23169,7 +23778,8 @@ class AimTrainerGame {
     snapshot.misses = session.targetsExpired;
     snapshot.hitsPerSecond = session.elapsedLiveMs > 0 ? session.shotsHit / (session.elapsedLiveMs / 1000) : 0;
     snapshot.rounds = this.magazine.rounds;
-    snapshot.isTouchInput = this.input.lastPointerType === 'touch' || this.input.lastPointerType === 'pen';
+    snapshot.isTouchInput = this.input.usesTouchAim;
+    snapshot.showsFireButton = snapshot.isTouchInput && this.fsm.is(GAME_STATES.PLAYING);
     snapshot.isReloading = this.magazine.isReloading;
     snapshot.reloadProgress = this.gun.reloadProgress;
     snapshot.adaptiveLevel = this.difficulty.level;
