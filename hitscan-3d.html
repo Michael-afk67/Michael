@@ -2337,6 +2337,56 @@ kbd {
 }
 
 /* ------------------------------------------------------------------
+   Neon accents: panels carry a thin neon edge, and buttons, cards and
+   tabs flash white for a moment when the pointer arrives, then settle
+   on a neon glow.
+   ------------------------------------------------------------------ */
+.console {
+  border-color: rgba(56, 245, 255, 0.3);
+  box-shadow: 0 30px 90px var(--console-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 0 0 1px rgba(56, 245, 255, 0.06), 0 0 32px rgba(56, 245, 255, 0.07);
+}
+
+.button-secondary,
+.mode-card,
+.skin-item,
+.journey-detail {
+  border-color: rgba(56, 245, 255, 0.28);
+}
+
+.cta:hover,
+.button-secondary:hover,
+.mode-card:hover,
+.skin-item:hover,
+.journey__node:hover,
+.segmented button:hover,
+.tab:hover {
+  animation: neon-flash 460ms ease-out;
+}
+
+@keyframes neon-flash {
+  0% {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 24px rgba(255, 255, 255, 0.7);
+  }
+  100% {
+    border-color: rgba(56, 245, 255, 0.9);
+    box-shadow: 0 0 0 1px rgba(56, 245, 255, 0.4), 0 0 14px rgba(56, 245, 255, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta:hover,
+  .button-secondary:hover,
+  .mode-card:hover,
+  .skin-item:hover,
+  .journey__node:hover,
+  .segmented button:hover,
+  .tab:hover {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
    Sign-in screen
    ------------------------------------------------------------------ */
 .account__tabs {
@@ -4217,8 +4267,10 @@ const LEVEL_BASE = deepFreeze({
   driftAccelerationMax: 0,
   driftFrequencyMinHz: 0,
   driftFrequencyMaxHz: 0,
-  // Gravity for GRAVITY_BOUNCE, and where new orbs appear ('TOP' drops them from above).
+  // Gravity for GRAVITY_BOUNCE, how high each bounce rises (a share of the arena's height),
+  // and where new orbs appear ('TOP' drops them from above).
   gravityPx: 0,
+  bounceHeight: 0.9,
   spawnBand: 'ANY',
   // A fading trail behind each moving orb.
   trail: false,
@@ -4309,14 +4361,15 @@ const DIFFICULTY_CONFIG = deepFreeze({
     label: 'Hard',
     title: 'The Bouncing Arena',
     summary: 'Orbs drop from the top and bounce across the arena like basketballs.',
-    radiusMin: 26,
-    radiusMax: 32,
+    radiusMin: 28,
+    radiusMax: 34,
     lifespanMs: 3200,
     movementType: MOVEMENT_TYPES.GRAVITY_BOUNCE,
     heading: HEADINGS.HORIZONTAL,
-    speedMin: 90,
-    speedMax: 170,
-    gravityPx: 1500,
+    speedMin: 70,
+    speedMax: 130,
+    gravityPx: 800,
+    bounceHeight: 0.6,
     spawnBand: 'TOP',
     spawnIntervalMs: 850,
     maxConcurrentTargets: 4,
@@ -4376,13 +4429,13 @@ const DIFFICULTY_CONFIG = deepFreeze({
     label: 'Ultra Demon',
     title: 'Absolute Pandemonium',
     summary: 'Tiny orbs split in two if you take longer than 1 s. A miss shakes the screen and costs 300.',
-    radiusMin: 11,
-    radiusMax: 14,
+    radiusMin: 13,
+    radiusMax: 16,
     lifespanMs: 1000,
     movementType: MOVEMENT_TYPES.LINEAR_BOUNCE,
     heading: HEADINGS.PLANAR,
-    speedMin: 360,
-    speedMax: 480,
+    speedMin: 260,
+    speedMax: 360,
     split: { childScale: 0.78, childLifespanMs: 1400, spreadDegrees: 38 },
     missShake: 16,
     whiffPenalty: 300,
@@ -4390,7 +4443,7 @@ const DIFFICULTY_CONFIG = deepFreeze({
     maxConcurrentTargets: 5,
     baseHitScore: 420,
     coinMultiplier: 200,
-    hitboxScale: 1.12,
+    hitboxScale: 1.15,
     magazineCapacity: 15,
     reloadDurationMs: 940,
     accentHue: 350,
@@ -4511,21 +4564,27 @@ function isValidRoundSeconds(seconds) {
  * of 30 s or more that reaches the level's target beats it: that opens the
  * next level, and beating Level 7 earns the golden crown. Each target is set
  * for a 60 s round and scales with the round length. The targets come from
- * simulated players of different skill levels (a first try does not reach
- * them; a few rounds of practice do). The leaderboard server applies the
- * same numbers (UNLOCK_RULES in the server code at the end of this file),
- * so change both together.
+ * simulated players of four skill levels (scores in a 60 s round):
+ *   Level 1  first try ~10,000, beginner ~29,000      target 15,000
+ *   Level 2  beginner ~23,000, after practice ~35,000  target 25,000
+ *   Level 3  beginner ~25,000, after practice ~35,000  target 30,000
+ *   Level 4  beginner ~4,000, after practice ~8,500    target 10,000
+ *   Level 5  beginner ~2,600, after practice ~8,300    target 12,000
+ *   Level 6  after practice ~15,000, regular ~29,000   target 18,000
+ *   Level 7  regulars still go negative; good ~43,000  target 25,000 (the crown)
+ * The leaderboard server applies the same numbers (UNLOCK_RULES in the
+ * server code at the end of this file), so change both together.
  */
 const UNLOCK_RULES = deepFreeze({
   minimumRoundSeconds: 30,
   scorePerMinute: {
-    SUPER_EASY: 12000,
-    EASY: 30000,
-    NORMAL: 35000,
-    HARD: 30000,
-    INSANE: 30000,
-    DEMON_GOD: 30000,
-    ULTRA_DEMON: 20000
+    SUPER_EASY: 15000,
+    EASY: 25000,
+    NORMAL: 30000,
+    HARD: 10000,
+    INSANE: 12000,
+    DEMON_GOD: 18000,
+    ULTRA_DEMON: 25000
   }
 });
 
@@ -4636,6 +4695,13 @@ const GAME_RULES = deepFreeze({
   multiplierMaximum: 4,
   // Every 5th hit in a row pays streak × 50: +250 at 5, +500 at 10, +750 at 15 and so on.
   streakBonusPointsPerHit: 50,
+  // Every 10 hits in a row: a giant neon callout and a shower of gold stars (LEGENDARY from 30 on).
+  streakCalloutInterval: 10,
+  streakCallouts: [
+    { text: 'UNSTOPPABLE!', color: '#7cf9ff', glow: 'rgba(56, 245, 255, 0.95)' },
+    { text: 'GODLIKE!', color: '#ff8dfa', glow: 'rgba(255, 61, 220, 0.95)' },
+    { text: 'LEGENDARY!', color: '#ffe066', glow: 'rgba(255, 190, 40, 0.95)' }
+  ],
   bullseyeRadiusRatio: 0.3,
   bullseyeBonusPoints: 500,
   speedBonusWeight: 0.4,
@@ -8507,6 +8573,7 @@ class Target {
     this.movementType = spec.movementType;
     this.cruiseSpeed = spec.cruiseSpeed;
     this.gravity = typeof spec.gravity === 'number' ? spec.gravity : 0;
+    this.bounceHeight = typeof spec.bounceHeight === 'number' ? spec.bounceHeight : 0.9;
     // Falling orbs speed up well past their launch speed, so only drifting ones are capped.
     this.maximumSpeed = this.movementType === MOVEMENT_TYPES.GRAVITY_BOUNCE ? Infinity : Math.max(spec.cruiseSpeed * 1.65, 0.0001);
     this.drift = spec.drift;
@@ -8662,9 +8729,9 @@ class Target {
       this.velocity.y = 0;
     } else if (this.position.y < minimumY) {
       this.position.y = minimumY;
-      // A falling orb bounces back up to 90% of the arena height every time, like a basketball.
+      // A falling orb bounces back up to the same height every time (bounceHeight of the arena), like a basketball.
       this.velocity.y = this.movementType === MOVEMENT_TYPES.GRAVITY_BOUNCE
-        ? Math.sqrt(2 * this.gravity * (maximumY - minimumY) * 0.9)
+        ? Math.sqrt(2 * this.gravity * (maximumY - minimumY) * this.bounceHeight)
         : Math.abs(this.velocity.y);
       collided = true;
     } else if (this.position.y > maximumY) {
@@ -9021,6 +9088,7 @@ class TargetSpawner {
       isDecorative: Boolean(options.isDecorative),
       hitboxScale: options.isDecorative ? 1 : spawnParameters.hitboxScale,
       gravity: (spawnParameters.gravityPx || 0) * metersPerPixel,
+      bounceHeight: spawnParameters.bounceHeight || 0.9,
       cloak: options.isDecorative ? null : spawnParameters.cloak || null,
       split: options.isDecorative ? null : spawnParameters.split || null,
       trail: !options.isDecorative && Boolean(spawnParameters.trail)
@@ -9054,6 +9122,7 @@ class TargetSpawner {
       drift: parent.drift,
       hitboxScale: parent.hitRadiusScale,
       gravity: parent.gravity,
+      bounceHeight: parent.bounceHeight,
       cloak: parent.cloak,
       split: split,
       trail: parent.trail !== null,
@@ -9642,6 +9711,7 @@ class FloatingText {
     this.fontFamily = options.fontFamily || FONT_STACKS.stencil;
     this.fontWeight = options.fontWeight || 800;
     this.lifeMs = options.lifeMs || 900;
+    this.glowColor = options.glowColor || null;
     this.ageMs = 0;
   }
 
@@ -9671,8 +9741,83 @@ class FloatingText {
     context.lineWidth = 4;
     context.strokeStyle = 'rgba(4, 6, 10, 0.72)';
     context.strokeText(this.text, 0, 0);
+    if (this.glowColor !== null) {
+      // Neon: the letters glow in their color.
+      context.shadowColor = this.glowColor;
+      context.shadowBlur = this.fontSizePx * 0.45;
+    }
     context.fillStyle = this.color;
     context.fillText(this.text, 0, 0);
+    context.restore();
+  }
+}
+
+/** A glittering gold star for the streak callouts: thrown up, falling, spinning and twinkling out. */
+class StarSpark {
+  constructor() {
+    this.isActive = false;
+    this.x = 0;
+    this.y = 0;
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.rotation = 0;
+    this.spin = 0;
+    this.size = 6;
+    this.lifeMs = 1200;
+    this.ageMs = 0;
+    this.twinklePhase = 0;
+  }
+
+  activate(x, y) {
+    const angle = MathUtils.randomRange(-Math.PI * 0.95, -Math.PI * 0.05);
+    const speed = MathUtils.randomRange(260, 720);
+    this.isActive = true;
+    this.x = x + MathUtils.randomRange(-90, 90);
+    this.y = y + MathUtils.randomRange(-20, 20);
+    this.velocityX = Math.cos(angle) * speed;
+    this.velocityY = Math.sin(angle) * speed;
+    this.rotation = Math.random() * TAU;
+    this.spin = MathUtils.randomRange(-7, 7);
+    this.size = MathUtils.randomRange(5, 12);
+    this.lifeMs = MathUtils.randomRange(900, 1600);
+    this.ageMs = 0;
+    this.twinklePhase = Math.random() * TAU;
+  }
+
+  update(deltaSeconds) {
+    this.ageMs += deltaSeconds * 1000;
+    this.velocityY += 900 * deltaSeconds;
+    this.velocityX *= Math.exp(-1.2 * deltaSeconds);
+    this.x += this.velocityX * deltaSeconds;
+    this.y += this.velocityY * deltaSeconds;
+    this.rotation += this.spin * deltaSeconds;
+    if (this.ageMs >= this.lifeMs) {
+      this.isActive = false;
+    }
+  }
+
+  render(context) {
+    const life = MathUtils.clamp(this.ageMs / this.lifeMs, 0, 1);
+    const twinkle = 0.65 + 0.35 * Math.sin(this.ageMs * 0.03 + this.twinklePhase);
+    context.save();
+    context.globalAlpha = (1 - life * life) * twinkle;
+    context.translate(this.x, this.y);
+    context.rotate(this.rotation);
+    context.shadowColor = 'rgba(255, 200, 40, 0.9)';
+    context.shadowBlur = this.size * 1.4;
+    context.fillStyle = '#ffd84a';
+    context.beginPath();
+    for (let point = 0; point < 10; point += 1) {
+      const radius = point % 2 === 0 ? this.size : this.size * 0.42;
+      const angle = point * Math.PI / 5 - Math.PI / 2;
+      if (point === 0) {
+        context.moveTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+      } else {
+        context.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+      }
+    }
+    context.closePath();
+    context.fill();
     context.restore();
   }
 }
@@ -9691,6 +9836,7 @@ class EffectsSystem {
     this.impactMarks = new FixedEffectPool(ImpactMark, 24);
     this.bullseyeMarks = new FixedEffectPool(BullseyeMark, 8);
     this.floatingTexts = new FixedEffectPool(FloatingText, 32);
+    this.stars = new FixedEffectPool(StarSpark, 96);
     this.geometryScratch = {
       position: new Vector3D(),
       a: new Vector3D(),
@@ -9944,6 +10090,14 @@ class EffectsSystem {
     this.impactMarks.update(deltaSeconds);
     this.bullseyeMarks.update(deltaSeconds);
     this.floatingTexts.update(deltaSeconds);
+    this.stars.update(deltaSeconds);
+  }
+
+  /** A shower of glittering gold stars from a point on screen. */
+  emitStarShower(screenX, screenY, count) {
+    for (let index = 0; index < count; index += 1) {
+      this.stars.acquire().activate(screenX, screenY);
+    }
   }
 
   /** Streams every world-space effect into the renderer's batches. */
@@ -9973,6 +10127,7 @@ class EffectsSystem {
     this.impactMarks.forEachActive((mark) => mark.render(context));
     this.bullseyeMarks.forEachActive((mark) => mark.render(context));
     this.floatingTexts.forEachActive((text) => text.render(context));
+    this.stars.forEachActive((star) => star.render(context));
   }
 
   clearWorld() {
@@ -9983,6 +10138,7 @@ class EffectsSystem {
     this.impactMarks.clear();
     this.bullseyeMarks.clear();
     this.floatingTexts.clear();
+    this.stars.clear();
   }
 
   get activeParticleCount() {
@@ -13339,6 +13495,7 @@ class DifficultyEngine {
       hueSpread: null,
       heading: HEADINGS.ANY,
       gravityPx: 0,
+      bounceHeight: 0.9,
       spawnBand: 'ANY',
       trail: false,
       cloak: null,
@@ -13504,6 +13661,7 @@ class DifficultyEngine {
     parameters.hueSpread = config.hueSpread;
     parameters.heading = config.heading || HEADINGS.ANY;
     parameters.gravityPx = config.gravityPx || 0;
+    parameters.bounceHeight = config.bounceHeight || 0.9;
     parameters.spawnBand = config.spawnBand || 'ANY';
     parameters.trail = Boolean(config.trail);
     parameters.cloak = config.cloak || null;
@@ -14113,6 +14271,19 @@ const LevelFaces = {
   /** An image of a face, for drawing on canvases (the share card and the milestone badge). */
   dataUrl(levelKey) {
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">' + (LevelFaces.shapes[levelKey] || '') + '</svg>');
+  },
+
+  images: {},
+
+  /** A loaded image of a face for drawing on a canvas, or null while it loads (the first call starts loading). */
+  image(levelKey) {
+    let image = LevelFaces.images[levelKey];
+    if (!image && typeof Image !== 'undefined' && LevelFaces.shapes[levelKey]) {
+      image = new Image();
+      image.src = LevelFaces.dataUrl(levelKey);
+      LevelFaces.images[levelKey] = image;
+    }
+    return image && image.complete && image.naturalWidth > 0 ? image : null;
   },
 
   /** Fills every [data-face] element under a root with its face. */
@@ -15703,6 +15874,15 @@ class CrosshairEditor {
       const swatch = this.swatches[swatchElements.indexOf(element)];
       this.update({ color: { r: swatch.color.r, g: swatch.color.g, b: swatch.color.b } });
     };
+    swatchElements.forEach((element, index) => {
+      element.addEventListener('pointerenter', (event) => {
+        if (event.pointerType !== 'touch') {
+          const color = this.swatches[index].color;
+          this.preview.setSettings(Object.assign({}, this.look, { color: { r: color.r, g: color.g, b: color.b } }));
+        }
+      });
+      element.addEventListener('pointerleave', () => this.preview.setSettings(this.look));
+    });
     for (let index = 0; index < swatchElements.length; index += 1) {
       const element = swatchElements[index];
       element.addEventListener('click', () => pickColor(element));
@@ -16161,6 +16341,13 @@ class ArmoryView {
       item.appendChild(meta);
       item.addEventListener('click', (event) => this.handleItemClick(skin.id, event));
       item.addEventListener('keydown', (event) => this.handleListKeys(event));
+      // Hover to try it on: the pistol wears it at once, owned or not.
+      item.addEventListener('pointerenter', (event) => {
+        if (event.pointerType !== 'touch') {
+          this.callbacks.onHoverPreview(skin.id);
+        }
+      });
+      item.addEventListener('pointerleave', () => this.callbacks.onHoverPreview(null));
       list.appendChild(item);
       this.items.push({ skin: skin, element: item, priceIcon: priceIcon, priceText: priceText });
     }
@@ -17610,7 +17797,7 @@ const SHADER_SOURCES = (function buildShaderSources() {
       'uniform vec3 uViewForward;',
       'uniform float uTheme;',
       'const float PI = 3.14159265;',
-      'const vec3 GRID_TINT_RANGE = vec3(0.47, 0.60, 0.80);',
+      'const vec3 GRID_TINT_RANGE = vec3(0.30, 0.86, 1.0);',
       'const vec3 GRID_TINT_DEMON = vec3(0.95, 0.34, 0.24);',
       'const vec3 BRASS_RANGE = vec3(0.886, 0.682, 0.282);',
       'const vec3 BRASS_DEMON = vec3(1.0, 0.45, 0.14);',
@@ -17632,9 +17819,10 @@ const SHADER_SOURCES = (function buildShaderSources() {
       '  float longitudeDegrees = degrees(longitude);',
       '  float cosLatitude = cos(latitude);',
       '',
-      '  vec3 top = mix(vec3(0.040, 0.058, 0.094), vec3(0.070, 0.018, 0.020), uTheme);',
-      '  vec3 horizonColor = mix(vec3(0.052, 0.074, 0.114), vec3(0.120, 0.032, 0.022), uTheme);',
-      '  vec3 bottom = mix(vec3(0.016, 0.022, 0.034), vec3(0.034, 0.008, 0.006), uTheme);',
+      '  // Midnight blue: an ultra-dark navy sky deepening into sapphire and electric indigo toward the floor.',
+      '  vec3 top = mix(vec3(0.010, 0.016, 0.042), vec3(0.070, 0.018, 0.020), uTheme);',
+      '  vec3 horizonColor = mix(vec3(0.040, 0.058, 0.150), vec3(0.120, 0.032, 0.022), uTheme);',
+      '  vec3 bottom = mix(vec3(0.075, 0.068, 0.300), vec3(0.034, 0.008, 0.006), uTheme);',
       '  vec3 gridTint = mix(GRID_TINT_RANGE, GRID_TINT_DEMON, uTheme);',
       '  vec3 accent = mix(BRASS_RANGE, BRASS_DEMON, uTheme);',
       '  vec3 color = direction.y >= 0.0',
@@ -17642,14 +17830,14 @@ const SHADER_SOURCES = (function buildShaderSources() {
       '    : mix(horizonColor, bottom, smoothstep(0.0, 0.45, -direction.y));',
       '',
       '  float flood = pow(max(dot(direction, normalize(vec3(0.0, -0.42, -1.0))), 0.0), 7.0);',
-      '  color += mix(vec3(0.075, 0.105, 0.160), vec3(0.17, 0.045, 0.02), uTheme) * flood;',
+      '  color += mix(vec3(0.060, 0.080, 0.220), vec3(0.17, 0.045, 0.02), uTheme) * flood;',
       '',
       '  float meridianFade = smoothstep(0.12, 0.42, cosLatitude);',
       '  float minorGrid = max(lineMask(latitudeDegrees, 5.0, 1.0), lineMask(longitudeDegrees, 5.0, 1.0) * meridianFade);',
       '  float majorGrid = max(lineMask(latitudeDegrees, 15.0, 1.5), lineMask(longitudeDegrees, 15.0, 1.5) * meridianFade);',
       '  float crossings = lineMask(latitudeDegrees, 15.0, 4.0) * lineMask(longitudeDegrees, 15.0, 4.0) * meridianFade;',
       '  color += gridTint * (minorGrid * 0.055 + majorGrid * 0.11);',
-      '  color += mix(vec3(0.66, 0.76, 0.94), vec3(1.0, 0.6, 0.42), uTheme) * crossings * 0.22;',
+      '  color += mix(vec3(0.60, 0.95, 1.0), vec3(1.0, 0.6, 0.42), uTheme) * crossings * 0.22;',
       '',
       '  float horizonLine = lineMask(latitudeDegrees, 360.0, 2.2);',
       '  color += accent * horizonLine * 0.42;',
@@ -19583,8 +19771,29 @@ class ShareCard {
       context.arc(x, y, radius * GAME_RULES.bullseyeRadiusRatio, 0, TAU);
       context.stroke();
     };
-    orb(1090, 96, 34, accent);
-    orb(1004, 170, 17, (accent + 137) % 360);
+    if (!card.rankTitle) {
+      orb(1090, 96, 34, accent);
+      orb(1004, 170, 17, (accent + 137) % 360);
+    }
+
+    // Neon frame.
+    context.save();
+    context.strokeStyle = card.isDemon ? 'rgba(255, 90, 60, 0.85)' : 'rgba(56, 245, 255, 0.85)';
+    context.shadowColor = context.strokeStyle;
+    context.shadowBlur = 18;
+    context.lineWidth = 3;
+    context.beginPath();
+    if (typeof context.roundRect === 'function') {
+      context.roundRect(14, 14, width - 28, height - 28, 22);
+    } else {
+      context.rect(14, 14, width - 28, height - 28);
+    }
+    context.stroke();
+    context.restore();
+
+    if (card.rankTitle) {
+      this.drawRankBadge(context, card, 1010, 170);
+    }
 
     // Brass range-marker corners.
     context.fillStyle = PALETTE.brass;
@@ -19605,13 +19814,20 @@ class ShareCard {
     ShareCard.drawLabel(context, 'Hitscan · aim trainer score card', left, 82, PALETTE.brass);
     context.fillStyle = '#ffffff';
     context.textAlign = 'left';
-    ShareCard.fitFont(context, card.callsign, 800, FONT_STACKS.stencil, 132, 64, 820);
+    const nameWidth = card.rankTitle ? 700 : 820;
+    ShareCard.fitFont(context, card.callsign, 800, FONT_STACKS.stencil, 132, 64, nameWidth);
     context.shadowColor = 'hsla(' + accent + ', 100%, 60%, 0.55)';
     context.shadowBlur = 28;
     context.fillText(card.callsign, left - 4, 196);
+    if (card.hasCrown) {
+      const nameEnd = left - 4 + context.measureText(card.callsign).width;
+      context.font = '64px ' + FONT_STACKS.body;
+      context.shadowColor = 'rgba(255, 200, 40, 0.9)';
+      context.fillText('\u{1F451}', nameEnd + 14, 186);
+    }
     context.shadowBlur = 0;
     context.fillStyle = 'rgba(226, 174, 72, 0.75)';
-    context.fillRect(left, 226, 1056, 3);
+    context.fillRect(left, 226, card.rankTitle ? 780 : 1056, 3);
 
     // Left column: game mode and accuracy.
     const columnWidth = 470;
@@ -19649,6 +19865,73 @@ class ShareCard {
     this.drawQrCode(context, card.url, width - 72 - 196, height - 60 - 196, 196);
     ShareCard.drawLabel(context, 'Scan to play', width - 72, height - 60 - 196 - 14, PALETTE.brass, 'right');
     return canvas;
+  }
+
+  /**
+   * The rank badge: a glowing hexagon with the face of the player's highest
+   * level, "RANK" and its title, and the player level with lifetime XP under it.
+   */
+  drawRankBadge(context, card, centerX, centerY) {
+    const radius = 128;
+    const color = card.rankColor || '#38f5ff';
+    const hexagon = () => {
+      context.beginPath();
+      for (let corner = 0; corner < 6; corner += 1) {
+        const angle = corner * Math.PI / 3 - Math.PI / 2;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        if (corner === 0) {
+          context.moveTo(x, y);
+        } else {
+          context.lineTo(x, y);
+        }
+      }
+      context.closePath();
+    };
+    context.save();
+    const fill = context.createLinearGradient(centerX, centerY - radius, centerX, centerY + radius);
+    fill.addColorStop(0, 'rgba(30, 40, 70, 0.95)');
+    fill.addColorStop(1, 'rgba(8, 10, 22, 0.95)');
+    hexagon();
+    context.fillStyle = fill;
+    context.shadowColor = color;
+    context.shadowBlur = 40;
+    context.fill();
+    context.lineWidth = 5;
+    context.strokeStyle = color;
+    context.stroke();
+    context.shadowBlur = 0;
+    const face = LevelFaces.image(card.rankLevelKey);
+    if (face !== null) {
+      context.shadowColor = color;
+      context.shadowBlur = 24;
+      context.drawImage(face, centerX - 52, centerY - 96, 104, 104);
+      context.shadowBlur = 0;
+    }
+    context.textAlign = 'center';
+    ShareCard.drawLabel(context, 'Rank', centerX, centerY + 36, '#9fb0c8', 'center');
+    context.fillStyle = '#ffffff';
+    ShareCard.fitFont(context, card.rankTitle.toUpperCase(), 800, FONT_STACKS.stencil, 46, 24, radius * 1.6);
+    context.shadowColor = color;
+    context.shadowBlur = 18;
+    context.fillText(card.rankTitle.toUpperCase(), centerX, centerY + 82);
+    context.shadowBlur = 0;
+    // The player level pill under the badge.
+    const pill = 'LV ' + card.playerLevel + ' · ' + card.xpText + ' XP';
+    context.font = '700 22px ' + FONT_STACKS.data;
+    const pillWidth = context.measureText(pill).width + 36;
+    context.fillStyle = color;
+    context.beginPath();
+    if (typeof context.roundRect === 'function') {
+      context.roundRect(centerX - pillWidth / 2, centerY + radius + 10, pillWidth, 40, 20);
+    } else {
+      context.rect(centerX - pillWidth / 2, centerY + radius + 10, pillWidth, 40);
+    }
+    context.fill();
+    context.fillStyle = '#05070c';
+    context.fillText(pill, centerX, centerY + radius + 38);
+    context.restore();
+    context.textAlign = 'left';
   }
 
   /** A crisp QR code: whole-pixel modules on a white tile with the standard four-module quiet zone. */
@@ -19824,6 +20107,7 @@ class AimTrainerGame {
     });
     this.armoryView = new ArmoryView(documentRef, {
       onSelect: (skinId) => this.previewFinish(skinId),
+      onHoverPreview: (skinId) => this.hoverFinish(skinId),
       onEquip: (skinId) => this.equipFinish(skinId),
       onPurchase: (skinId) => this.purchaseFinish(skinId),
       onDenied: () => this.audio.playDenied(),
@@ -20228,6 +20512,7 @@ class AimTrainerGame {
         this.changeBoardTab(levelKey);
       }
       ShareCard.preloadFonts(this.documentRef);
+      LevelFaces.image(this.playerRank().levelKey);
     });
   }
 
@@ -21217,6 +21502,9 @@ class AimTrainerGame {
       });
     }
 
+    if (isStreakMilestone && streak % GAME_RULES.streakCalloutInterval === 0) {
+      this.showStreakCallout(streak);
+    }
     if (isStreakMilestone) {
       this.audio.playComboStreak(streak);
       this.toasts.show(streak + ' streak +' + Formatters.formatInteger(streakBonus), {
@@ -21225,6 +21513,30 @@ class AimTrainerGame {
         durationMs: 1400
       });
     }
+  }
+
+  /** 10, 20 and 30+ hits in a row: giant neon words across the screen and a shower of gold stars. */
+  showStreakCallout(streak) {
+    const callouts = GAME_RULES.streakCallouts;
+    const callout = callouts[Math.min(callouts.length, streak / GAME_RULES.streakCalloutInterval) - 1];
+    const centerX = this.viewportWidth / 2;
+    const centerY = this.viewportHeight * 0.36;
+    this.effects.spawnFloatingText(callout.text, centerX, centerY, {
+      color: callout.color,
+      glowColor: callout.glow,
+      fontSizePx: Math.round(MathUtils.clamp(this.viewportWidth * 0.075, 48, 104)),
+      velocityY: -26,
+      lifeMs: 1500
+    });
+    this.effects.spawnFloatingText(streak + ' IN A ROW', centerX, centerY + Math.round(MathUtils.clamp(this.viewportWidth * 0.05, 34, 66)), {
+      color: '#fff6d8',
+      glowColor: callout.glow,
+      fontSizePx: 22,
+      fontFamily: FONT_STACKS.data,
+      velocityY: -26,
+      lifeMs: 1400
+    });
+    this.effects.emitStarShower(centerX, centerY, 46);
   }
 
   handleWhiff(screenX, screenY) {
@@ -21519,6 +21831,14 @@ class AimTrainerGame {
   }
 
   /** Shows a finish on the turntable without buying it. */
+  /** Hovering a finish in the Armory: the pistol wears it while the pointer is on it (null: back to the selected one). */
+  hoverFinish(skinId) {
+    if (!this.fsm.is(GAME_STATES.ARMORY)) {
+      return;
+    }
+    this.previewSkinId = skinId !== null && SkinCatalog.isKnown(skinId) ? skinId : this.armoryView.selectedSkinId;
+  }
+
   previewFinish(skinId) {
     if (!SkinCatalog.isKnown(skinId)) {
       return;
@@ -22277,6 +22597,20 @@ class AimTrainerGame {
       + roundSeconds + ' s ' + DIFFICULTY_CONFIG[summary.levelKey].label + ' round. This run: ' + Formatters.formatInteger(summary.score) + '.';
   }
 
+  /**
+   * The player's rank for the share card: their highest open level (with the
+   * crown, "Absolute Legend"), its face and a badge color.
+   */
+  playerRank() {
+    const highest = DIFFICULTY_KEYS.filter((levelKey) => this.isLevelUnlocked(levelKey)).pop() || DIFFICULTY_KEYS[0];
+    const config = DIFFICULTY_CONFIG[highest];
+    return {
+      levelKey: highest,
+      title: this.profile.hasCrown ? 'Absolute Legend' : config.label,
+      color: this.profile.hasCrown ? '#ffd23f' : 'hsl(' + config.accentHue + ', 100%, 62%)'
+    };
+  }
+
   /** The address the share card's QR code opens: the server's public address, this page, or the project page. */
   shareUrl() {
     if (this.globalBoard.publicUrl) {
@@ -22297,6 +22631,7 @@ class AimTrainerGame {
     }
     const callsign = this.accounts.current !== null ? this.accounts.current.username : 'PLAYER';
     const levelConfig = DIFFICULTY_CONFIG[summary.levelKey] || null;
+    const rank = this.playerRank();
     const hitsText = summary.shotsHit + (summary.shotsHit === 1 ? ' hit' : ' hits');
     let detailText = Math.round(summary.roundDurationMs / 1000) + ' s round · ' + hitsText;
     if (summary.roundType === ROUND_TYPES.TIME_ATTACK) {
@@ -22317,7 +22652,13 @@ class AimTrainerGame {
         url: url,
         dateText: new Date(summary.finishedAt || Date.now()).toISOString().slice(0, 10),
         accentHue: levelConfig !== null ? levelConfig.accentHue : this.activeConfig.accentHue,
-        isDemon: levelConfig !== null && levelConfig.theme === 'DEMON'
+        isDemon: levelConfig !== null && levelConfig.theme === 'DEMON',
+        rankLevelKey: rank.levelKey,
+        rankTitle: rank.title,
+        rankColor: rank.color,
+        playerLevel: Experience.progress(this.profile.xp).level,
+        xpText: Formatters.formatInteger(this.profile.xp),
+        hasCrown: this.profile.hasCrown
       });
       dataUrl = canvas.toDataURL('image/png');
     } catch (error) {
@@ -23072,7 +23413,7 @@ const BASE_HIT_POINTS = [80, 100, 150, 220, 260, 300, 420];
 // scorePerMinute × seconds ÷ 60 on a level beats it. That opens the next level; Level 7 earns the crown.
 const UNLOCK_RULES = Object.freeze({
   minimumRoundSeconds: 30,
-  scorePerMinute: [12000, 30000, 35000, 30000, 30000, 30000, 20000]
+  scorePerMinute: [15000, 25000, 30000, 10000, 12000, 18000, 25000]
 });
 
 // XP, as in the game: at most 10 for one broken orb.
@@ -23216,6 +23557,7 @@ const statements = {
     + 'WHERE difficulty = ? AND user_id = ? ORDER BY ' + RANKING_ORDER + ' LIMIT ?'
   ),
   countPlayerRuns: database.prepare('SELECT COUNT(*) AS total FROM Leaderboard WHERE difficulty = ? AND user_id = ?'),
+  highestPlayed: database.prepare('SELECT MAX(difficulty) AS highest FROM Leaderboard WHERE user_id = ?'),
   qualifyingRun: database.prepare(
     'SELECT 1 AS found FROM Leaderboard WHERE user_id = ? AND difficulty = ? AND duration_seconds >= ? AND score * 60 >= ? * duration_seconds LIMIT 1'
   ),
@@ -23256,9 +23598,15 @@ function hasBeaten(userId, difficulty) {
   return Boolean(statements.qualifyingRun.get(userId, difficulty, UNLOCK_RULES.minimumRoundSeconds, UNLOCK_RULES.scorePerMinute[difficulty]));
 }
 
-/** The levels a player has opened: Level 1, plus every level after one they have beaten. */
+/**
+ * The levels a player has opened: every level up to the highest one they have
+ * runs on (runs moved over from the four-level board count), plus every level
+ * after one they have beaten. Level 1 is always open.
+ */
 function unlockedLevels(userId) {
-  return LEVEL_KEYS.filter((level, index) => index === 0 || hasBeaten(userId, index - 1));
+  const played = statements.highestPlayed.get(userId);
+  const highest = played && played.highest !== null ? Number(played.highest) : 0;
+  return LEVEL_KEYS.filter((level, index) => index <= highest || hasBeaten(userId, index - 1));
 }
 
 /* ---------------------------------------------------------------------------
